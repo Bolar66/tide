@@ -22,7 +22,7 @@
   margin-top: 0;
 }
 
-.day-editor__more {
+.button.day-editor__more {
   align-self: flex-start;
   padding-left: 0;
 }
@@ -143,7 +143,8 @@
     color var(--dur) var(--ease-out);
 }
 
-.chip[aria-pressed='true'] {
+.chip[aria-pressed='true'],
+.chip[aria-checked='true'] {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);

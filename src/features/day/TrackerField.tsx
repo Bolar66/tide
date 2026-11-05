@@ -154,6 +154,29 @@ export function TrackerField({ def, value, onChange }: Props) {
       );
     }
 
+    case 'choice':
+      return (
+        <div className="tracker">
+          <span className="tracker__label" id={id}>
+            {copy.label}
+          </span>
+          <div className="chips" role="radiogroup" aria-labelledby={id}>
+            {def.options.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                role="radio"
+                className="chip"
+                aria-checked={value === opt}
+                onClick={() => set(value === opt ? undefined : opt)}
+              >
+                {copy.options?.[opt] ?? opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
     case 'boolean':
       return (
         <button type="button" className="chip chip--wide" aria-pressed={value === true} onClick={() => set(value !== true)}>

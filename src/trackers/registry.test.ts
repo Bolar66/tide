@@ -6,6 +6,10 @@ describe('tracker registry', () => {
     expect(new Set(TRACKERS.map((t) => t.id)).size).toBe(TRACKERS.length);
   });
 
+  it('keeps sensitive and new trackers off by default', () => {
+    for (const id of ['sex', 'libido', 'discharge', 'painkiller']) expect(DEFAULT_TRACKERS).not.toContain(id);
+  });
+
   it('keeps weight off by default', () => {
     expect(DEFAULT_TRACKERS).not.toContain('weight');
     expect(DEFAULT_TRACKERS).toEqual(['sleepHours', 'sleepQuality', 'stress']);
@@ -25,6 +29,9 @@ describe('tracker registry', () => {
     expect(sanitizeMetric(t('caffeine'), -1)).toBeUndefined();
     expect(sanitizeMetric(t('skin'), ['dry', 'dry', 'unknown'])).toEqual(['dry']);
     expect(sanitizeMetric(t('skin'), [])).toBeUndefined();
+    expect(sanitizeMetric(t('discharge'), 'eggwhite')).toBe('eggwhite');
+    expect(sanitizeMetric(t('discharge'), ['dry'])).toBeUndefined();
+    expect(sanitizeMetric(t('sex'), 'sometimes')).toBeUndefined();
     expect(sanitizeMetric(t('pill'), true)).toBe(true);
     expect(sanitizeMetric(t('pill'), false)).toBeUndefined();
     expect(sanitizeMetric(t('medication'), '  Burana 400  ')).toBe('Burana 400');
