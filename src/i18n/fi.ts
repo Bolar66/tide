@@ -352,6 +352,9 @@ export const fi = {
     appearance: 'Ulkoasu',
     theme: 'Teema',
     themes: { system: 'Automaattinen', light: 'Vaalea', dark: 'Tumma' },
+    palette: 'Väriteema',
+    palettes: { meri: 'Meri', ruusu: 'Ruusu', salvia: 'Salvia', laventeli: 'Laventeli' },
+    mode: 'Tila',
     data: 'Varmuuskopio',
     backupInfo:
       'Tiedot ovat vain tässä puhelimessa. Jos poistat sovelluksen tai vaihdat puhelinta, ne eivät siirry mukana. Kun teet varmuuskopion, valitse avautuvasta valikosta ”Tallenna Tiedostoihin” ja esimerkiksi iCloud Drive. Palauta-toiminnolla saat tiedot takaisin.',

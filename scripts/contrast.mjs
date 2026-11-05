@@ -1,11 +1,6 @@
-// Checks WCAG contrast of the text/background pairs used in the UI, for both themes.
+// Checks WCAG contrast of the text/background pairs used in the UI, for every palette and mode.
 // Usage: node scripts/contrast.mjs
-import { readFileSync } from 'node:fs';
-
-const css = readFileSync(new URL('../src/styles/tokens.css', import.meta.url), 'utf8');
-const block = (re) => Object.fromEntries([...(css.match(re)?.[1] ?? '').matchAll(/--([\w-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]));
-const light = block(/:root \{([\s\S]*?)\n\}/);
-const dark = { ...light, ...block(/:root\[data-theme='dark'\] \{([\s\S]*?)\n\}/) };
+import { PALETTES, resolved } from './palettes.mjs';
 
 const lum = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
@@ -25,15 +20,21 @@ const pairs = [
   ['warning-text', 'warning-bg', 4.5], ['danger', 'surface', 4.5], ['danger', 'bg', 4.5],
   ['predicted', 'surface', 2], ['text-faint', 'surface', 2.5],
   ['fertile', 'fertile-soft', 4.5], ['surface', 'fertile', 4.5], ['text', 'fertile-soft', 4.5], ['text-muted', 'accent-soft', 4.5],
+  ['period', 'surface', 3], ['fertile', 'surface', 3],
 ];
 
 let failed = false;
-for (const [name, theme] of [['light', light], ['dark', dark]]) {
-  for (const [fg, bg, min] of pairs) {
-    const r = ratio(theme[fg], theme[bg]);
-    const ok = r >= min;
-    if (!ok) failed = true;
-    console.log(`${ok ? 'ok  ' : 'FAIL'} ${name.padEnd(5)} ${fg} on ${bg}: ${r.toFixed(2)} (min ${min})`);
+for (const name of Object.keys(PALETTES)) {
+  for (const mode of ['light', 'dark']) {
+    const theme = resolved(name, mode);
+    for (const [fg, bg, min] of pairs) {
+      const r = ratio(theme[fg], theme[bg]);
+      if (r < min) {
+        failed = true;
+        console.log(`FAIL ${name}/${mode} ${fg} on ${bg}: ${r.toFixed(2)} (min ${min})`);
+      }
+    }
   }
 }
+console.log(failed ? 'Contrast check failed.' : `All pairs pass in ${Object.keys(PALETTES).length} palettes × 2 modes.`);
 process.exit(failed ? 1 : 0);

@@ -25,6 +25,7 @@ export function App() {
   const { t } = useI18n();
   const status = useTide((s) => s.status);
   const theme = useTide((s) => s.settings.theme);
+  const palette = useTide((s) => s.settings.palette);
   const onboarded = useTide((s) => s.settings.onboarded);
   const profile = useTide((s) => profileOf(s.settings));
   const session = useSession();
@@ -43,7 +44,7 @@ export function App() {
   const saveError = useTide((s) => s.saveError);
   const [route, navigate] = useHashRoute();
   const today = useToday();
-  useTheme(theme);
+  useTheme(theme, palette);
 
   // Close periods whose end was never marked, on start and whenever the day changes.
   useEffect(() => {

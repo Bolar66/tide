@@ -1,3 +1,4 @@
+import { Logo } from '../../components/Logo';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { IconChevronLeft, IconCloudOff, IconLock, IconUserOff } from '../../components/icons';
 import { Stepper } from '../../components/Stepper';
@@ -72,7 +73,7 @@ export function Onboarding() {
     case 'welcome':
       content = (
         <>
-          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="onboarding__logo" width={112} height={112} />
+          <Logo size={112} className="onboarding__logo" />
           <h1 className="onboarding__title display">{t.onboarding.welcomeTitle}</h1>
           <p className="onboarding__text">{t.onboarding.welcomeText}</p>
         </>

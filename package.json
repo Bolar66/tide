@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "icons": "pwa-assets-generator",
-    "contrast": "node scripts/contrast.mjs"
+    "contrast": "node scripts/contrast.mjs",
+    "palettes": "node scripts/build-palettes.mjs"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.3.0",

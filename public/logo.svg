@@ -2,9 +2,9 @@
   <title>Tide</title>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
-      <stop offset="0" stop-color="#f4a3b6"/>
-      <stop offset="0.55" stop-color="#e45f7f"/>
-      <stop offset="1" stop-color="#c23356"/>
+      <stop offset="0" stop-color="#7cc4c0"/>
+      <stop offset="0.55" stop-color="#1b7d82"/>
+      <stop offset="1" stop-color="#0a4f54"/>
     </linearGradient>
     <mask id="crescent">
       <rect width="512" height="512" fill="#000"/>
@@ -13,7 +13,7 @@
     </mask>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
-  <rect width="512" height="512" fill="#fff8f9" mask="url(#crescent)"/>
-  <path d="M116 334 q35 -38 70 0 t70 0 t70 0 t70 0" fill="none" stroke="#fff8f9" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M146 388 q27.5 -28 55 0 t55 0 t55 0 t55 0" fill="none" stroke="#fff8f9" stroke-opacity="0.55" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="512" height="512" fill="#f6fcfb" mask="url(#crescent)"/>
+  <path d="M116 334 q35 -38 70 0 t70 0 t70 0 t70 0" fill="none" stroke="#f6fcfb" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 388 q27.5 -28 55 0 t55 0 t55 0 t55 0" fill="none" stroke="#f6fcfb" stroke-opacity="0.55" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

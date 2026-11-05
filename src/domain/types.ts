@@ -36,9 +36,12 @@ export interface Period {
 }
 
 export type ThemeSetting = 'system' | 'light' | 'dark';
+export type PaletteName = 'meri' | 'ruusu' | 'salvia' | 'laventeli';
 
 export interface Settings {
   theme: ThemeSetting;
+  /** Colour theme; Meri (neutral) when unset. */
+  palette?: PaletteName;
   /** UI language. Only 'fi' exists for now. */
   locale: 'fi';
   /** Set when the first-run flow is finished (or skipped because data already existed). */

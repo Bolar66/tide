@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { IconChevronRight, IconDatabase, IconExport, IconImport, IconInfo, IconKey } from '../../components/icons';
 import { Segmented } from '../../components/Segmented';
 import { Sheet } from '../../components/Sheet';
+import { PalettePicker } from '../../components/PalettePicker';
 import { ProfilePicker } from '../../components/ProfilePicker';
 import { Switch } from '../../components/Switch';
 import { profileOf } from '../../domain/profile';
@@ -116,7 +117,8 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
 
       <section className="settings-section">
         <h2 className="section-label">{t.settings.appearance}</h2>
-        <div className="card">
+        <div className="card stack">
+          <PalettePicker value={settings.palette ?? 'meri'} onChange={(palette) => store.updateSettings({ palette })} />
           <Segmented<ThemeSetting>
             label={t.settings.theme}
             options={themeOptions}

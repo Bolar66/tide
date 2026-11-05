@@ -1,9 +1,10 @@
+import { Logo } from '../../components/Logo';
 import { useEffect, useState } from 'react';
 import { IconFaceId } from '../../components/icons';
 import { Sheet } from '../../components/Sheet';
 import * as lock from '../../crypto/lock';
 import type { TideDB } from '../../db/db';
-import { storedTheme, useTheme } from '../../hooks/useTheme';
+import { storedPalette, storedTheme, useTheme } from '../../hooks/useTheme';
 import { useI18n } from '../../i18n';
 import { PinPad } from './PinPad';
 
@@ -17,7 +18,7 @@ type Mode = { kind: 'pin' } | { kind: 'newPin'; master: Uint8Array<ArrayBuffer> 
 
 export function LockScreen({ db, config, onUnlock }: Props) {
   const { t } = useI18n();
-  useTheme(storedTheme());
+  useTheme(storedTheme(), storedPalette());
   const [mode, setMode] = useState<Mode>({ kind: 'pin' });
   const [error, setError] = useState<string | null>(null);
   const [errorKey, setErrorKey] = useState(0);
@@ -110,7 +111,7 @@ export function LockScreen({ db, config, onUnlock }: Props) {
   return (
     <main className="lock-screen">
       <header className="lock-screen__header">
-        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" width={64} height={64} className="lock-screen__logo" />
+        <Logo size={64} className="lock-screen__logo" />
         <h1 className="display lock-screen__title">{t.lock.title}</h1>
       </header>
 

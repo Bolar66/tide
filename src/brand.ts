@@ -4,6 +4,6 @@
  */
 export const BRAND = {
   name: 'Tide',
-  themeLight: '#faf6f4',
-  themeDark: '#141011',
+  themeLight: '#f4f7f7',
+  themeDark: '#0d1618',
 } as const;

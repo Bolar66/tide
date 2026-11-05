@@ -1,3 +1,4 @@
+import { Logo } from '../../components/Logo';
 import type { CSSProperties } from 'react';
 import { IconChevronLeft } from '../../components/icons';
 import { BRAND } from '../../brand';
@@ -25,7 +26,7 @@ export function AboutView({ onBack }: { onBack: () => void }) {
       </header>
 
       <section className="about-hero enter">
-        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="about-hero__logo" width={88} height={88} />
+        <Logo size={88} className="about-hero__logo" />
         <h1 className="display about-hero__name">{BRAND.name}</h1>
         <p className="muted">{t.about.tagline}</p>
         <p className="small muted">{t.about.version(__APP_VERSION__)}</p>
