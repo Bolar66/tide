@@ -12,6 +12,7 @@ import {
   IconSparkle,
   IconSun,
   IconUser,
+  IconBell,
 } from '../../components/icons';
 import { useSession } from '../../session/context';
 import { Segmented } from '../../components/Segmented';
@@ -32,13 +33,15 @@ import { BackupGuide } from './BackupGuide';
 import { AccountSettings } from '../account/AccountSettings';
 import { SharingSettings } from '../sharing/SharingSettings';
 import { LockSettings } from './LockSettings';
+import { ReminderSettings } from '../reminders/ReminderSettings';
 import { TrackerSettings } from './TrackerSettings';
 import './settings.css';
 
-type Page = 'menu' | 'account' | 'use' | 'appearance' | 'security' | 'backup' | 'profile';
+type Page = 'menu' | 'account' | 'use' | 'reminders' | 'appearance' | 'security' | 'backup' | 'profile';
 const MENU = [
   { page: 'account', Icon: IconHeart },
   { page: 'use', Icon: IconSparkle },
+  { page: 'reminders', Icon: IconBell },
   { page: 'appearance', Icon: IconSun },
   { page: 'security', Icon: IconLock },
   { page: 'backup', Icon: IconExport },
@@ -57,7 +60,7 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
       const p = sessionStorage.getItem(SETTINGS_PAGE_KEY) as Page | null;
       sessionStorage.removeItem(SETTINGS_PAGE_KEY);
       if (sessionStorage.getItem(BACKUP_GUIDE_FLAG) === '1') return 'backup';
-      return p && ['account', 'use', 'appearance', 'security', 'backup', 'profile'].includes(p) ? p : 'menu';
+      return p && ['account', 'use', 'reminders', 'appearance', 'security', 'backup', 'profile'].includes(p) ? p : 'menu';
     } catch {
       return 'menu';
     }
@@ -75,6 +78,14 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         return t.settings.pages.use.trackers(settings.enabledTrackers.length);
       case 'profile':
         return t.settings.profiles[profileOf(settings)].title;
+      case 'reminders': {
+        const rm = settings.reminders;
+        const parts = [
+          ...(rm && rm.log.mode !== 'off' ? [`${t.reminders.logShort[rm.log.mode]} ${rm.log.time}`] : []),
+          ...(rm?.headsUp.on ? [t.reminders.headsUpShort(rm.headsUp.daysBefore)] : []),
+        ];
+        return parts.length ? t.reminders.rowOn(parts) : t.reminders.rowOff;
+      }
       case 'appearance':
         return `${t.settings.palettes[settings.palette ?? 'meri']} · ${t.settings.themes[settings.theme]}`;
       case 'security':
@@ -206,6 +217,8 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
           </li>
         </ul>
       )}
+
+      {page === 'reminders' && <ReminderSettings onOpenAccount={() => go('account')} />}
 
       {page === 'profile' && (
         <section className="settings-section stack">

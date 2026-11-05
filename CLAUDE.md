@@ -103,6 +103,16 @@ Jos muutit värejä: myös `pnpm contrast`.**
   Migraatiossa salaisuuden kohdalla on paikkamerkki `__TIDE_WEBHOOK_SECRET__`.
 - Service workerin push-käsittelijä: `public/push-handler.js` (workbox `importScripts`).
 
+## Oivallukset, raportti, katsaus, muistutukset
+
+- Oivallukset (`domain/insights.ts`): nykyinen vaihe vs. muu kierto ja 3 päivää ennen kuukautisia. Vaatii riittävästi
+  dataa (`MIN_DAYS_FOR_INSIGHT`, vähintään kaksi kiertoa ennen-ikkunalle). Ei koskaan arvailua vähällä datalla.
+- Lääkäriraportti (`domain/report.ts`, `#/report`): tulostus / Tallenna PDF. Intiimitiedot eivät ole koskaan mukana;
+  lääkitys ja muistiinpanot vain erikseen valittuina. Testi varmistaa tämän.
+- Kierron katsaus (`domain/recap.ts`, `features/recap`): tarjotaan etusivulla uuden kierron ensimmäisellä viikolla.
+- Muistutukset (`domain/reminders.ts`): ajat lasketaan laitteella, palvelimelle vain aikaleimat + laji (1/2)
+  (`0005_tide_reminders.sql`, pg_cron 5 min → `notify`-funktio `kind: 'reminders'`). Tekstit aina yleisiä.
+
 ## Datamalli ja skeemamuutokset
 
 - Päivämäärät ovat merkkijonoja `yyyy-MM-dd` (`ISODate`), ei `Date`-olioita tallennettuna. Käytä `domain/dates.ts`-apureita.

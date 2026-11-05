@@ -11,6 +11,7 @@ self.addEventListener('push', (event) => {
       self.registration.showNotification(data.title, {
         body: data.body,
         tag: data.tag,
+        data: { url: data.url ?? '' },
         icon: 'pwa-192x192.png',
         badge: 'pwa-64x64.png',
       }),
@@ -24,8 +25,14 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      // Reminders may point at a view, e.g. "#/calendar" for the heads-up.
+      const hash = event.notification.data?.url ?? '';
       const open = clients.find((c) => 'focus' in c);
-      return open ? open.focus() : self.clients.openWindow(self.registration.scope);
+      if (open) {
+        if (hash && 'navigate' in open) open.navigate(self.registration.scope + hash).catch(() => undefined);
+        return open.focus();
+      }
+      return self.clients.openWindow(self.registration.scope + hash);
     }),
   );
 });

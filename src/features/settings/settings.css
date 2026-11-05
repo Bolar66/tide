@@ -174,3 +174,37 @@
   /* Fade the scrolling text out above the pinned button. */
   box-shadow: 0 -16px 20px 10px var(--bg);
 }
+
+/* ---------- Reminders ---------- */
+.reminder-time .input {
+  max-width: 160px;
+}
+
+.notification-preview {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-md);
+}
+
+.notification-preview__icon {
+  flex-shrink: 0;
+  border-radius: 9px;
+}
+
+.notification-preview__app {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-weight: 650;
+}
+
+.notification-preview__app span {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}

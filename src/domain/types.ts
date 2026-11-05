@@ -1,3 +1,4 @@
+import type { ReminderSettings } from './reminders';
 import type { FollowedShare, OwnedShare } from '../sharing/types';
 import { DEFAULT_TRACKERS } from '../trackers/registry';
 import type { ISODate } from './dates';
@@ -41,6 +42,8 @@ export type PaletteName = (typeof PALETTE_NAMES)[number];
 
 export interface Settings {
   theme: ThemeSetting;
+  /** Push reminders; only the times ever reach the server (see domain/reminders.ts). */
+  reminders?: ReminderSettings;
   /** Colour theme; Meri (neutral) when unset. */
   palette?: PaletteName;
   /** UI language. Only 'fi' exists for now. */

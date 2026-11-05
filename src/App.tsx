@@ -13,6 +13,7 @@ import { FollowedTab } from './features/followed/FollowedCards';
 import { FollowerHome } from './features/followed/FollowerHome';
 import { TodayView } from './features/today/TodayView';
 import { ReportView } from './features/report/ReportView';
+import { ReminderSync } from './features/reminders/ReminderSync';
 import { Welcome } from './features/welcome/Welcome';
 import { profileOf } from './domain/profile';
 import { useSession } from './session/context';
@@ -140,6 +141,7 @@ export function App() {
         {route === 'about' && <AboutView onBack={() => navigate('settings')} />}
         {route === 'report' && <ReportView onBack={() => navigate('stats')} />}
       </main>
+      <ReminderSync />
       <TabBar route={route} onNavigate={navigate} profile={profile} following={following} />
     </>
   );

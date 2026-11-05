@@ -83,12 +83,15 @@ export interface Remote {
   deletePushSubscription(endpoint: string): Promise<void>;
   /** The only plaintext the user puts on the server: their display name, for notifications. */
   setDisplayName(name: string): Promise<void>;
+  /** Replace this user's upcoming reminders (times and kinds only). */
+  setReminders(items: { at: string; kind: 1 | 2 }[]): Promise<void>;
 }
 
 /** In-memory server with the same semantics as the SQL functions. Used in tests. */
 export class MemoryServer {
   users = new Map<string, { id: string; email: string; secret: string }>();
   vaults = new Map<string, VaultRow>();
+  reminders = new Map<string, { at: string; kind: 1 | 2 }[]>();
   snapshots = new Map<string, RemoteSnapshot>();
   shares = new Map<string, ShareRow & { wrapped_key: Sealed }>();
   shared = new Map<string, SharedRow>();
@@ -228,6 +231,9 @@ export class MemoryServer {
       },
       async setDisplayName() {
         uid();
+      },
+      async setReminders(items) {
+        server.reminders.set(uid(), items);
       },
       async deletePushSubscription(endpoint) {
         if (server.push.get(endpoint)?.user === uid()) server.push.delete(endpoint);

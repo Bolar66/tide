@@ -520,6 +520,10 @@ export function Root() {
         await remote.savePushSubscription(r);
         return 'on';
       },
+      async scheduleReminders(items) {
+        if (!acct) return;
+        await remote.setReminders(items);
+      },
       async disablePush() {
         const endpoint = await unsubscribePush();
         if (endpoint) await remote.deletePushSubscription(endpoint).catch(() => undefined);

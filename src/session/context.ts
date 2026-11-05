@@ -75,6 +75,8 @@ export interface Session {
   /** Turn push notifications on for this device; resolves with the outcome. */
   enablePush(): Promise<'on' | 'denied' | 'unsupported'>;
   disablePush(): Promise<void>;
+  /** Replace the scheduled reminders on the server (needs an account). */
+  scheduleReminders(items: { at: string; kind: 1 | 2 }[]): Promise<void>;
 }
 
 export const SessionContext = createContext<Session | null>(null);
