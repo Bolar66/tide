@@ -127,7 +127,7 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
                 <span className="list__sub">
                   {settings.lastBackupAt
                     ? t.settings.lastBackup(f.fullDate(todayISO(new Date(settings.lastBackupAt))))
-                    : t.settings.neverBackedUp}
+                    : t.settings.exportHint}
                 </span>
               </span>
               <IconChevronRight className="list__chevron" />
@@ -138,7 +138,10 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
               <span className="list__icon">
                 <IconImport />
               </span>
-              <span className="list__text">{t.settings.import}</span>
+              <span className="list__text">
+                {t.settings.import}
+                <span className="list__sub">{t.settings.importHint}</span>
+              </span>
               <IconChevronRight className="list__chevron" />
               <input
                 ref={fileInput}
