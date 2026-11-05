@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { calendarMarks } from '../domain/calendar';
-import { fertileWindows } from '../domain/fertility';
+import { fertileWindows, nextOvulation } from '../domain/fertility';
 import { findPatternWarnings } from '../domain/patterns';
 import { findPeriodOn } from '../domain/periods';
 import { cyclePhase } from '../domain/phases';
@@ -34,6 +34,7 @@ export function useCycle() {
       stats,
       prediction,
       fertile,
+      ovulation: nextOvulation(fertile, today),
       marks,
       cycleDay,
       phase,

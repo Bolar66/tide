@@ -5,6 +5,8 @@ export function createFormat(locale: DateLocale) {
   return {
     /** "torstai 5. marraskuuta" (standalone weekday, not the inflected "torstaina") */
     longDate: (d: ISODate) => format(fromISO(d), 'cccc d. MMMM', { locale }),
+    /** "ke 5.11." */
+    weekdayDate: (d: ISODate) => format(fromISO(d), 'cccccc d.M.', { locale }),
     /** "5.11." */
     shortDate: (d: ISODate) => format(fromISO(d), 'd.M.'),
     /** "5.11.2026" */

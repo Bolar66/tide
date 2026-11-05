@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { calendarMarks } from './calendar';
-import { fertileWindowBefore, fertileWindows } from './fertility';
+import { fertileWindowBefore, fertileWindows, nextOvulation } from './fertility';
 import { computeStats, predict } from './prediction';
 import type { Period } from './types';
 
@@ -38,5 +38,19 @@ describe('fertileWindows', () => {
     expect(marks.get('2026-09-24')).toBe('period');
     expect(marks.get('2026-09-29')).toBe('ovulation');
     expect(marks.get('2026-09-27')).toBe('fertile');
+  });
+});
+
+describe('nextOvulation', () => {
+  const windows = [fertileWindowBefore('2026-11-29'), fertileWindowBefore('2026-12-27')];
+  it('returns the current cycle ovulation until it has passed', () => {
+    expect(nextOvulation(windows, '2026-11-10')).toBe('2026-11-15');
+    expect(nextOvulation(windows, '2026-11-15')).toBe('2026-11-15');
+  });
+  it('moves on to the next cycle afterwards', () => {
+    expect(nextOvulation(windows, '2026-11-16')).toBe('2026-12-13');
+  });
+  it('is null without windows', () => {
+    expect(nextOvulation([], '2026-11-16')).toBeNull();
   });
 });

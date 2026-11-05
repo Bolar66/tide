@@ -70,6 +70,16 @@ Jos muutit värejä: myös `pnpm contrast`.**
   Lähteisiin linkitetään vain etusivuille (`SOURCE_LINKS`), jotta linkit eivät vanhene.
 - Ei hoito- tai annostusohjeita, ei ravintolisäsuosituksia. Sisältö tarkistetaan ammattilaisella ennen julkista julkaisua.
 
+## Tili ja synkronointi (vaihe 4)
+
+- Vapaaehtoinen. Supabase (EU), skeema `supabase/migrations/` (ajetaan käsin SQL Editorissa). Vain publishable-avain
+  sovelluksessa (`account/config.ts`); service_role-avainta ei koskaan.
+- Salasana ei lähde laitteelta: siitä johdetaan erikseen kirjautumistunniste ja pääavaimen lukitusavain (`crypto/account.ts`).
+- Koko data salataan yhdeksi dokumentiksi; synkronointi = kolmisuuntainen yhdistäminen (`sync/merge.ts`, päivät
+  kenttä kerrallaan) + versiotarkistus `push_snapshot`-funktiossa (`sync/engine.ts`).
+- Testit: `MemoryServer` (`sync/remote.ts`) jäljittelee SQL-funktioita. Muutokset synkronointiin testataan myös
+  kahdella laitteella oikeaa palvelinta vasten.
+
 ## Datamalli ja skeemamuutokset
 
 - Päivämäärät ovat merkkijonoja `yyyy-MM-dd` (`ISODate`), ei `Date`-olioita tallennettuna. Käytä `domain/dates.ts`-apureita.

@@ -7,11 +7,13 @@ interface Props {
   phase: Phase;
   cycleDay: number;
   showFertileNote: boolean;
+  /** Next estimated ovulation with days until it, when the fertile window is shown. */
+  ovulation?: { date: string; inDays: number } | null;
 }
 
 /** Phase summary with an expandable explanation and a tip that changes every day. */
-export function PhaseCard({ phase, cycleDay, showFertileNote }: Props) {
-  const { t } = useI18n();
+export function PhaseCard({ phase, cycleDay, showFertileNote, ovulation }: Props) {
+  const { t, f } = useI18n();
   const p = t.phases;
   const [open, setOpen] = useState(false);
   const tips = p.tips[phase];
@@ -24,6 +26,9 @@ export function PhaseCard({ phase, cycleDay, showFertileNote }: Props) {
       </p>
       <h2 className="card__title phase-card__name">{p.names[phase]}</h2>
       <p className="phase-card__text">{p.summaries[phase]}</p>
+      {ovulation && phase !== 'late' && (
+        <p className="phase-card__ovulation">{p.ovulationOn(f.weekdayDate(ovulation.date), ovulation.inDays)}</p>
+      )}
 
       {open && (
         <div className="phase-card__more">
@@ -50,7 +55,7 @@ export function PhaseCard({ phase, cycleDay, showFertileNote }: Props) {
           </div>
         </div>
       )}
-      {showFertileNote && <p className="phase-card__note">{p.fertileNote}</p>}
+      {(showFertileNote || ovulation) && <p className="phase-card__note">{p.fertileNote}</p>}
     </section>
   );
 }

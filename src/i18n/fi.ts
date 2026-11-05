@@ -128,6 +128,8 @@ export const fi = {
     readMore: 'Lue lisää',
     readLess: 'Näytä vähemmän',
     dayLabel: (day: number) => `päivä ${day}`,
+    ovulationOn: (date: string, inN: number) =>
+      `Ovulaatio arviolta ${date} · ${inN === 0 ? 'tänään' : inN === 1 ? 'huomenna' : `${inN} päivän päästä`}`,
     fertileNote: 'Hedelmällinen ikkuna on arvio eikä sovellu raskauden ehkäisyyn.',
   },
   patterns: {

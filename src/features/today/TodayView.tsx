@@ -27,7 +27,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
   const store = useStore();
   const { t, f } = useI18n();
   const lastBackupAt = useTide((s) => s.settings.lastBackupAt);
-  const { today, periods, prediction, stats, ring, hasHints, phase, warnings, fertile, cycleDay } = useCycle();
+  const { today, periods, prediction, stats, ring, hasHints, phase, warnings, fertile, cycleDay, ovulation } = useCycle();
   const [undo, setUndo] = useState<Undo | null>(null);
   const [otherDay, setOtherDay] = useState<'start' | 'end' | null>(null);
 
@@ -141,6 +141,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
           phase={phase}
           cycleDay={cycleDay}
           showFertileNote={fertile.length > 0 && (phase === 'ovulation' || phase === 'follicular')}
+          ovulation={ovulation ? { date: ovulation, inDays: diffDays(ovulation, today) } : null}
         />
       )}
 

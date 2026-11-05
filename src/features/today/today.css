@@ -68,6 +68,17 @@
   font-size: var(--text-md);
 }
 
+.phase-card__ovulation {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--fertile-soft);
+  color: var(--fertile);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
 .phase-card__more {
   display: flex;
   flex-direction: column;

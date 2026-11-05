@@ -34,3 +34,8 @@ export function fertileWindows(prediction: Prediction): FertileWindow[] {
   if (!prediction.expectedStart) return [];
   return [prediction.expectedStart, ...prediction.upcoming.slice(1).map((p) => p.start)].map(fertileWindowBefore);
 }
+
+/** The next estimated ovulation on or after today (the current cycle's, if not yet passed). */
+export function nextOvulation(windows: readonly FertileWindow[], today: ISODate): ISODate | null {
+  return windows.find((w) => w.ovulation >= today)?.ovulation ?? null;
+}
