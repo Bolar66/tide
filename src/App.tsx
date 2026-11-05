@@ -17,7 +17,7 @@ import { profileOf } from './domain/profile';
 import { useSession } from './session/context';
 import { parseInviteHash } from './sharing/crypto';
 import { useEffect, useState } from 'react';
-import { useHashRoute } from './hooks/useHashRoute';
+import { useHashRoute, type Route } from './hooks/useHashRoute';
 import { useToday } from './hooks/useToday';
 import { useTheme } from './hooks/useTheme';
 import { useI18n } from './i18n';
@@ -47,7 +47,7 @@ export function App() {
   const saveError = useTide((s) => s.saveError);
   // First launch: welcome screen and intro, then the onboarding questions.
   const [introDone, setIntroDone] = useState(false);
-  const [route, navigate] = useHashRoute();
+  const [route, navigateTo] = useHashRoute();
   const today = useToday();
   useTheme(theme, palette);
 
@@ -65,6 +65,14 @@ export function App() {
     navigate('settings');
     // after the view transition has swapped the page in
     window.setTimeout(() => document.getElementById('trackers')?.scrollIntoView({ behavior: 'smooth' }), 350);
+  };
+
+  // Between tabs the page slides in the direction of travel.
+  const navigate = (r: Route) => {
+    const tabs = visibleTabs(profile, following);
+    const from = tabs.indexOf(tabOf(route));
+    const to = tabs.indexOf(tabOf(r));
+    navigateTo(r, from >= 0 && to >= 0 && from !== to ? (to > from ? 'forward' : 'back') : r === 'about' ? 'forward' : route === 'about' ? 'back' : undefined);
   };
 
   // Sideways swipes: back out of a sub page, otherwise move to the neighbouring tab.

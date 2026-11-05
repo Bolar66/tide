@@ -1,5 +1,9 @@
 /* ---------- Layout ---------- */
 .app {
+  view-transition-name: page;
+}
+
+.app {
   min-height: 100dvh;
   padding: calc(env(safe-area-inset-top) + var(--space-4)) var(--space-5) calc(env(safe-area-inset-bottom) + 112px);
   max-width: 560px;

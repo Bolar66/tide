@@ -81,19 +81,73 @@ ul {
   font-variant-numeric: tabular-nums;
 }
 
-/* View transitions between tabs: quick cross-fade with a slight lift. */
+/* View transitions between tabs. Only the page content (.app) animates; the theme backdrop and
+   the tab bar stay put. Tabs slide sideways in the direction of travel, other routes lift in. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(page) {
+  animation: none;
+}
+
+::view-transition-old(page),
+::view-transition-new(page) {
   animation-duration: var(--dur);
   animation-timing-function: var(--ease-out);
 }
 
-::view-transition-new(root) {
+::view-transition-new(page) {
   animation-name: vt-in;
 }
 
-::view-transition-old(root) {
+::view-transition-old(page) {
   animation-name: vt-out;
+}
+
+:root[data-nav='forward']::view-transition-new(page) {
+  animation-name: vt-from-right;
+}
+
+:root[data-nav='forward']::view-transition-old(page) {
+  animation-name: vt-to-left;
+}
+
+:root[data-nav='back']::view-transition-new(page) {
+  animation-name: vt-from-left;
+}
+
+:root[data-nav='back']::view-transition-old(page) {
+  animation-name: vt-to-right;
+}
+
+@keyframes vt-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+@keyframes vt-to-left {
+  to {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes vt-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes vt-to-right {
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
 }
 
 /* The home ring morphs into the calendar card. */

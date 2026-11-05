@@ -15,7 +15,9 @@ const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)'
  * Hash routing with View Transitions where supported (Safari 18+, Chrome). The DOM must update
  * synchronously inside the transition callback, hence flushSync + pushState instead of hashchange.
  */
-export function useHashRoute(): [Route, (r: Route) => void] {
+export type NavDirection = 'forward' | 'back';
+
+export function useHashRoute(): [Route, (r: Route, direction?: NavDirection) => void] {
   const [route, setRoute] = useState(read);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export function useHashRoute(): [Route, (r: Route) => void] {
     };
   }, []);
 
-  const navigate = (r: Route) => {
+  const navigate = (r: Route, direction?: NavDirection) => {
     if (r === route) return;
     const update = () => {
       flushSync(() => setRoute(r));
@@ -37,9 +39,13 @@ export function useHashRoute(): [Route, (r: Route) => void] {
     };
     if (document.startViewTransition && !reducedMotion()) {
       // A transition can be skipped (e.g. viewport resize mid-animation); the DOM update still happens.
+      // Sideways slide between tabs in the direction of travel (CSS keys off data-nav).
+      const root = document.documentElement;
+      if (direction) root.dataset.nav = direction;
+      else delete root.dataset.nav;
       const vt = document.startViewTransition(update);
       vt.ready.catch(() => undefined);
-      vt.finished.catch(() => undefined);
+      vt.finished.catch(() => undefined).finally(() => delete root.dataset.nav);
     } else {
       update();
     }
