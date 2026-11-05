@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { diffDays, todayISO } from '../../domain/dates';
-import { openPeriod } from '../../domain/periods';
+import { findPeriodOn, openPeriod } from '../../domain/periods';
 import type { Period } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
 import { capitalize, useI18n } from '../../i18n';
@@ -41,8 +41,14 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
   }
 
   const open = openPeriod(periods);
-  const inPeriod = open !== undefined && open.start <= today;
-  const periodDay = open ? diffDays(today, open.start) + 1 : 0;
+  // Today may also fall inside a period that already has an end date (auto-ended, edited in the
+  // calendar or synced from another device). Then the main action is to end it today.
+  const current = findPeriodOn(periods, today, today);
+  const inPeriod = current !== undefined;
+  const periodDay = current ? diffDays(today, current.start) + 1 : 0;
+  const [error, setError] = useState<string | null>(null);
+  // Already marked as ending today: offer to reopen it instead of a button that changes nothing.
+  const endedToday = current?.end === today;
   const next = prediction.upcoming[0];
 
   const backupAge = lastBackupAt ? diffDays(today, todayISO(new Date(lastBackupAt))) : null;
@@ -51,8 +57,10 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
   const status =
     periods.length === 0
       ? t.today.noHistory
-      : inPeriod
-        ? t.ring.inPeriod(periodDay)
+      : endedToday
+        ? t.ring.endedToday
+        : inPeriod
+          ? t.ring.inPeriod(periodDay)
         : prediction.daysLate > 0
           ? t.ring.late(prediction.daysLate)
           : next
@@ -61,12 +69,20 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
 
   const start = () => {
     const r = store.startPeriod(today);
+    setError(r.ok ? null : (t.day.errors[r.reason] ?? null));
     if (r.ok && r.period) setUndo({ kind: 'start', period: r.period });
   };
   const end = () => {
-    const before = open;
+    const before = current;
     const r = store.endPeriod(today);
+    setError(r.ok ? null : (t.day.errors[r.reason] ?? null));
     if (r.ok && before) setUndo({ kind: 'end', period: before });
+  };
+  const reopen = () => {
+    if (!current) return;
+    const r = store.savePeriod({ ...current, end: undefined });
+    setError(r.ok ? null : (t.stats.errors[r.reason] ?? null));
+    if (r.ok) setUndo({ kind: 'end', period: current });
   };
   const revert = () => {
     if (!undo) return;
@@ -121,8 +137,8 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
         <CycleRing ring={ring} cycleLength={stats.avgCycle} status={status} onOpen={onOpenCalendar} pulse={pulse} />
 
         <div className="today-hero__actions enter" style={{ '--i': 2 } as CSSProperties}>
-          <button type="button" className="button" onClick={inPeriod ? end : start}>
-            {inPeriod ? t.today.ended : t.today.started}
+          <button type="button" className="button" onClick={endedToday ? reopen : inPeriod ? end : start}>
+            {endedToday ? t.today.continues : inPeriod ? t.today.ended : t.today.started}
           </button>
           <div className="today-hero__secondary">
             <button type="button" className="button button--ghost button--small" onClick={() => setOtherDay(inPeriod ? 'end' : 'start')}>
@@ -136,7 +152,12 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
           </div>
         </div>
 
-        {inPeriod && <p className="today-hero__note">{t.today.autoEndNote}</p>}
+        {error && (
+          <p className="error-text today-hero__note" role="alert">
+            {error}
+          </p>
+        )}
+        {open && inPeriod && <p className="today-hero__note">{t.today.autoEndNote}</p>}
 
         {periods.length > 0 && stats.usingDefaultCycle && (
           <p className="today-hero__note">{hasHints ? t.today.hintsNote : t.today.defaultsNote}</p>
