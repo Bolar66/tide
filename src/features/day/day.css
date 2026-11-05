@@ -197,3 +197,45 @@
 .log-panel__body {
   animation: fade-up var(--dur) var(--ease-out);
 }
+
+/* "Tallennettu ✓" floats up briefly after each change. */
+.log-saved {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--text);
+  color: var(--bg);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: saved-flash 1.6s var(--ease-out) forwards;
+}
+
+@keyframes saved-flash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.9);
+  }
+  15%,
+  70% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .log-saved {
+    display: none;
+  }
+}

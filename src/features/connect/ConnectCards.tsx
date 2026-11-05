@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNow } from '../../hooks/useNow';
+import { burst } from '../../ui/burst';
 import { useI18n } from '../../i18n';
 import { useSession } from '../../session/context';
 import { ackedIds, CHEER_PRESETS, COUPON_PRESETS, couponsFrom, MAX_TEXT, NEED_PRESETS, type Message } from '../../sharing/messages';
@@ -49,7 +50,8 @@ export function OwnerConnectCard() {
   const inbox = mine.filter((m) => !m.fromMe && m.body.type === 'cheer' && recent(m)).slice(-5).reverse();
   const coupons = couponsFrom(mine).filter((x) => !x.fromMe);
 
-  const sendNeed = async (need: string) => {
+  const sendNeed = async (need: string, from: Element) => {
+    burst(from, '🫶', 5);
     setSentAt((s) => ({ ...s, [need]: Date.now() }));
     await Promise.all(active.map((s) => session.sendMessage(s.id, { type: 'need', need })));
   };
@@ -61,7 +63,7 @@ export function OwnerConnectCard() {
       <h3 className="section-label">{c.needTitle}</h3>
       <div className="chips">
         {NEED_PRESETS.map((need) => (
-          <button key={need} type="button" className="chip" aria-pressed={!!sentAt[need]} onClick={() => void sendNeed(need)}>
+          <button key={need} type="button" className="chip" aria-pressed={!!sentAt[need]} onClick={(e) => void sendNeed(need, e.currentTarget)}>
             {c.needs[need]}
           </button>
         ))}
@@ -106,7 +108,8 @@ export function OwnerConnectCard() {
                   <button
                     type="button"
                     className="button button--small"
-                    onClick={() => {
+                    onClick={(e) => {
+                      burst(e.currentTarget, '🎟️', 6);
                       const share = mine.find((m) => m.id === cp.id)?.shareId;
                       if (share) void session.sendMessage(share, { type: 'redeem', couponId: cp.id });
                     }}
@@ -165,7 +168,10 @@ export function PartnerConnectCard({ shareId, name }: { shareId: string; name: s
                 {acked.has(m.id) ? (
                   <span className="muted small">{c.sent}</span>
                 ) : (
-                  <button type="button" className="button button--small" disabled={busy} onClick={() => void send({ type: 'ack', replyTo: m.id })}>
+                  <button type="button" className="button button--small" disabled={busy} onClick={(e) => {
+                    burst(e.currentTarget, '💛', 5);
+                    void send({ type: 'ack', replyTo: m.id });
+                  }}>
                     {c.ack}
                   </button>
                 )}
@@ -188,7 +194,10 @@ export function PartnerConnectCard({ shareId, name }: { shareId: string; name: s
       <h3 className="section-label">{c.cheerTitle}</h3>
       <div className="chips">
         {CHEER_PRESETS.map((p) => (
-          <button key={p} type="button" className="chip" disabled={busy} onClick={() => void send({ type: 'cheer', preset: p })}>
+          <button key={p} type="button" className="chip" disabled={busy} onClick={(e) => {
+              burst(e.currentTarget, '💛');
+              void send({ type: 'cheer', preset: p });
+            }}>
             {c.cheers[p]}
           </button>
         ))}
@@ -198,6 +207,7 @@ export function PartnerConnectCard({ shareId, name }: { shareId: string; name: s
         onSubmit={(e) => {
           e.preventDefault();
           if (!text.trim()) return;
+          burst(e.currentTarget.querySelector('button'), '💛');
           void send({ type: 'cheer', text: text.trim() }).then(() => setText(''));
         }}
       >
@@ -211,7 +221,10 @@ export function PartnerConnectCard({ shareId, name }: { shareId: string; name: s
       <p className="muted small">{c.couponHint}</p>
       <div className="chips">
         {COUPON_PRESETS.map((p) => (
-          <button key={p} type="button" className="chip" disabled={busy} onClick={() => void send({ type: 'coupon', preset: p })}>
+          <button key={p} type="button" className="chip" disabled={busy} onClick={(e) => {
+              burst(e.currentTarget, '🎁', 6);
+              void send({ type: 'coupon', preset: p });
+            }}>
             {c.coupons[p]}
           </button>
         ))}
@@ -221,6 +234,7 @@ export function PartnerConnectCard({ shareId, name }: { shareId: string; name: s
         onSubmit={(e) => {
           e.preventDefault();
           if (!coupon.trim()) return;
+          burst(e.currentTarget.querySelector('button'), '🎁', 6);
           void send({ type: 'coupon', text: coupon.trim() }).then(() => setCoupon(''));
         }}
       >

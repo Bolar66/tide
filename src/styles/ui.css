@@ -742,3 +742,72 @@ button.list__row:active {
   font-size: var(--text-sm);
   font-weight: 600;
 }
+
+/* ---------- Effects ---------- */
+.burst-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.burst-particle {
+  position: absolute;
+  font-size: 22px;
+  transform: translate(-50%, -50%);
+  animation: burst-fly 1.1s var(--ease-out) forwards;
+  opacity: 0;
+}
+
+@keyframes burst-fly {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.15) rotate(var(--rot));
+  }
+}
+
+/* Buttons and chips give a soft press response. */
+.button,
+.chip,
+.log-tab,
+.segmented__option {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chip:active,
+.log-tab:active {
+  transform: scale(0.95);
+}
+
+.chip[aria-pressed='true'],
+.chip[aria-checked='true'] {
+  animation: pop var(--dur) var(--ease-spring);
+}
+
+/* Sheets also slide away instead of vanishing. */
+.sheet.is-closing {
+  animation: sheet-down var(--dur) var(--ease-out) forwards;
+}
+
+.sheet.is-closing::backdrop {
+  animation: fade-out var(--dur) var(--ease-out) forwards;
+}
+
+@keyframes sheet-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}

@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { Ring } from '../../domain/ring';
 import { useI18n } from '../../i18n';
 import { IconChevronRight } from '../../components/icons';
+import { useCountUp } from '../../hooks/useCountUp';
 import './ring.css';
 
 const SIZE = 300;
@@ -26,14 +27,17 @@ interface Props {
   status: string;
   /** Opens the calendar. Without it the ring is display-only (e.g. a partner's cycle). */
   onOpen?: () => void;
+  /** Changes whenever today's log changes: today's dot gives a little pulse. */
+  pulse?: number;
 }
 
 /**
  * Home screen hero: the days of the current cycle as dots around a disc whose "tide" rises
  * through the cycle. The whole ring opens the calendar (and morphs into it via view transitions).
  */
-export function CycleRing({ ring, cycleLength, status, onOpen }: Props) {
+export function CycleRing({ ring, cycleLength, status, onOpen, pulse = 0 }: Props) {
   const { t } = useI18n();
+  const shownDay = useCountUp(ring.cycleDay ?? 0);
   const n = ring.days.length;
   // Keep a little water even on day 1 and never fill the disc completely.
   const level = C + DISC_R - (0.14 + ring.progress * 0.68) * DISC_R * 2;
@@ -63,8 +67,11 @@ export function CycleRing({ ring, cycleLength, status, onOpen }: Props) {
 
         <circle cx={C} cy={C} r={DISC_R} className="cycle-ring__disc" />
         <g clipPath="url(#cycle-ring-disc)">
-          <path d={wavePath(level + 4, 7)} className="cycle-ring__wave cycle-ring__wave--back" />
-          <path d={wavePath(level, 5)} className="cycle-ring__wave cycle-ring__wave--front" />
+          {/* The tide rises into place on load and moves smoothly when the level changes. */}
+          <g className="cycle-ring__tide" style={{ transform: `translateY(${level}px)` }}>
+            <path d={wavePath(4, 7)} className="cycle-ring__wave cycle-ring__wave--back" />
+            <path d={wavePath(0, 5)} className="cycle-ring__wave cycle-ring__wave--front" />
+          </g>
         </g>
 
         {ring.days.map((day, i) => {
@@ -76,6 +83,7 @@ export function CycleRing({ ring, cycleLength, status, onOpen }: Props) {
             return (
               <g key={day.date} className="cycle-ring__dot" style={style}>
                 <circle cx={x} cy={y} r={13} className="cycle-ring__halo" />
+                {pulse > 0 && <circle key={pulse} cx={x} cy={y} r={13} className="cycle-ring__ping" />}
                 <circle cx={x} cy={y} r={7.5} className="cycle-ring__today" />
               </g>
             );
@@ -98,7 +106,7 @@ export function CycleRing({ ring, cycleLength, status, onOpen }: Props) {
           <>
             <span className="cycle-ring__eyebrow">{t.ring.cycleDay}</span>
             <span className="cycle-ring__number display tabular">
-              {ring.cycleDay}
+              {shownDay || ring.cycleDay}
               <span className="cycle-ring__of">{t.ring.ofLength(Math.max(cycleLength, ring.cycleDay))}</span>
             </span>
           </>

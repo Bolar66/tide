@@ -149,3 +149,49 @@
   font-weight: 600;
   color: var(--accent);
 }
+
+/* Tide level: rises in on load, then glides when the level changes. */
+.cycle-ring__tide {
+  transition: transform 1.2s var(--ease-out);
+  animation: tide-rise 1.4s var(--ease-out) backwards;
+}
+
+@keyframes tide-rise {
+  from {
+    transform: translateY(300px);
+  }
+}
+
+/* Today's dot breathes softly and pings when something is logged. */
+.cycle-ring__halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: halo-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes halo-breathe {
+  50% {
+    transform: scale(1.18);
+    opacity: 0.7;
+  }
+}
+
+.cycle-ring__ping {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring-ping 0.9s var(--ease-out) forwards;
+}
+
+@keyframes ring-ping {
+  from {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}

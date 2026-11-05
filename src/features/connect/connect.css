@@ -71,8 +71,35 @@
   background: transparent;
 }
 
+.connect__coupons li {
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-spring);
+}
+
 .connect__coupons li.is-redeemed {
   opacity: 0.6;
+  transform: rotate(-1deg) scale(0.98);
+}
+
+/* Bubbles pop in one after another. */
+.connect__bubbles li {
+  animation: bubble-in var(--dur-slow) var(--ease-spring) backwards;
+}
+
+.connect__bubbles li:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.connect__bubbles li:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+  }
 }
 
 .connect__compose {

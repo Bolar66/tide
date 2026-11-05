@@ -31,6 +31,14 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
   const { today, periods, prediction, stats, ring, hasHints, phase, warnings, fertile, cycleDay, ovulation } = useCycle();
   const [undo, setUndo] = useState<Undo | null>(null);
   const [otherDay, setOtherDay] = useState<'start' | 'end' | null>(null);
+  // Ping today's ring dot whenever today's log or the periods change.
+  const todayEntry = useTide((s) => s.days[today]);
+  const [seen, setSeen] = useState({ todayEntry, periods });
+  const [pulse, setPulse] = useState(0);
+  if (seen.todayEntry !== todayEntry || seen.periods !== periods) {
+    setSeen({ todayEntry, periods });
+    setPulse((n) => n + 1);
+  }
 
   const open = openPeriod(periods);
   const inPeriod = open !== undefined && open.start <= today;
@@ -110,7 +118,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
       )}
 
       <section className="today-hero" aria-live="polite">
-        <CycleRing ring={ring} cycleLength={stats.avgCycle} status={status} onOpen={onOpenCalendar} />
+        <CycleRing ring={ring} cycleLength={stats.avgCycle} status={status} onOpen={onOpenCalendar} pulse={pulse} />
 
         <div className="today-hero__actions enter" style={{ '--i': 2 } as CSSProperties}>
           <button type="button" className="button" onClick={inPeriod ? end : start}>
