@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { AccountInfo } from '../account/service';
 import type { LockConfig } from '../crypto/lock';
+import type { Message, MessageBody } from '../sharing/messages';
 import type { SharedSnapshot, ShareScope } from '../sharing/types';
 
 export interface OwnedShareView {
@@ -61,6 +62,10 @@ export interface Session {
   setShareScopes(id: string, scopes: ShareScope[]): void;
   joinShare(shareId: string, secret: string, myName: string): Promise<void>;
   leaveShare(id: string): Promise<void>;
+
+  /** Messages of all active shares, oldest first. */
+  messages: Message[];
+  sendMessage(shareId: string, body: MessageBody): Promise<void>;
 }
 
 export const SessionContext = createContext<Session | null>(null);

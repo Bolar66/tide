@@ -28,6 +28,15 @@ export interface SharedRow {
   updated_at: string;
 }
 
+export interface MessageRow {
+  id: string;
+  share_id: string;
+  sender_id: string;
+  iv: string;
+  data: string;
+  created_at: string;
+}
+
 export interface RemoteUser {
   id: string;
   email: string;
@@ -66,6 +75,10 @@ export interface Remote {
   acceptInvite(id: string, info: Sealed): Promise<boolean>;
   pushShared(id: string, iv: string, data: string): Promise<void>;
   pullShared(id: string): Promise<SharedRow | null>;
+  sendMessage(shareId: string, iv: string, data: string): Promise<void>;
+  /** Messages of the given shares created after `since` (ISO), oldest first. */
+  listMessages(shareIds: string[], since: string | null): Promise<MessageRow[]>;
+  currentUserId(): Promise<string | null>;
 }
 
 /** In-memory server with the same semantics as the SQL functions. Used in tests. */
@@ -75,6 +88,7 @@ export class MemoryServer {
   snapshots = new Map<string, RemoteSnapshot>();
   shares = new Map<string, ShareRow & { wrapped_key: Sealed }>();
   shared = new Map<string, SharedRow>();
+  messages: MessageRow[] = [];
   now = () => Date.now();
 
   client(): Remote {
@@ -184,6 +198,25 @@ export class MemoryServer {
         const row = server.shares.get(id);
         if (!row || row.owner_id !== uid() || row.status !== 'active') throw new Error('permission denied');
         server.shared.set(id, { iv, data, updated_at: new Date(server.now()).toISOString() });
+      },
+      async sendMessage(shareId, iv, data) {
+        const row = server.shares.get(shareId);
+        const me = uid();
+        if (!row || row.status !== 'active' || (row.owner_id !== me && row.partner_id !== me)) throw new Error('permission denied');
+        server.messages.push({ id: crypto.randomUUID(), share_id: shareId, sender_id: me, iv, data, created_at: new Date(server.now()).toISOString() });
+      },
+      async listMessages(shareIds, since) {
+        const me = uid();
+        const allowed = new Set(
+          shareIds.filter((id) => {
+            const r = server.shares.get(id);
+            return r && r.status === 'active' && (r.owner_id === me || r.partner_id === me);
+          }),
+        );
+        return server.messages.filter((m) => allowed.has(m.share_id) && (!since || m.created_at > since));
+      },
+      async currentUserId() {
+        return session?.id ?? null;
       },
       async pullShared(id) {
         const row = server.shares.get(id);

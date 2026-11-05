@@ -13,6 +13,7 @@ import { todayISO } from '../domain/dates';
 import { buildSharedSnapshot } from '../sharing/build';
 import { createInvite, inviteLink, newShareKey, openForShare, openInvite, sealForShare } from '../sharing/crypto';
 import { ShareError } from '../sharing/errors';
+import { parseMessageBody, type Message } from '../sharing/messages';
 import { DEFAULT_SCOPES, type SharedCache } from '../sharing/types';
 import { EMPTY_SYNC_STATE, syncOnce } from '../sync/engine';
 import { canonical } from '../sync/merge';
@@ -53,6 +54,8 @@ export function Root() {
   const [partnerNames, setPartnerNames] = useState<Record<string, string | null>>({});
   const [sharedCache, setSharedCache] = useState<SharedCache>({});
   const lastPushed = useRef<Record<string, string>>({});
+  const [messages, setMessages] = useState<Message[]>([]);
+  const messagesRef = useRef<Message[]>([]);
 
   const openStore = useCallback(async (config: lock.LockConfig | null, secret: Master | null) => {
     master.current = secret ?? (await lock.readPlainMaster(db));
@@ -157,6 +160,26 @@ export function Root() {
       store.updateSettings({ shares: ownedNext, following: followingNext });
     }
     await store.getPersistence().saveSharedCache(cache);
+
+    // Messages of active shares, decrypted with each share's key; only new ones are fetched.
+    const keys = new Map<string, string>([
+      ...ownedNext.map((x) => [x.id, x.key] as const),
+      ...followingNext.map((x) => [x.id, x.key] as const),
+    ]);
+    const active = rows.filter((r) => r.status === 'active' && keys.has(r.id)).map((r) => r.id);
+    const known = messagesRef.current.filter((m) => active.includes(m.shareId));
+    const since = known.length ? known[known.length - 1]!.createdAt : null;
+    const me = await remote.currentUserId();
+    const fresh: Message[] = [];
+    for (const row of await remote.listMessages(active, since)) {
+      const raw = await openForShare<unknown>(keys.get(row.share_id)!, row).catch(() => null);
+      const body = parseMessageBody(raw);
+      if (body) fresh.push({ id: row.id, shareId: row.share_id, fromMe: row.sender_id === me, createdAt: row.created_at, body });
+    }
+    const seen = new Set(known.map((m) => m.id));
+    messagesRef.current = [...known, ...fresh.filter((m) => !seen.has(m.id))];
+    setMessages(messagesRef.current);
+
     setShareRows(rows);
     setPartnerNames(names);
     setSharedCache(cache);
@@ -390,6 +413,14 @@ export function Root() {
         });
         await runSync();
       },
+      messages,
+      async sendMessage(shareId, body) {
+        const key = [...(settings?.shares ?? []), ...(settings?.following ?? [])].find((x) => x.id === shareId)?.key;
+        if (!key) throw new Error('unknown share');
+        const sealed = await sealForShare(key, body);
+        await remote.sendMessage(shareId, sealed.iv, sealed.data);
+        await runSync();
+      },
       async leaveShare(id) {
         await remote.deleteShare(id).catch(() => undefined);
         store.updateSettings({ following: (store.getState().settings.following ?? []).filter((x) => x.id !== id) });
@@ -399,7 +430,7 @@ export function Root() {
         setSharedCache(cache);
       },
     };
-  }, [phase, lockNow, acct, sync, runSync, shareRows, partnerNames, sharedCache, settings]);
+  }, [phase, lockNow, acct, sync, runSync, shareRows, partnerNames, sharedCache, settings, messages]);
 
   if (phase.kind === 'checking') return <div className="center-screen" aria-busy="true" />;
   if (phase.kind === 'locked') {

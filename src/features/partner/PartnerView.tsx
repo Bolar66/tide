@@ -7,6 +7,7 @@ import { useToday } from '../../hooks/useToday';
 import { useI18n } from '../../i18n';
 import type { FollowedView } from '../../session/context';
 import { trackerById } from '../../trackers/registry';
+import { PartnerConnectCard } from '../connect/ConnectCards';
 import { CycleRing } from '../today/CycleRing';
 import './partner.css';
 
@@ -106,6 +107,8 @@ export function PartnerView({ followed }: { followed: FollowedView }) {
         )}
         {entry?.note && <p className="partner-note">“{entry.note}”</p>}
       </section>
+
+      {followed.status === 'active' && <PartnerConnectCard shareId={followed.id} name={data.ownerName} />}
 
       {minutes !== null && (
         <p className="muted small partner-updated">

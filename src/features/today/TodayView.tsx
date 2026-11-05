@@ -7,6 +7,7 @@ import { capitalize, useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
 import { DayEditor } from '../day/DayEditor';
 import { BACKUP_GUIDE_FLAG, exportBackup } from '../settings/backupIO';
+import { OwnerConnectCard } from '../connect/ConnectCards';
 import { CycleRing } from './CycleRing';
 import { OtherDaySheet } from './OtherDaySheet';
 import { PatternWarnings } from './PatternWarnings';
@@ -133,6 +134,8 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
           <p className="today-hero__note">{hasHints ? t.today.hintsNote : t.today.defaultsNote}</p>
         )}
       </section>
+
+      <OwnerConnectCard />
 
       <PatternWarnings warnings={warnings} />
 

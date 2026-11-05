@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../account/config';
 import type { Sealed } from '../crypto/keys';
-import { AuthError, type Remote, type RemoteSnapshot, type RemoteUser, type SharedRow, type ShareRow, type VaultRow } from './remote';
+import { AuthError, type Remote, type RemoteSnapshot, type RemoteUser, type MessageRow, type SharedRow, type ShareRow, type VaultRow } from './remote';
 
 let clientPromise: Promise<SupabaseClient> | null = null;
 
@@ -123,6 +123,27 @@ export const supabaseRemote: Remote = {
   async pullShared(id) {
     const rows = check(await (await client()).from('shared_snapshots').select('iv, data, updated_at').eq('share_id', id).limit(1));
     return (rows?.[0] as SharedRow | undefined) ?? null;
+  },
+
+  async sendMessage(shareId, iv, data) {
+    check(await (await client()).from('share_messages').insert({ share_id: shareId, iv, data }));
+  },
+
+  async listMessages(shareIds, since) {
+    if (shareIds.length === 0) return [];
+    let q = (await client())
+      .from('share_messages')
+      .select('id, share_id, sender_id, iv, data, created_at')
+      .in('share_id', shareIds)
+      .order('created_at', { ascending: true })
+      .limit(500);
+    if (since) q = q.gt('created_at', since);
+    return (check(await q) ?? []) as MessageRow[];
+  },
+
+  async currentUserId() {
+    const { data } = await (await client()).auth.getSession();
+    return data.session?.user.id ?? null;
   },
 
   async deleteAccount() {
