@@ -2,6 +2,7 @@ import { mergeSnapshots } from '../db/backup';
 import type { Persistence, Snapshot } from '../db/persistence';
 import { addDaysISO, todayISO, type ISODate } from '../domain/dates';
 import {
+  autoEndPeriods,
   endPeriod as endPeriodOp,
   includeDayInPeriods,
   startPeriod as startPeriodOp,
@@ -177,6 +178,16 @@ export function createStore(initialPersistence: Persistence, now: () => Date = (
       const settings = { ...state.settings, ...patch };
       set({ settings });
       void write(persistence.putSettings(settings));
+    },
+
+    /** Close periods whose end was never marked (see autoEndPeriods). Safe to call often. */
+    autoEnd(date: ISODate = today()) {
+      const flowDays = new Set(Object.values(state.days).filter((d) => d.flow).map((d) => d.date));
+      const changed = autoEndPeriods(state.periods, flowDays, date, computeStats(state.periods, fallback()).avgPeriod);
+      if (changed.length === 0) return;
+      const byId = new Map(changed.map((p) => [p.id, p]));
+      set({ periods: state.periods.map((p) => byId.get(p.id) ?? p) });
+      for (const p of changed) void write(persistence.putPeriod(p));
     },
 
     completeOnboarding(answers: OnboardingAnswers) {

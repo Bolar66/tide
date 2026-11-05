@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { effectiveEnd, endPeriod, includeDayInPeriods, startPeriod, validatePeriodEdit } from './periods';
+import { autoEndPeriods, effectiveEnd, endPeriod, includeDayInPeriods, startPeriod, validatePeriodEdit } from './periods';
 import type { Period } from './types';
 
 const p = (id: string, start: string, end?: string): Period => ({ id, start, ...(end ? { end } : {}) });
@@ -104,5 +104,28 @@ describe('validatePeriodEdit', () => {
   });
   it('rejects overlaps', () => {
     expect(validatePeriodEdit(periods, p('a', '2026-09-01', '2026-10-02'))).toBe('overlap');
+  });
+});
+
+describe('autoEndPeriods', () => {
+  const open = p('a', '2026-11-01');
+  const flow = (...d: string[]) => new Set(d);
+
+  it('keeps a period open until the average length has passed', () => {
+    expect(autoEndPeriods([open], flow('2026-11-01'), '2026-11-05', 5)).toEqual([]);
+  });
+
+  it('closes it after the average length when no more flow was logged', () => {
+    expect(autoEndPeriods([open], flow('2026-11-01'), '2026-11-06', 5)).toEqual([{ id: 'a', start: '2026-11-01', end: '2026-11-05' }]);
+  });
+
+  it('waits for the last logged flow day when it runs longer than average', () => {
+    const days = flow('2026-11-01', '2026-11-06', '2026-11-07');
+    expect(autoEndPeriods([open], days, '2026-11-07', 5)).toEqual([]);
+    expect(autoEndPeriods([open], days, '2026-11-08', 5)).toEqual([{ id: 'a', start: '2026-11-01', end: '2026-11-07' }]);
+  });
+
+  it('leaves closed and future periods alone', () => {
+    expect(autoEndPeriods([p('a', '2026-10-01', '2026-10-04'), p('b', '2026-12-01')], flow(), '2026-11-20', 5)).toEqual([]);
   });
 });

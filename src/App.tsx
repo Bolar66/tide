@@ -5,7 +5,9 @@ import { Onboarding } from './features/onboarding/Onboarding';
 import { SettingsView } from './features/settings/SettingsView';
 import { StatsView } from './features/stats/StatsView';
 import { TodayView } from './features/today/TodayView';
+import { useEffect } from 'react';
 import { useHashRoute } from './hooks/useHashRoute';
+import { useToday } from './hooks/useToday';
 import { useTheme } from './hooks/useTheme';
 import { useI18n } from './i18n';
 import { useStore, useTide } from './store/context';
@@ -18,7 +20,13 @@ export function App() {
   const onboarded = useTide((s) => s.settings.onboarded);
   const saveError = useTide((s) => s.saveError);
   const [route, navigate] = useHashRoute();
+  const today = useToday();
   useTheme(theme);
+
+  // Close periods whose end was never marked, on start and whenever the day changes.
+  useEffect(() => {
+    if (status === 'ready') store.autoEnd(today);
+  }, [store, status, today]);
 
   if (status === 'loading') return <div className="center-screen" aria-busy="true" />;
   if (status === 'error') return <div className="center-screen">{t.common.loadError}</div>;

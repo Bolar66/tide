@@ -91,4 +91,11 @@ describe('store', () => {
     await store.load();
     expect(store.getState().settings.onboarded).toBe(true);
   });
+
+  it('auto-ends a forgotten period after the average length', async () => {
+    const { store } = await setup(); // today 2026-11-05
+    store.startPeriod('2026-10-28');
+    store.autoEnd();
+    expect(store.getState().periods[0]?.end).toBe('2026-11-01');
+  });
 });

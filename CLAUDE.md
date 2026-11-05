@@ -57,6 +57,9 @@ Jos muutit värejä: myös `pnpm contrast`.**
   Tekstit `i18n`:n `trackers.items[id]`. Arvot tallentuvat `DayEntry.metrics[id]`, joka **ei vaadi migraatiota**.
 - Tracker-id:tä ei saa koskaan vaihtaa eikä käyttää uudelleen: vanha data ja varmuuskopiot viittaavat siihen.
 - Kaikki arvot kulkevat `sanitizeMetric()`-funktion läpi ennen tallennusta.
+- `parent`-kenttä = alaseurattava (esim. ateriat syömisen alla): näkyy kun pääseurattava on päällä, ei omaa valintaa asetuksissa.
+- Uuden seurattavan tekstit puuttuvat → `i18n.test.ts` kaatuu. Lisää label, 5 tasoa (scale5) ja jokainen vaihtoehto.
+- Avoin kuukautisjakso päättyy automaattisesti keskimääräisen keston jälkeen, jos vuotoa ei ole merkitty (`autoEndPeriods`).
 - Vaihevertailu (`domain/phaseStats.ts`) luokittelee päivät syklin todellisen pituuden mukaan. Havainnot eivät
   koskaan nosta esiin vaihetta tasapelin sattuessa.
 

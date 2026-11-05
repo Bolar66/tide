@@ -124,3 +124,27 @@ export function validatePeriodEdit(periods: readonly Period[], edited: Period): 
   });
   return clash ? 'overlap' : null;
 }
+
+/**
+ * Open periods the user forgot to end: once the average length has passed and no flow has been
+ * logged since, the period is closed on its last day with flow (or after the average length if
+ * flow was never logged). Logging flow again later reopens/extends it via includeDayInPeriods.
+ */
+export function autoEndPeriods(
+  periods: readonly Period[],
+  flowDays: ReadonlySet<ISODate>,
+  today: ISODate,
+  averageLength: number,
+): Period[] {
+  const changed: Period[] = [];
+  for (const p of periods) {
+    if (p.end || p.start > today) continue;
+    let lastFlow: ISODate | null = null;
+    for (const d of flowDays) if (d >= p.start && d <= today && (!lastFlow || d > lastFlow)) lastFlow = d;
+    const expectedEnd = addDaysISO(p.start, Math.max(1, averageLength) - 1);
+    const end = lastFlow && lastFlow > expectedEnd ? lastFlow : expectedEnd;
+    // Only once a full day has passed after the presumed end without new flow.
+    if (today > end) changed.push({ ...p, end });
+  }
+  return changed;
+}

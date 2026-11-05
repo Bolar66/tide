@@ -15,6 +15,9 @@ export const PHASE_METRICS = [
   { id: 'mood', read: (d: DayEntry) => d.symptoms?.mood },
   { id: 'energy', read: (d: DayEntry) => d.symptoms?.energy },
   { id: 'stress', read: (d: DayEntry) => d.metrics?.stress },
+  { id: 'anxiety', read: (d: DayEntry) => d.metrics?.anxiety },
+  { id: 'irritability', read: (d: DayEntry) => d.metrics?.irritability },
+  { id: 'appetite', read: (d: DayEntry) => d.metrics?.appetite },
 ] as const;
 
 export type PhaseMetricId = (typeof PHASE_METRICS)[number]['id'];
@@ -81,7 +84,16 @@ export function phaseAverages(
 /** Days per phase needed before a phase takes part in an insight. */
 export const MIN_DAYS_FOR_INSIGHT = 3;
 /** Smallest difference worth mentioning, per metric (hours for sleep, scale points otherwise). */
-const MEANINGFUL: Record<PhaseMetricId, number> = { sleepHours: 0.5, sleepQuality: 0.5, mood: 0.5, energy: 0.5, stress: 0.5 };
+const MEANINGFUL: Record<PhaseMetricId, number> = {
+  sleepHours: 0.5,
+  sleepQuality: 0.5,
+  mood: 0.5,
+  energy: 0.5,
+  stress: 0.5,
+  anxiety: 0.5,
+  irritability: 0.5,
+  appetite: 0.5,
+};
 
 export interface PhaseInsight {
   metric: PhaseMetricId;

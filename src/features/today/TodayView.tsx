@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { diffDays, todayISO } from '../../domain/dates';
-import { MAX_OPEN_PERIOD_DAYS, openPeriod } from '../../domain/periods';
+import { openPeriod } from '../../domain/periods';
 import type { Period } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
 import { capitalize, useI18n } from '../../i18n';
@@ -27,7 +27,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
   const store = useStore();
   const { t, f } = useI18n();
   const lastBackupAt = useTide((s) => s.settings.lastBackupAt);
-  const { today, periods, prediction, stats, ring, hasHints, phase, warnings, fertile } = useCycle();
+  const { today, periods, prediction, stats, ring, hasHints, phase, warnings, fertile, cycleDay } = useCycle();
   const [undo, setUndo] = useState<Undo | null>(null);
   const [otherDay, setOtherDay] = useState<'start' | 'end' | null>(null);
 
@@ -111,8 +111,6 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
       <section className="today-hero" aria-live="polite">
         <CycleRing ring={ring} cycleLength={stats.avgCycle} status={status} onOpen={onOpenCalendar} />
 
-        {inPeriod && periodDay > MAX_OPEN_PERIOD_DAYS && <p className="today-hero__note">{t.today.forgotEnd(periodDay)}</p>}
-
         <div className="today-hero__actions enter" style={{ '--i': 2 } as CSSProperties}>
           <button type="button" className="button" onClick={inPeriod ? end : start}>
             {inPeriod ? t.today.ended : t.today.started}
@@ -129,6 +127,8 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
           </div>
         </div>
 
+        {inPeriod && <p className="today-hero__note">{t.today.autoEndNote}</p>}
+
         {periods.length > 0 && stats.usingDefaultCycle && (
           <p className="today-hero__note">{hasHints ? t.today.hintsNote : t.today.defaultsNote}</p>
         )}
@@ -136,7 +136,13 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
 
       <PatternWarnings warnings={warnings} />
 
-      {phase && <PhaseCard phase={phase} showFertileNote={fertile.length > 0 && (phase === 'ovulation' || phase === 'follicular')} />}
+      {phase && cycleDay !== null && (
+        <PhaseCard
+          phase={phase}
+          cycleDay={cycleDay}
+          showFertileNote={fertile.length > 0 && (phase === 'ovulation' || phase === 'follicular')}
+        />
+      )}
 
       <section className="card enter" style={{ '--i': 3 } as CSSProperties}>
         <h2 className="card__title">{t.today.todayLog}</h2>

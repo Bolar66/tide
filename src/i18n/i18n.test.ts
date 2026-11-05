@@ -23,4 +23,24 @@ describe('fi locale', () => {
   it('has a label for every scale step', () => {
     for (const s of Object.values(t.symptoms)) expect(s.levels).toHaveLength(5);
   });
+
+  it('has complete texts for every cycle phase', () => {
+    for (const phase of ['menstrual', 'follicular', 'ovulation', 'luteal', 'late'] as const) {
+      expect(t.phases.names[phase]).toBeTruthy();
+      expect(t.phases.summaries[phase]).toBeTruthy();
+      expect(t.phases.body[phase]).toBeTruthy();
+      expect(t.phases.notice[phase].length).toBeGreaterThan(0);
+      expect(t.phases.tips[phase].length).toBeGreaterThan(0);
+    }
+  });
+
+  it('has a label for every tracker and its options', async () => {
+    const { TRACKERS } = await import('../trackers/registry');
+    for (const def of TRACKERS) {
+      const copy = t.trackers.items[def.id];
+      expect(copy?.label, def.id).toBeTruthy();
+      if (def.kind === 'scale5') expect(copy?.levels, def.id).toHaveLength(5);
+      if (def.kind === 'chips' || def.kind === 'choice') for (const o of def.options) expect(copy?.options?.[o], `${def.id}.${o}`).toBeTruthy();
+    }
+  });
 });

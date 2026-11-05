@@ -15,41 +15,70 @@ export type TrackerKind =
   | { kind: 'boolean' }
   | { kind: 'text' };
 
-export type TrackerGroup = 'sleep' | 'mind' | 'body' | 'intimacy' | 'lifestyle' | 'medication';
+export type TrackerGroup = 'sleep' | 'mind' | 'body' | 'food' | 'intimacy' | 'lifestyle' | 'medication';
 
 export type TrackerDef = TrackerKind & {
   id: string;
   group: TrackerGroup;
   /** Shown to new users unless they choose otherwise. */
   defaultEnabled: boolean;
+  /** A follow-up field shown whenever its parent tracker is enabled (not listed separately in settings). */
+  parent?: string;
 };
 
 export const TRACKERS = [
+  // Sleep
   { id: 'sleepHours', group: 'sleep', kind: 'number', min: 0, max: 14, step: 0.5, unit: 'h', default: 7.5, decimals: 1, defaultEnabled: true },
   { id: 'sleepQuality', group: 'sleep', kind: 'scale5', defaultEnabled: true },
+  // Mind
   { id: 'stress', group: 'mind', kind: 'scale5', defaultEnabled: true },
-  { id: 'skin', group: 'body', kind: 'chips', options: ['clear', 'breakout', 'dry', 'oily'], defaultEnabled: false },
-  { id: 'cravings', group: 'body', kind: 'chips', options: ['sweet', 'salty', 'carbs', 'chocolate'], defaultEnabled: false },
-  { id: 'digestion', group: 'body', kind: 'chips', options: ['normal', 'bloating', 'constipation', 'diarrhea', 'nausea'], defaultEnabled: false },
+  { id: 'anxiety', group: 'mind', kind: 'scale5', defaultEnabled: false },
+  { id: 'irritability', group: 'mind', kind: 'scale5', defaultEnabled: false },
+  { id: 'sensitivity', group: 'mind', kind: 'scale5', defaultEnabled: false },
+  { id: 'focus', group: 'mind', kind: 'scale5', defaultEnabled: false },
+  // Body
+  {
+    id: 'skin',
+    group: 'body',
+    kind: 'chips',
+    options: ['clear', 'breakout', 'dry', 'oily', 'redness', 'itchy', 'sensitive', 'glowing'],
+    defaultEnabled: false,
+  },
   { id: 'discharge', group: 'body', kind: 'choice', options: ['dry', 'sticky', 'creamy', 'watery', 'eggwhite'], defaultEnabled: false },
   { id: 'breastTenderness', group: 'body', kind: 'scale5', defaultEnabled: false },
   { id: 'backPain', group: 'body', kind: 'scale5', defaultEnabled: false },
   { id: 'bloating', group: 'body', kind: 'scale5', defaultEnabled: false },
+  { id: 'digestion', group: 'body', kind: 'chips', options: ['normal', 'bloating', 'constipation', 'diarrhea', 'nausea'], defaultEnabled: false },
   { id: 'bbt', group: 'body', kind: 'number', min: 35, max: 38, step: 0.05, unit: '°C', default: 36.5, decimals: 2, defaultEnabled: false },
   { id: 'weight', group: 'body', kind: 'number', min: 30, max: 200, step: 0.1, unit: 'kg', default: 65, decimals: 1, defaultEnabled: false },
+  // Food
+  { id: 'appetite', group: 'food', kind: 'scale5', defaultEnabled: false },
+  { id: 'eating', group: 'food', kind: 'scale5', defaultEnabled: false },
+  { id: 'meals', group: 'food', kind: 'chips', options: ['breakfast', 'lunch', 'snack', 'dinner', 'evening'], defaultEnabled: false, parent: 'eating' },
+  {
+    id: 'cravings',
+    group: 'food',
+    kind: 'chips',
+    options: ['sweet', 'salty', 'fatty', 'carbs', 'chocolate', 'spicy'],
+    defaultEnabled: false,
+  },
+  { id: 'cravingsIntensity', group: 'food', kind: 'scale5', defaultEnabled: false, parent: 'cravings' },
+  // Intimacy
   { id: 'libido', group: 'intimacy', kind: 'scale5', defaultEnabled: false },
   { id: 'sex', group: 'intimacy', kind: 'choice', options: ['protected', 'unprotected'], defaultEnabled: false },
+  // Lifestyle
   { id: 'caffeine', group: 'lifestyle', kind: 'count', max: 10, unit: 'cups', defaultEnabled: false },
   { id: 'alcohol', group: 'lifestyle', kind: 'count', max: 15, unit: 'drinks', defaultEnabled: false },
   { id: 'exercise', group: 'lifestyle', kind: 'number', min: 0, max: 240, step: 5, unit: 'min', default: 30, decimals: 0, defaultEnabled: false },
   { id: 'steps', group: 'lifestyle', kind: 'number', min: 0, max: 40000, step: 500, unit: 'steps', default: 6000, decimals: 0, defaultEnabled: false },
+  // Medication
   { id: 'pill', group: 'medication', kind: 'boolean', defaultEnabled: false },
   { id: 'painkiller', group: 'medication', kind: 'boolean', defaultEnabled: false },
   { id: 'medication', group: 'medication', kind: 'text', defaultEnabled: false },
 ] as const satisfies readonly TrackerDef[];
 
 export type TrackerId = (typeof TRACKERS)[number]['id'];
-export const TRACKER_GROUPS: readonly TrackerGroup[] = ['sleep', 'mind', 'body', 'intimacy', 'lifestyle', 'medication'];
+export const TRACKER_GROUPS: readonly TrackerGroup[] = ['sleep', 'mind', 'body', 'food', 'intimacy', 'lifestyle', 'medication'];
 
 const BY_ID = new Map<string, TrackerDef>(TRACKERS.map((t) => [t.id, t]));
 
@@ -59,10 +88,16 @@ export function trackerById(id: string): TrackerDef | undefined {
 
 export const DEFAULT_TRACKERS: TrackerId[] = TRACKERS.filter((t) => t.defaultEnabled).map((t) => t.id);
 
-/** Enabled trackers in registry order; unknown ids (e.g. from a newer backup) are ignored. */
+/** Trackers the user can switch on and off (follow-up fields come with their parent). */
+export const SELECTABLE_TRACKERS: readonly TrackerDef[] = TRACKERS.filter((t: TrackerDef) => !t.parent);
+
+/**
+ * Enabled trackers in registry order, each followed by its follow-up fields.
+ * Unknown ids (e.g. from a newer backup) are ignored.
+ */
 export function enabledTrackers(ids: readonly string[]): TrackerDef[] {
   const set = new Set(ids);
-  return TRACKERS.filter((t) => set.has(t.id));
+  return TRACKERS.filter((t: TrackerDef) => (t.parent ? set.has(t.parent) : set.has(t.id)));
 }
 
 /** Coerce a stored value to what the tracker accepts, or undefined if it does not fit. */

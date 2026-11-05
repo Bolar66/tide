@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_TRACKERS, enabledTrackers, sanitizeMetric, trackerById, TRACKERS } from './registry';
+import { DEFAULT_TRACKERS, enabledTrackers, sanitizeMetric, SELECTABLE_TRACKERS, trackerById, TRACKERS } from './registry';
 
 describe('tracker registry', () => {
   it('has unique ids', () => {
@@ -13,6 +13,15 @@ describe('tracker registry', () => {
   it('keeps weight off by default', () => {
     expect(DEFAULT_TRACKERS).not.toContain('weight');
     expect(DEFAULT_TRACKERS).toEqual(['sleepHours', 'sleepQuality', 'stress']);
+  });
+
+  it('brings follow-up fields along with their parent', () => {
+    expect(enabledTrackers(['cravings', 'eating']).map((t) => t.id)).toEqual(['eating', 'meals', 'cravings', 'cravingsIntensity']);
+  });
+
+  it('lists only top-level trackers as selectable', () => {
+    expect(SELECTABLE_TRACKERS.map((t) => t.id)).not.toContain('meals');
+    expect(SELECTABLE_TRACKERS.map((t) => t.id)).not.toContain('cravingsIntensity');
   });
 
   it('returns enabled trackers in registry order and ignores unknown ids', () => {

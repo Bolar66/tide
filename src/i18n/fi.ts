@@ -48,18 +48,75 @@ export const fi = {
       luteal: 'Luteaalivaihe',
       late: 'Kuukautiset odotettavissa',
     },
-    descriptions: {
-      menstrual:
-        'Kohdun limakalvo irtoaa. Väsymys, alavatsakivut ja alhaisempi energia ovat tavallisia. Lepo, lämpö ja liike voivat helpottaa.',
-      follicular:
-        'Estrogeenitaso nousee ja munasolu kypsyy. Moni kokee energian ja mielialan kohoavan tässä vaiheessa.',
-      ovulation:
-        'Munasolu irtoaa arviolta näinä päivinä. Osa tuntee lievää kipua alavatsan toisella puolella tai huomaa muutoksia valkovuodossa.',
-      luteal:
-        'Progesteronitaso nousee. Loppua kohden voi esiintyä turvotusta, rintojen arkuutta, mielialan vaihtelua tai mielihaluja.',
-      late:
-        'Sykli on kestänyt keskimääräistä pidempään. Pituus vaihtelee luonnostaan esimerkiksi stressin, sairastumisen tai matkustamisen vuoksi.',
+    summaries: {
+      menstrual: 'Uusi sykli alkaa. Keho irrottaa kohdun limakalvon, ja hormonitasot ovat matalimmillaan.',
+      follicular: 'Estrogeeni nousee ja keho valmistautuu ovulaatioon. Moni tuntee olonsa nyt energisimmäksi.',
+      ovulation: 'Munasolu irtoaa arviolta näinä päivinä. Estrogeeni on huipussaan ja LH-hormoni nousee hetkellisesti.',
+      luteal: 'Progesteroni nousee ja keho valmistautuu mahdolliseen raskauteen. Loppua kohden moni huomaa PMS-oireita.',
+      late: 'Sykli on kestänyt tavallista pidempään. Syklin pituus vaihtelee luonnostaan.',
     },
+    bodyTitle: 'Kehossa nyt',
+    body: {
+      menstrual:
+        'Estrogeeni- ja progesteronitasot ovat laskeneet, minkä vuoksi kohdun limakalvo irtoaa. Kohtu supistelee prostaglandiinien vaikutuksesta, mikä aiheuttaa tuttuja alavatsakipuja. Vuoto kestää yleensä 3–7 päivää.',
+      follicular:
+        'Aivolisäke erittää follikkelia stimuloivaa hormonia (FSH), joka kypsyttää munarakkuloita munasarjoissa. Kasvava munarakkula tuottaa estrogeenia, joka paksuntaa kohdun limakalvoa ja vaikuttaa usein myönteisesti mielialaan ja energiaan.',
+      ovulation:
+        'Luteinisoivan hormonin (LH) nopea nousu laukaisee ovulaation: kypsä munasolu irtoaa munasarjasta ja elää noin vuorokauden. Ovulaation jälkeen perusruumiinlämpö nousee noin 0,2–0,5 astetta.',
+      luteal:
+        'Tyhjä munarakkula muuttuu keltarauhaseksi, joka tuottaa progesteronia. Progesteroni nostaa kehon lämpöä ja voi lisätä nälkää ja väsymystä. Jos raskautta ei ala, hormonitasot laskevat vaiheen lopussa ja kuukautiset alkavat.',
+      late:
+        'Stressi, sairastuminen, matkustaminen, painon muutokset ja runsas liikunta voivat siirtää ovulaatiota ja sen myötä kuukautisia. Satunnainen pidempi sykli on tavallinen.',
+    },
+    noticeTitle: 'Saatat huomata',
+    notice: {
+      menstrual: ['Väsymystä ja matalampaa energiaa', 'Alavatsa- tai alaselkäkipua', 'Turvotusta tai muutoksia vatsan toiminnassa', 'Halua vetäytyä ja levätä'],
+      follicular: ['Energian ja mielialan kohoamista', 'Parempaa keskittymiskykyä', 'Ihon kirkastumista', 'Valkovuodon lisääntymistä vaiheen lopulla'],
+      ovulation: ['Kirkasta, venyvää valkovuotoa', 'Lievää kipua alavatsan toisella puolella', 'Seksuaalisen halun lisääntymistä', 'Rintojen arkuutta'],
+      luteal: ['Lisääntynyttä nälkää tai mielihaluja', 'Turvotusta ja rintojen arkuutta', 'Ärtyneisyyttä tai mielialan vaihtelua', 'Unen laadun heikkenemistä'],
+      late: ['Odottavaa oloa tai PMS-oireita', 'Rintojen arkuutta', 'Huolta, mikä on täysin ymmärrettävää'],
+    },
+    tipTitle: 'Päivän vinkki',
+    tips: {
+      menstrual: [
+        'Lämpötyyny vatsan päällä rentouttaa kohtua ja voi helpottaa kipua.',
+        'Kevyt liike, kuten kävely tai venyttely, voi lievittää kramppeja.',
+        'Tulehduskipulääke tehoaa parhaiten, kun sen ottaa kipujen alkaessa. Tarkista annostus pakkauksesta.',
+        'Runsas vuoto voi kuluttaa rautavarastoja. Rautaa saa esimerkiksi palkokasveista, täysjyvästä ja lihasta.',
+        'Anna itsellesi lupa ottaa rauhallisemmin. Riittävä uni auttaa jaksamaan.',
+        'Muista juoda. Nestevaje voi pahentaa päänsärkyä ja väsymystä.',
+      ],
+      follicular: [
+        'Hyvä hetki aloittaa uusia projekteja tai kokeilla haastavampia treenejä.',
+        'Moni jaksaa nyt sosiaalisia menoja paremmin. Tapaamiset kannattaa suunnitella tähän vaiheeseen.',
+        'Kirjaa energiatasosi. Muutaman syklin jälkeen näet, toistuuko nousu juuri sinulla.',
+        'Monipuolinen ruoka ja riittävä proteiini tukevat palautumista treeneistä.',
+        'Hyödynnä hyvää keskittymiskykyä tehtäviin, jotka vaativat tarkkuutta.',
+      ],
+      ovulation: [
+        'Venyvä, munanvalkuaisen kaltainen valkovuoto on tavallinen merkki ovulaation lähestymisestä.',
+        'Jos mittaat perusruumiinlämpöä, nousu näkyy vasta ovulaation jälkeen.',
+        'Toispuoleinen ovulaatiokipu kestää yleensä muutamasta tunnista vuorokauteen.',
+        'Muista, että sovelluksen arvio ei sovellu raskauden ehkäisyyn eikä sen suunnitteluun.',
+        'Moni tuntee olonsa nyt itsevarmaksi ja sosiaaliseksi. Nauti siitä.',
+      ],
+      luteal: [
+        'Säännöllinen ateriarytmi auttaa tasaamaan mielihaluja ja energiaa.',
+        'Suolan ja alkoholin vähentäminen voi helpottaa turvotusta.',
+        'Rauhallisempi liikunta, kuten jooga tai kävely, voi tuntua vaiheen lopussa paremmalta.',
+        'Kerro läheisillesi, jos tiedät olevasi tavallista herkempi. Se helpottaa kaikkia.',
+        'Jos PMS-oireet haittaavat arkea kuukaudesta toiseen, siitä kannattaa puhua terveydenhuollossa. Apua on saatavilla.',
+        'Kiinnitä huomiota iltarutiineihin. Progesteroni voi vaikuttaa unen laatuun.',
+      ],
+      late: [
+        'Muutaman päivän viive on tavallista eikä yleensä ole syy huoleen.',
+        'Raskaustestin voi tehdä kuukautisten odotetusta alkamispäivästä alkaen. Tulos on luotettavampi, kun on kulunut noin viikko.',
+        'Jos kuukautiset jäävät tulematta yli kolmeksi kuukaudeksi tai syklit ovat toistuvasti yli 35 päivää, kannattaa käydä terveydenhuollossa.',
+      ],
+    },
+    readMore: 'Lue lisää',
+    readLess: 'Näytä vähemmän',
+    dayLabel: (day: number) => `päivä ${day}`,
     fertileNote: 'Hedelmällinen ikkuna on arvio eikä sovellu raskauden ehkäisyyn.',
   },
   patterns: {
@@ -79,7 +136,7 @@ export const fi = {
     ended: 'Kuukautiset loppuivat tänään',
     startedOther: 'Alkoivat toisena päivänä',
     endedOther: 'Loppuivat toisena päivänä',
-    forgotEnd: (n: number) => `Kuukautiset ovat jatkuneet ${days(n)}. Muistitko merkitä loppumisen?`,
+    autoEndNote: 'Jos et merkitse loppumista, kuukautiset päättyvät automaattisesti tavallisen kestosi jälkeen. Voit muokata päiviä myöhemmin.',
     noHistory: 'Kirjaa kuukautisten alku, niin ennuste alkaa muodostua.',
     hintsNote: 'Ennuste perustuu antamiisi tietoihin, kunnes omaa historiaa kertyy.',
     defaultsNote: 'Ennuste käyttää tyypillisiä arvoja (28 pv sykli, 5 pv kuukautiset), kunnes omaa historiaa kertyy.',
@@ -121,13 +178,55 @@ export const fi = {
     clear: 'Tyhjennä',
     decrease: 'Vähennä',
     increase: 'Lisää',
-    groups: { sleep: 'Uni', mind: 'Mieli', body: 'Keho', intimacy: 'Seksuaalisuus', lifestyle: 'Elämäntavat', medication: 'Lääkkeet' },
+    groups: {
+      sleep: 'Uni',
+      mind: 'Mieli',
+      body: 'Keho',
+      food: 'Ruoka',
+      intimacy: 'Seksuaalisuus',
+      lifestyle: 'Elämäntavat',
+      medication: 'Lääkkeet',
+    },
     items: {
       sleepHours: { label: 'Unen pituus', hint: 'Edellisen yön uni' },
       sleepQuality: { label: 'Unen laatu', levels: ['Todella huono', 'Huono', 'Kohtalainen', 'Hyvä', 'Erinomainen'] },
       stress: { label: 'Stressi', levels: ['Ei lainkaan', 'Vähäinen', 'Kohtalainen', 'Suuri', 'Todella suuri'] },
-      skin: { label: 'Iho', options: { clear: 'Puhdas', breakout: 'Näppylöitä', dry: 'Kuiva', oily: 'Rasvainen' } },
-      cravings: { label: 'Mielihalut', options: { sweet: 'Makea', salty: 'Suolainen', carbs: 'Hiilihydraatit', chocolate: 'Suklaa' } },
+      anxiety: { label: 'Ahdistus', levels: ['Ei lainkaan', 'Vähäinen', 'Kohtalainen', 'Voimakas', 'Todella voimakas'] },
+      irritability: { label: 'Ärtyneisyys', levels: ['Ei lainkaan', 'Vähäinen', 'Kohtalainen', 'Voimakas', 'Todella voimakas'] },
+      sensitivity: { label: 'Herkkyys ja itkuisuus', levels: ['Ei lainkaan', 'Vähäinen', 'Kohtalainen', 'Voimakas', 'Todella voimakas'] },
+      focus: { label: 'Keskittyminen', levels: ['Todella hajanainen', 'Hajanainen', 'Kohtalainen', 'Hyvä', 'Terävä'] },
+      skin: {
+        label: 'Iho',
+        options: {
+          clear: 'Hyvä',
+          breakout: 'Finnejä',
+          dry: 'Kuiva',
+          oily: 'Rasvainen',
+          redness: 'Punoitus',
+          itchy: 'Kutina',
+          sensitive: 'Herkkä',
+          glowing: 'Hehkuva',
+        },
+      },
+      appetite: { label: 'Ruokahalu', levels: ['Todella pieni', 'Pieni', 'Tavallinen', 'Suuri', 'Todella suuri'] },
+      eating: { label: 'Kuinka hyvin söit?', settingsLabel: 'Syöminen', levels: ['Todella huonosti', 'Huonosti', 'Kohtalaisesti', 'Hyvin', 'Todella hyvin'] },
+      meals: {
+        label: 'Ateriat',
+        options: { breakfast: 'Aamupala', lunch: 'Lounas', snack: 'Välipala', dinner: 'Päivällinen', evening: 'Iltapala' },
+      },
+      cravings: {
+        label: 'Teki mieli',
+        settingsLabel: 'Mielihalut',
+        options: {
+          sweet: 'Makeaa',
+          salty: 'Suolaista',
+          fatty: 'Rasvaista',
+          carbs: 'Hiilihydraatteja',
+          chocolate: 'Suklaata',
+          spicy: 'Mausteista',
+        },
+      },
+      cravingsIntensity: { label: 'Mielihalujen voimakkuus', levels: ['Hyvin lieviä', 'Lieviä', 'Kohtalaisia', 'Voimakkaita', 'Todella voimakkaita'] },
       digestion: {
         label: 'Ruoansulatus',
         options: { normal: 'Normaali', bloating: 'Turvotus', constipation: 'Ummetus', diarrhea: 'Ripuli', nausea: 'Pahoinvointi' },
@@ -150,7 +249,10 @@ export const fi = {
       steps: { label: 'Askeleet' },
       pill: { label: 'E-pilleri tai lääke otettu' },
       medication: { label: 'Lääkkeet', placeholder: 'Esim. ibuprofeeni 400 mg' },
-    } as Record<string, { label: string; hint?: string; levels?: string[]; options?: Record<string, string>; placeholder?: string }>,
+    } as Record<
+      string,
+      { label: string; settingsLabel?: string; hint?: string; levels?: string[]; options?: Record<string, string>; placeholder?: string }
+    >,
     unit: (unit: string, n: number) =>
       ({
         cups: n === 1 ? 'kuppi' : 'kuppia',
@@ -162,7 +264,16 @@ export const fi = {
     title: 'Syklin vaiheet',
     intro: 'Keskiarvot kirjauksistasi syklin eri vaiheissa.',
     empty: 'Kun kirjaat unta, mielialaa, energiaa tai stressiä, näet täällä miten ne vaihtelevat syklisi aikana.',
-    metrics: { sleepHours: 'Unen pituus', sleepQuality: 'Unen laatu', mood: 'Mieliala', energy: 'Energia', stress: 'Stressi' },
+    metrics: {
+      sleepHours: 'Unen pituus',
+      sleepQuality: 'Unen laatu',
+      mood: 'Mieliala',
+      energy: 'Energia',
+      stress: 'Stressi',
+      anxiety: 'Ahdistus',
+      irritability: 'Ärtyneisyys',
+      appetite: 'Ruokahalu',
+    },
     phases: { menstrual: 'Kuukautiset', follicular: 'Follikulaari', ovulation: 'Ovulaatio', luteal: 'Luteaali' },
     phasesIn: {
       menstrual: 'kuukautisten aikana',
