@@ -245,6 +245,8 @@ export const fi = {
     importReplaceHint: 'Nykyiset tiedot poistetaan ja korvataan tiedoston sisällöllä.',
     importDone: 'Tiedot palautettu varmuuskopiosta.',
     exportDone: 'Varmuuskopio tehty. Muista tallentaa tiedosto turvalliseen paikkaan.',
+    guideRow: 'Näin varmuuskopioit',
+    guideHint: 'Mihin tiedosto kannattaa tallentaa',
     importErrors: {
       'not-json': 'Tiedosto ei ole kelvollinen varmuuskopio.',
       'not-tide': `Tiedosto ei ole ${NAME}-varmuuskopio.`,
@@ -348,10 +350,49 @@ export const fi = {
     pinChanged: 'PIN-koodi vaihdettu.',
     disabled: 'PIN-lukko poistettu käytöstä.',
   },
+  backupGuide: {
+    title: 'Näin varmuuskopioit',
+    intro:
+      'Varmuuskopio on yksi tiedosto, jossa ovat kaikki kirjauksesi. Sen avulla saat tiedot takaisin, jos puhelin vaihtuu tai katoaa tai sovellus poistetaan.',
+    stepsTitle: 'iPhonella',
+    steps: [
+      'Paina ”Tee varmuuskopio”.',
+      'Valitse avautuvasta valikosta ”Tallenna Tiedostoihin”.',
+      'Valitse iCloud Drive ja halutessasi oma kansio, esimerkiksi ”Tide”. Paina ”Tallenna”.',
+    ],
+    otherDevices: 'Muilla laitteilla tiedosto latautuu tai avautuu jakovalikkoon. Tallenna se omaan pilvitallennukseesi.',
+    whereTitle: 'Hyvä paikka',
+    good: [
+      {
+        title: 'iCloud Drive (suositus)',
+        text: 'Tiedosto säilyy, vaikka puhelin vaihtuisi tai katoaisi, ja löytyy uudesta iPhonesta automaattisesti.',
+      },
+      { title: 'Muu oma pilvitallennus', text: 'Esimerkiksi Google Drive tai OneDrive, johon vain sinulla on pääsy.' },
+    ],
+    avoidTitle: 'Vältä',
+    avoid: [
+      'Pelkkää ”Omassa iPhonessa” -kansiota: tiedosto katoaa puhelimen mukana.',
+      'Sähköpostia ja viestisovelluksia: tiedosto jää keskusteluihin ja palvelimille.',
+      'Jaettuja kansioita sekä työ- ja koulutilejä, joihin muillakin on pääsy.',
+    ],
+    securityTitle: 'Tietoturva',
+    security: [
+      'Varmuuskopiota ei ole salattu, vaikka PIN-lukko olisi päällä. Kuka tahansa, jolla on tiedosto, voi lukea sen.',
+      'iCloudia käyttäessäsi ota käyttöön Edistynyt tietosuoja (Asetukset → oma nimesi → iCloud → Edistynyt tietosuoja). Silloin iCloud Driven tiedostot salataan niin, ettei Applekaan pääse niihin.',
+      'Suojaa Apple-tilisi vahvalla salasanalla ja kaksivaiheisella tunnistautumisella.',
+    ],
+    howOftenTitle: 'Kuinka usein?',
+    howOften: `Kerran kuussa riittää useimmille. ${NAME} muistuttaa, jos edellisestä varmuuskopiosta on yli 30 päivää. Uusin tiedosto sisältää aina kaiken, joten vanhat voi poistaa.`,
+    restoreTitle: 'Tietojen palautus',
+    restore: `Asenna ${NAME} uuteen puhelimeen ja valitse ensimmäisellä näytöllä ”Minulla on varmuuskopio”. Voit palauttaa tiedot myös myöhemmin kohdasta Asetukset → Palauta varmuuskopiosta.`,
+    action: 'Tee varmuuskopio nyt',
+  },
   onboarding: {
     welcomeTitle: `Tervetuloa ${NAME_ILLATIVE}`,
     welcomeText: 'Seuraa kuukautisiasi ja hyvinvointiasi rauhassa. Kaikki tiedot pysyvät sinun puhelimessasi.',
     start: 'Aloitetaan',
+    restore: 'Minulla on varmuuskopio',
+    restoring: 'Palautetaan tietoja…',
     privacyTitle: 'Sinun tietosi ovat vain sinun',
     privacyPoints: [
       { title: 'Ei tiliä', text: 'Rekisteröitymistä ei tarvita, eikä sähköpostiasi kysytä.' },

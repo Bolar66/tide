@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { IconChevronRight, IconDatabase, IconExport, IconImport, IconInfo } from '../../components/icons';
+import { IconChevronRight, IconDatabase, IconExport, IconImport, IconInfo, IconKey } from '../../components/icons';
 import { Segmented } from '../../components/Segmented';
 import { Sheet } from '../../components/Sheet';
 import { Switch } from '../../components/Switch';
@@ -9,7 +9,8 @@ import { todayISO } from '../../domain/dates';
 import type { ThemeSetting } from '../../domain/types';
 import { useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
-import { exportBackup } from './backupIO';
+import { BACKUP_GUIDE_FLAG, exportBackup } from './backupIO';
+import { BackupGuide } from './BackupGuide';
 import { LockSettings } from './LockSettings';
 import { TrackerSettings } from './TrackerSettings';
 import './settings.css';
@@ -22,6 +23,16 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
   const [pending, setPending] = useState<Snapshot | null>(null);
   const [persisted, setPersisted] = useState<boolean | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const [guideOpen, setGuideOpen] = useState(() => {
+    // The home screen reminder asks for the guide when no backup has been made yet.
+    try {
+      const flagged = sessionStorage.getItem(BACKUP_GUIDE_FLAG) === '1';
+      sessionStorage.removeItem(BACKUP_GUIDE_FLAG);
+      return flagged;
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     navigator.storage?.persisted?.().then(setPersisted, () => setPersisted(null));
@@ -29,7 +40,7 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
 
   const themeOptions = (['system', 'light', 'dark'] as const).map((value) => ({ value, label: t.settings.themes[value] }));
 
-  const onExport = () => {
+  const doExport = () => {
     exportBackup(store.snapshot())
       .then((done) => {
         if (!done) return;
@@ -41,6 +52,9 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         setMessage({ text: String(err), error: true });
       });
   };
+
+  // First backup: show where to save the file before the share sheet opens.
+  const onExport = () => (settings.lastBackupAt ? doExport() : setGuideOpen(true));
 
   const onFile = async (file: File | undefined) => {
     if (!file) return;
@@ -134,6 +148,18 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
             </button>
           </li>
           <li>
+            <button type="button" className="list__row" onClick={() => setGuideOpen(true)}>
+              <span className="list__icon">
+                <IconKey />
+              </span>
+              <span className="list__text">
+                {t.settings.guideRow}
+                <span className="list__sub">{t.settings.guideHint}</span>
+              </span>
+              <IconChevronRight className="list__chevron" />
+            </button>
+          </li>
+          <li>
             <label className="list__row">
               <span className="list__icon">
                 <IconImport />
@@ -189,6 +215,15 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
           </li>
         </ul>
       </section>
+
+      <BackupGuide
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        onBackup={() => {
+          setGuideOpen(false);
+          doExport();
+        }}
+      />
 
       <Sheet open={pending !== null} onClose={() => setPending(null)} title={t.settings.importTitle}>
         {pending && (

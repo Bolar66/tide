@@ -2,6 +2,9 @@ import { createBackup } from '../../db/backup';
 import type { Snapshot } from '../../db/persistence';
 import { todayISO } from '../../domain/dates';
 
+/** sessionStorage flag: open the backup guide when the settings view mounts. */
+export const BACKUP_GUIDE_FLAG = 'tide.openBackupGuide';
+
 /**
  * Export via the share sheet where files can be shared (iOS: "Save to Files"),
  * otherwise as a normal download. Resolves false if the user cancelled.

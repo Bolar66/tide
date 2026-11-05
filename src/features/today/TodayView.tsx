@@ -6,7 +6,7 @@ import { useCycle } from '../../hooks/useCycle';
 import { capitalize, useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
 import { DayEditor } from '../day/DayEditor';
-import { exportBackup } from '../settings/backupIO';
+import { BACKUP_GUIDE_FLAG, exportBackup } from '../settings/backupIO';
 import { CycleRing } from './CycleRing';
 import { OtherDaySheet } from './OtherDaySheet';
 import { PatternWarnings } from './PatternWarnings';
@@ -85,13 +85,23 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
           <button
             type="button"
             className="button button--ghost button--small"
-            onClick={() =>
+            onClick={() => {
+              if (backupAge === null) {
+                // First backup: go through the guide in settings so the file lands somewhere safe.
+                try {
+                  sessionStorage.setItem(BACKUP_GUIDE_FLAG, '1');
+                } catch {
+                  /* ignore */
+                }
+                onOpenSettings();
+                return;
+              }
               // Called straight from the tap: iOS only opens the share sheet from a user gesture.
               exportBackup(store.snapshot()).then(
                 (done) => done && store.updateSettings({ lastBackupAt: Date.now() }),
                 () => onOpenSettings(),
-              )
-            }
+              );
+            }}
           >
             {t.today.backupAction}
           </button>
