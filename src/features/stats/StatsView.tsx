@@ -6,6 +6,7 @@ import { useCycle } from '../../hooks/useCycle';
 import { useI18n } from '../../i18n';
 import { PeriodSheet } from './PeriodSheet';
 import { PhaseComparison } from './PhaseComparison';
+import { RecapRow } from '../recap/RecapEntry';
 import './stats.css';
 
 /** Cycles within this many days of each other count as regular (common clinical rule of thumb). */
@@ -121,6 +122,7 @@ export function StatsView({ above }: { above?: ReactNode } = {}) {
       <PhaseComparison />
 
       <ul className="list">
+        <RecapRow />
         <li>
           <button type="button" className="list__row" onClick={() => (window.location.hash = '#/report')}>
             <span className="list__icon">

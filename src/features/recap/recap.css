@@ -1,0 +1,216 @@
+.recap {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top) + var(--space-3)) var(--space-5) calc(env(safe-area-inset-bottom) + var(--space-4));
+  background:
+    radial-gradient(90% 60% at 80% 0%, rgb(var(--glow-rgb) / 45%), transparent 70%),
+    radial-gradient(80% 50% at 0% 100%, rgb(var(--glow-rgb) / 30%), transparent 70%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  color: var(--text);
+  animation: fade-in var(--dur-slow) var(--ease-out);
+}
+
+.recap__progress {
+  display: flex;
+  gap: 4px;
+  padding-right: calc(var(--tap) + var(--space-2));
+}
+
+.recap__progress span {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--surface-3);
+  transition: background-color var(--dur) var(--ease-out);
+}
+
+.recap__progress span.is-done,
+.recap__progress span.is-active {
+  background: var(--accent);
+}
+
+.recap__close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + var(--space-1));
+  right: var(--space-4);
+}
+
+.recap__stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.recap__slide {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  animation: fade-up var(--dur-slow) var(--ease-out);
+}
+
+.recap__eyebrow {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.recap__title {
+  font-size: var(--text-3xl);
+  line-height: 1.15;
+}
+
+.recap__big {
+  font-size: 120px;
+  line-height: 1;
+  color: var(--accent);
+  animation: pop-in var(--dur-slow) var(--ease-spring) 150ms backwards;
+}
+
+.recap__unit {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.recap__text {
+  font-size: var(--text-lg);
+  color: var(--text-muted);
+  max-width: 30ch;
+  line-height: 1.5;
+}
+
+.recap__text--small {
+  font-size: var(--text-sm);
+}
+
+.recap__art {
+  margin-bottom: var(--space-2);
+}
+
+.recap__meter {
+  width: 100%;
+  max-width: 280px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.recap__meter span {
+  display: block;
+  height: 100%;
+  width: var(--w);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  animation: bar-fill 1.2s var(--ease-out) 200ms both;
+}
+
+.recap__list {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  counter-reset: recap;
+}
+
+.recap__list li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  font-weight: 600;
+  animation: fade-up var(--dur-slow) var(--ease-out) backwards;
+}
+
+.recap__list li:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.recap__list li:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.recap-spark {
+  width: 100%;
+  max-width: 320px;
+  margin: 0;
+  text-align: left;
+}
+
+.recap-spark figcaption {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.recap-spark svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.recap-spark__mid {
+  stroke: var(--border);
+  stroke-dasharray: 3 4;
+}
+
+.recap-spark__line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.recap-spark__dot {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.recap-spark__empty {
+  color: var(--text-faint);
+}
+
+.recap__done {
+  margin-top: var(--space-4);
+  min-width: 200px;
+}
+
+.recap__tap {
+  min-height: 1.5em;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+}
+
+/* Keyframes used here live in other stylesheets; keep local copies so the story works on its own. */
+@keyframes bar-fill {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}

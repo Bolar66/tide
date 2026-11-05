@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeStats, cycleDay, getCycles, predict, stdDev } from './prediction';
+import { computeStats, cycleDay, getCycles, predict, predictionSpread, stdDev } from './prediction';
 import type { Period } from './types';
 
 const p = (id: string, start: string, end?: string): Period => ({ id, start, ...(end ? { end } : {}) });
@@ -123,5 +123,15 @@ describe('cycleDay', () => {
   });
   it('ignores periods logged in the future', () => {
     expect(cycleDay([p('a', '2026-10-01'), p('b', '2026-12-01')], '2026-11-05')).toBe(36);
+  });
+});
+
+describe('predictionSpread', () => {
+  const base = { avgCycle: 28, avgPeriod: 5, cycleCount: 4, min: 26, max: 30, usingDefaultCycle: false, usingDefaultPeriod: false };
+  it('uses the rounded standard deviation within 1–5 days', () => {
+    expect(predictionSpread({ ...base, sd: null })).toBe(2);
+    expect(predictionSpread({ ...base, sd: 0.2 })).toBe(1);
+    expect(predictionSpread({ ...base, sd: 2.6 })).toBe(3);
+    expect(predictionSpread({ ...base, sd: 9 })).toBe(5);
   });
 });

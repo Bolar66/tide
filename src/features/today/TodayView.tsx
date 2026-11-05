@@ -1,12 +1,14 @@
 import { useState, type CSSProperties } from 'react';
 import { diffDays, todayISO } from '../../domain/dates';
 import { openPeriod, periodToday } from '../../domain/periods';
+import { predictionSpread } from '../../domain/prediction';
 import type { Period } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
 import { capitalize, useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
 import { TodaySummary } from './TodaySummary';
 import { InsightCard } from './InsightCard';
+import { RecapCard } from '../recap/RecapEntry';
 import { BACKUP_GUIDE_FLAG, exportBackup } from '../settings/backupIO';
 import { OwnerConnectCard } from '../connect/ConnectCards';
 import { CycleRing } from './CycleRing';
@@ -16,6 +18,7 @@ import { PhaseCard } from './PhaseCard';
 import './today.css';
 
 const BACKUP_INTERVAL_DAYS = 30;
+const SCRUB_HINT_KEY = 'tide.scrubHintSeen';
 
 type Undo = { kind: 'start' | 'end'; period: Period };
 
@@ -36,6 +39,23 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
   const todayEntry = useTide((s) => s.days[today]);
   const [seen, setSeen] = useState({ todayEntry, periods });
   const [pulse, setPulse] = useState(0);
+  const spread = predictionSpread(stats);
+  // One-time hint for scrubbing the ring, hidden after the first scrub.
+  const [scrubHint, setScrubHint] = useState(() => {
+    try {
+      return localStorage.getItem(SCRUB_HINT_KEY) !== '1';
+    } catch {
+      return false;
+    }
+  });
+  const hideScrubHint = () => {
+    setScrubHint(false);
+    try {
+      localStorage.setItem(SCRUB_HINT_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+  };
   if (seen.todayEntry !== todayEntry || seen.periods !== periods) {
     setSeen({ todayEntry, periods });
     setPulse((n) => n + 1);
@@ -62,7 +82,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
         : prediction.daysLate > 0
           ? t.ring.late(prediction.daysLate)
           : next
-            ? t.ring.next(diffDays(next.start, today))
+            ? `${t.ring.next(diffDays(next.start, today))} (${t.ring.spread(spread)})`
             : '';
 
   const start = () => {
@@ -132,7 +152,16 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
       )}
 
       <section className="today-hero" aria-live="polite">
-        <CycleRing ring={ring} cycleLength={stats.avgCycle} status={status} onOpen={onOpenCalendar} pulse={pulse} />
+        <CycleRing
+          ring={ring}
+          cycleLength={stats.avgCycle}
+          status={status}
+          onOpen={onOpenCalendar}
+          pulse={pulse}
+          spread={periods.length > 0 ? spread : undefined}
+          onScrubbed={hideScrubHint}
+        />
+        {scrubHint && periods.length > 0 && <p className="cycle-ring-hint">{t.ring.scrubHint}</p>}
 
         <div className="today-hero__actions enter" style={{ '--i': 2 } as CSSProperties}>
           <button type="button" className="button" onClick={endedToday ? reopen : inPeriod ? end : start}>
@@ -163,6 +192,8 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
       </section>
 
       <TodaySummary date={today} onChooseTrackers={onOpenTrackers} />
+
+      <RecapCard />
 
       <InsightCard />
 

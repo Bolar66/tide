@@ -136,3 +136,12 @@ export function cycleDay(periods: readonly Period[], today: ISODate): number | n
   const last = started[started.length - 1];
   return last ? diffDays(today, last.start) + 1 : null;
 }
+
+/**
+ * How many days either side of the predicted start the next period may realistically begin:
+ * the cycle-length standard deviation, rounded, at least 1 and at most 5 (2 without history).
+ */
+export function predictionSpread(stats: CycleStats): number {
+  if (stats.sd === null) return 2;
+  return Math.min(5, Math.max(1, Math.round(stats.sd)));
+}
