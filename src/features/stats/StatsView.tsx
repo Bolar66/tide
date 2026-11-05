@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
-import { IconPlus } from '../../components/icons';
+import { IconChevronRight, IconExport, IconPlus } from '../../components/icons';
 import { getCycles, periodLength } from '../../domain/prediction';
 import type { Period } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
@@ -119,6 +119,21 @@ export function StatsView({ above }: { above?: ReactNode } = {}) {
       </section>
 
       <PhaseComparison />
+
+      <ul className="list">
+        <li>
+          <button type="button" className="list__row" onClick={() => (window.location.hash = '#/report')}>
+            <span className="list__icon">
+              <IconExport />
+            </span>
+            <span className="list__text">
+              {t.report.open}
+              <span className="list__sub">{t.report.openHint}</span>
+            </span>
+            <IconChevronRight className="list__chevron" />
+          </button>
+        </li>
+      </ul>
 
       <PeriodSheet
         key={editing === null ? 'closed' : editing === 'new' ? 'new' : editing.id}

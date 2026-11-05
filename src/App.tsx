@@ -12,6 +12,7 @@ import { FollowedCalendar } from './features/followed/FollowedCalendar';
 import { FollowedTab } from './features/followed/FollowedCards';
 import { FollowerHome } from './features/followed/FollowerHome';
 import { TodayView } from './features/today/TodayView';
+import { ReportView } from './features/report/ReportView';
 import { Welcome } from './features/welcome/Welcome';
 import { profileOf } from './domain/profile';
 import { useSession } from './session/context';
@@ -72,7 +73,7 @@ export function App() {
     const tabs = visibleTabs(profile, following);
     const from = tabs.indexOf(tabOf(route));
     const to = tabs.indexOf(tabOf(r));
-    navigateTo(r, from >= 0 && to >= 0 && from !== to ? (to > from ? 'forward' : 'back') : r === 'about' ? 'forward' : route === 'about' ? 'back' : undefined);
+    navigateTo(r, from >= 0 && to >= 0 && from !== to ? (to > from ? 'forward' : 'back') : r === 'about' || r === 'report' ? 'forward' : route === 'about' || route === 'report' ? 'back' : undefined);
   };
 
   // Sideways swipes: back out of a sub page, otherwise move to the neighbouring tab.
@@ -81,8 +82,8 @@ export function App() {
       if (dir === 'right') window.history.back();
       return;
     }
-    if (route === 'about') {
-      if (dir === 'right') navigate('settings');
+    if (route === 'about' || route === 'report') {
+      if (dir === 'right') navigate(route === 'about' ? 'settings' : 'stats');
       return;
     }
     const tabs = visibleTabs(profile, following);
@@ -137,6 +138,7 @@ export function App() {
         {route === 'learn' && <LearnView />}
         {route === 'settings' && <SettingsView onOpenAbout={() => navigate('about')} />}
         {route === 'about' && <AboutView onBack={() => navigate('settings')} />}
+        {route === 'report' && <ReportView onBack={() => navigate('stats')} />}
       </main>
       <TabBar route={route} onNavigate={navigate} profile={profile} following={following} />
     </>

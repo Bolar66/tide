@@ -6,6 +6,7 @@ import { useCycle } from '../../hooks/useCycle';
 import { capitalize, useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
 import { TodaySummary } from './TodaySummary';
+import { InsightCard } from './InsightCard';
 import { BACKUP_GUIDE_FLAG, exportBackup } from '../settings/backupIO';
 import { OwnerConnectCard } from '../connect/ConnectCards';
 import { CycleRing } from './CycleRing';
@@ -162,6 +163,8 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
       </section>
 
       <TodaySummary date={today} onChooseTrackers={onOpenTrackers} />
+
+      <InsightCard />
 
       <PatternWarnings warnings={warnings} />
 

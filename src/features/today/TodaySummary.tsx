@@ -4,7 +4,8 @@ import { Sheet } from '../../components/Sheet';
 import type { ISODate } from '../../domain/dates';
 import type { Scale5 } from '../../domain/types';
 import { useI18n } from '../../i18n';
-import { useTide } from '../../store/context';
+import { useStore, useTide } from '../../store/context';
+import { MoodFaces } from '../../components/MoodFaces';
 import { trackerById } from '../../trackers/registry';
 import { LogPanel } from '../day/LogPanel';
 
@@ -13,12 +14,14 @@ const MAX_CHIPS = 5;
 /** What has been logged today at a glance, with one button to log more. */
 export function TodaySummary({ date, onChooseTrackers }: { date: ISODate; onChooseTrackers: () => void }) {
   const { t, f } = useI18n();
+  const store = useStore();
   const entry = useTide((s) => s.days[date]);
   const [open, setOpen] = useState(false);
 
   const chips: string[] = [];
   if (entry?.flow) chips.push(`${t.day.flow}: ${t.day.flowLevels[entry.flow]}`);
-  for (const key of ['cramps', 'headache', 'mood', 'energy'] as const) {
+  // Mood is shown by the faces above, so it is not repeated as a chip.
+  for (const key of ['cramps', 'headache', 'energy'] as const) {
     const v = entry?.symptoms?.[key];
     if (v) chips.push(`${t.symptoms[key].label}: ${t.symptoms[key].levels[v - 1]}`);
   }
@@ -38,8 +41,14 @@ export function TodaySummary({ date, onChooseTrackers }: { date: ISODate; onChoo
   return (
     <section className="card today-summary">
       <h2 className="card__title">{t.today.todayLog}</h2>
+      <MoodFaces
+        label={t.symptoms.mood.label}
+        levels={t.symptoms.mood.levels}
+        value={entry?.symptoms?.mood}
+        onChange={(mood) => store.updateDay(date, { symptoms: { mood } })}
+      />
       {chips.length === 0 ? (
-        <p className="muted">{t.log.summaryEmpty}</p>
+        <p className="muted small">{t.log.summaryEmpty}</p>
       ) : (
         <ul className="today-summary__chips">
           {shown.map((c) => (

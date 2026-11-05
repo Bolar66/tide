@@ -1126,3 +1126,56 @@ button.list__row:active {
     transform: translateX(-28px);
   }
 }
+
+/* ---------- Mood faces (one-tap log) ---------- */
+.mood-faces {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+}
+
+.mood-face {
+  display: grid;
+  place-items: center;
+  min-height: 56px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  transition:
+    background-color var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.mood-face svg {
+  width: 32px;
+  height: 32px;
+}
+
+.mood-face__head {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.mood-face__eye {
+  fill: currentColor;
+}
+
+.mood-face__mouth {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.mood-face:active {
+  transform: scale(0.9);
+}
+
+.mood-face[aria-checked='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+  animation: pop var(--dur) var(--ease-spring);
+}

@@ -10,4 +10,5 @@ export function visibleTabs(profile: Profile, following: boolean): Route[] {
 }
 
 /** The tab that is highlighted for a route (pages that live under another tab). */
-export const tabOf = (route: Route): Route => (route === 'about' ? 'settings' : route === 'stats' ? 'calendar' : route);
+export const tabOf = (route: Route): Route =>
+  route === 'about' ? 'settings' : route === 'stats' || route === 'report' ? 'calendar' : route;

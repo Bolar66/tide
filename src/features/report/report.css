@@ -1,0 +1,158 @@
+.report-paper {
+  background: #fff;
+  color: #1a1a1a;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-5);
+  box-shadow: var(--shadow-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.report-paper__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  border-bottom: 2px solid #1a1a1a;
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.report-paper__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.report-paper__meta {
+  color: #555;
+  font-size: 13px;
+}
+
+.report-paper__brand {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: #555;
+}
+
+.report-paper__h {
+  font-size: 15px;
+  font-weight: 700;
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.report-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.report-summary div {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.report-summary dt {
+  font-size: 12px;
+  color: #555;
+}
+
+.report-summary dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.report-summary small {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: #555;
+}
+
+.report-table-wrap {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--space-5));
+  padding: 0 var(--space-5);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.report-table th,
+.report-table td {
+  white-space: nowrap;
+  text-align: left;
+  padding: 6px 6px 6px 0;
+  border-bottom: 1px solid #e3e3e3;
+  vertical-align: top;
+}
+
+.report-table th {
+  font-size: 11px;
+  font-weight: 650;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.report-table small {
+  color: #555;
+}
+
+.report-paper__note,
+.report-paper__footer {
+  font-size: 12px;
+  color: #555;
+  margin-top: var(--space-2);
+}
+
+.report-paper__footer {
+  margin-top: var(--space-6);
+  border-top: 1px solid #e3e3e3;
+  padding-top: var(--space-3);
+}
+
+.report-notes {
+  padding-left: 1.1em;
+}
+
+/* Print / "Save as PDF": only the paper, black on white. */
+@media print {
+  .backdrop,
+  .tabbar,
+  .report__controls {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  .app {
+    padding: 0 !important;
+  }
+
+  .report-paper {
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .report-table-wrap {
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+
+  .report-table tr {
+    break-inside: avoid;
+  }
+}

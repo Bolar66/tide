@@ -84,7 +84,7 @@ export function phaseAverages(
 /** Days per phase needed before a phase takes part in an insight. */
 export const MIN_DAYS_FOR_INSIGHT = 3;
 /** Smallest difference worth mentioning, per metric (hours for sleep, scale points otherwise). */
-const MEANINGFUL: Record<PhaseMetricId, number> = {
+export const MEANINGFUL: Record<PhaseMetricId, number> = {
   sleepHours: 0.5,
   sleepQuality: 0.5,
   mood: 0.5,
