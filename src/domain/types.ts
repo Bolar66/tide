@@ -1,3 +1,4 @@
+import { DEFAULT_TRACKERS } from '../trackers/registry';
 import type { ISODate } from './dates';
 
 export type Flow = 'light' | 'medium' | 'heavy';
@@ -57,5 +58,5 @@ export const DEFAULT_SETTINGS: Settings = {
   locale: 'fi',
   onboarded: false,
   showFertility: true,
-  enabledTrackers: [],
+  enabledTrackers: DEFAULT_TRACKERS,
 };

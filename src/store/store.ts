@@ -8,7 +8,7 @@ import {
   validatePeriodEdit,
 } from '../domain/periods';
 import { computeStats } from '../domain/prediction';
-import { DEFAULT_SETTINGS, type DayEntry, type Period, type Settings } from '../domain/types';
+import { DEFAULT_SETTINGS, type DayEntry, type MetricValue, type Period, type Settings } from '../domain/types';
 
 export interface State {
   status: 'loading' | 'ready' | 'error';
@@ -25,7 +25,10 @@ export interface OnboardingAnswers {
   periodLength?: number;
 }
 
-export type DayPatch = Partial<Omit<DayEntry, 'date' | 'updatedAt'>>;
+/** Fields to merge into a day. `undefined` clears a field, symptom or metric. */
+export type DayPatch = Partial<Omit<DayEntry, 'date' | 'updatedAt' | 'metrics'>> & {
+  metrics?: Record<string, MetricValue | undefined>;
+};
 export type ActionResult = { ok: true; period?: Period } | { ok: false; reason: string };
 
 const initial: State = { status: 'loading', periods: [], days: {}, settings: DEFAULT_SETTINGS, saveError: false };
@@ -36,7 +39,7 @@ const newId = () => crypto.randomUUID();
 function compact<T extends object>(obj: T): T {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(obj)) {
-    if (v === undefined || v === '') continue;
+    if (v === undefined || v === '' || (Array.isArray(v) && v.length === 0)) continue;
     if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
       const inner = compact(v as object);
       if (Object.keys(inner).length) out[k] = inner;
@@ -141,14 +144,15 @@ export function createStore(initialPersistence: Persistence, now: () => Date = (
     /** Merge a patch into a day. Pass `undefined` for a field to clear it. */
     updateDay(date: ISODate, patch: DayPatch) {
       const prev = state.days[date] ?? { date, updatedAt: 0 };
-      const merged = compact({
+      // compact() drops the undefined values, so the result is a valid DayEntry.
+      const merged = compact<DayEntry>({
         ...prev,
         ...patch,
         symptoms: patch.symptoms === undefined && 'symptoms' in patch ? undefined : { ...prev.symptoms, ...patch.symptoms },
         metrics: patch.metrics === undefined && 'metrics' in patch ? undefined : { ...prev.metrics, ...patch.metrics },
         date,
         updatedAt: now().getTime(),
-      });
+      } as DayEntry);
 
       const days = { ...state.days };
       if (isEmptyDay(merged)) {

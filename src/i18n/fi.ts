@@ -113,6 +113,63 @@ export const fi = {
     mood: { label: 'Mieliala', levels: ['Todella huono', 'Huono', 'Neutraali', 'Hyvä', 'Erinomainen'] },
     energy: { label: 'Energia', levels: ['Todella matala', 'Matala', 'Kohtalainen', 'Hyvä', 'Erinomainen'] },
   },
+  trackers: {
+    section: 'Hyvinvointi',
+    noneEnabled: 'Voit kirjata myös unta, stressiä, ihoa, liikuntaa ja muuta.',
+    choose: 'Valitse seurattavat',
+    add: 'Lisää',
+    clear: 'Tyhjennä',
+    decrease: 'Vähennä',
+    increase: 'Lisää',
+    groups: { sleep: 'Uni', mind: 'Mieli', body: 'Keho', lifestyle: 'Elämäntavat', medication: 'Lääkkeet' },
+    items: {
+      sleepHours: { label: 'Unen pituus', hint: 'Edellisen yön uni' },
+      sleepQuality: { label: 'Unen laatu', levels: ['Todella huono', 'Huono', 'Kohtalainen', 'Hyvä', 'Erinomainen'] },
+      stress: { label: 'Stressi', levels: ['Ei lainkaan', 'Vähäinen', 'Kohtalainen', 'Suuri', 'Todella suuri'] },
+      skin: { label: 'Iho', options: { clear: 'Puhdas', breakout: 'Näppylöitä', dry: 'Kuiva', oily: 'Rasvainen' } },
+      cravings: { label: 'Mielihalut', options: { sweet: 'Makea', salty: 'Suolainen', carbs: 'Hiilihydraatit', chocolate: 'Suklaa' } },
+      digestion: {
+        label: 'Ruoansulatus',
+        options: { normal: 'Normaali', bloating: 'Turvotus', constipation: 'Ummetus', diarrhea: 'Ripuli', nausea: 'Pahoinvointi' },
+      },
+      bbt: { label: 'Perusruumiinlämpö', hint: 'Mittaa aamulla ennen ylösnousua' },
+      weight: { label: 'Paino' },
+      caffeine: { label: 'Kofeiini' },
+      alcohol: { label: 'Alkoholi' },
+      exercise: { label: 'Liikunta' },
+      steps: { label: 'Askeleet' },
+      pill: { label: 'E-pilleri tai lääke otettu' },
+      medication: { label: 'Lääkkeet', placeholder: 'Esim. ibuprofeeni 400 mg' },
+    } as Record<string, { label: string; hint?: string; levels?: string[]; options?: Record<string, string>; placeholder?: string }>,
+    unit: (unit: string, n: number) =>
+      ({
+        cups: n === 1 ? 'kuppi' : 'kuppia',
+        drinks: n === 1 ? 'annos' : 'annosta',
+        steps: n === 1 ? 'askel' : 'askelta',
+      })[unit] ?? unit,
+  },
+  phaseView: {
+    title: 'Syklin vaiheet',
+    intro: 'Keskiarvot kirjauksistasi syklin eri vaiheissa.',
+    empty: 'Kun kirjaat unta, mielialaa, energiaa tai stressiä, näet täällä miten ne vaihtelevat syklisi aikana.',
+    metrics: { sleepHours: 'Unen pituus', sleepQuality: 'Unen laatu', mood: 'Mieliala', energy: 'Energia', stress: 'Stressi' },
+    phases: { menstrual: 'Kuukautiset', follicular: 'Follikulaari', ovulation: 'Ovulaatio', luteal: 'Luteaali' },
+    phasesIn: {
+      menstrual: 'kuukautisten aikana',
+      follicular: 'follikulaarivaiheessa',
+      ovulation: 'ovulaation aikaan',
+      luteal: 'luteaalivaiheessa',
+    },
+    insight: (metric: string, high: string | null, low: string | null, diff: string, isSleep: boolean) => {
+      const [hi, lo] = isSleep ? ['pisimmillään', 'lyhimmillään'] : ['korkeimmillaan', 'matalimmillaan'];
+      const unit = isSleep ? ' h' : '';
+      if (high && low) return `${metric} on keskimäärin ${hi} ${high} ja ${lo} ${low} (ero ${diff}${unit}).`;
+      if (high) return `${metric} on keskimäärin ${hi} ${high} (ero muihin vaiheisiin enintään ${diff}${unit}).`;
+      return `${metric} on keskimäärin ${lo} ${low} (ero muihin vaiheisiin enintään ${diff}${unit}).`;
+    },
+    days: (n: number) => `${n} pv`,
+    noData: 'ei kirjauksia',
+  },
   calendar: {
     prev: 'Edellinen kuukausi',
     next: 'Seuraava kuukausi',
@@ -184,6 +241,8 @@ export const fi = {
       invalid: 'Varmuuskopiossa on virheellisiä tietoja, eikä sitä voitu tuoda.',
     },
     cycle: 'Sykli',
+    trackers: 'Seurattavat',
+    trackersHint: 'Valitse, mitä haluat kirjata päivittäin. Kuukautiset ja oireet ovat aina mukana.',
     showFertility: 'Näytä hedelmällinen ikkuna',
     showFertilityHint: 'Arvio kalenterissa ja renkaassa. Ei sovellu raskauden ehkäisyyn.',
     security: 'Tietoturva',
@@ -292,6 +351,8 @@ export const fi = {
     lastPeriodText: 'Arviokin riittää. Voit tarkentaa tietoja myöhemmin kalenterissa.',
     lastPeriodLabel: 'Alkupäivä',
     dontRemember: 'En muista',
+    trackersTitle: 'Mitä haluat seurata?',
+    trackersText: 'Kuukautiset ja oireet ovat aina mukana. Voit muuttaa valintoja milloin tahansa asetuksista.',
     lengthsTitle: 'Millainen syklisi yleensä on?',
     lengthsText: 'Näitä käytetään ennusteeseen, kunnes omaa historiaa kertyy.',
     cycleLength: 'Syklin pituus',

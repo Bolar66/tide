@@ -6,9 +6,11 @@ import { DEFAULT_CYCLE_LENGTH, DEFAULT_PERIOD_LENGTH } from '../../domain/predic
 import { useToday } from '../../hooks/useToday';
 import { useI18n } from '../../i18n';
 import { useStore } from '../../store/context';
+import { DEFAULT_TRACKERS } from '../../trackers/registry';
+import { TrackerSettings } from '../settings/TrackerSettings';
 import './onboarding.css';
 
-const STEPS = ['welcome', 'privacy', 'lastPeriod', 'lengths', 'done'] as const;
+const STEPS = ['welcome', 'privacy', 'lastPeriod', 'lengths', 'trackers', 'done'] as const;
 type Step = (typeof STEPS)[number];
 
 const PRIVACY_ICONS = [IconUserOff, IconCloudOff, IconLock];
@@ -22,16 +24,19 @@ export function Onboarding() {
   const [cycle, setCycle] = useState(DEFAULT_CYCLE_LENGTH);
   const [period, setPeriod] = useState(DEFAULT_PERIOD_LENGTH);
   const [useDefaults, setUseDefaults] = useState(false);
+  const [trackers, setTrackers] = useState<string[]>(DEFAULT_TRACKERS);
 
   const step: Step = STEPS[index] ?? 'done';
   const next = () => setIndex((i) => Math.min(i + 1, STEPS.length - 1));
   const back = () => setIndex((i) => Math.max(i - 1, 0));
 
-  const finish = () =>
+  const finish = () => {
+    store.updateSettings({ enabledTrackers: trackers });
     store.completeOnboarding({
       lastPeriodStart: lastStart && lastStart <= today ? lastStart : undefined,
       ...(useDefaults ? {} : { cycleLength: cycle, periodLength: period }),
     });
+  };
 
   let content: ReactNode;
   let actions: ReactNode;
@@ -152,6 +157,21 @@ export function Onboarding() {
             {t.onboarding.dontKnow}
           </button>
         </>
+      );
+      break;
+
+    case 'trackers':
+      content = (
+        <>
+          <h1 className="onboarding__title display">{t.onboarding.trackersTitle}</h1>
+          <p className="onboarding__text">{t.onboarding.trackersText}</p>
+          <TrackerSettings enabled={trackers} onChange={setTrackers} />
+        </>
+      );
+      actions = (
+        <button type="button" className="button" onClick={next}>
+          {t.common.next}
+        </button>
       );
       break;
 

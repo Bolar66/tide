@@ -57,6 +57,10 @@
   animation: fade-up var(--dur-slow) var(--ease-out);
 }
 
+.onboarding__content--trackers {
+  justify-content: flex-start;
+}
+
 .onboarding__content--welcome,
 .onboarding__content--done {
   align-items: center;
@@ -150,4 +154,13 @@
   flex-direction: column;
   gap: var(--space-1);
   animation: fade-in var(--dur-slow) var(--ease-out);
+}
+
+/* Long steps (tracker list) scroll; keep the action reachable. */
+.onboarding__actions {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-3) 0 calc(env(safe-area-inset-bottom) + var(--space-2));
+  margin-bottom: calc(-1 * (env(safe-area-inset-bottom) + var(--space-6)));
+  background: linear-gradient(to bottom, transparent, var(--bg) 30%);
 }

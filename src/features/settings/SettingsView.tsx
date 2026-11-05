@@ -11,6 +11,7 @@ import { useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
 import { exportBackup } from './backupIO';
 import { LockSettings } from './LockSettings';
+import { TrackerSettings } from './TrackerSettings';
 import './settings.css';
 
 export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
@@ -96,6 +97,12 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
             />
           </li>
         </ul>
+      </section>
+
+      <section className="settings-section" id="trackers">
+        <h2 className="section-label">{t.settings.trackers}</h2>
+        <p className="muted small settings-note">{t.settings.trackersHint}</p>
+        <TrackerSettings enabled={settings.enabledTrackers} onChange={(enabledTrackers) => store.updateSettings({ enabledTrackers })} />
       </section>
 
       <section className="settings-section">

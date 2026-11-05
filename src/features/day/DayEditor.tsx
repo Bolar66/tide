@@ -7,15 +7,26 @@ import type { Flow, Symptoms } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
 import { useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
+import { enabledTrackers } from '../../trackers/registry';
+import { TrackerField } from './TrackerField';
 import './day.css';
 
 const SYMPTOM_KEYS = ['cramps', 'headache', 'mood', 'energy'] as const satisfies readonly (keyof Symptoms)[];
 
 /** Everything that can be logged for one day. Changes save immediately. */
-export function DayEditor({ date, showPeriodActions = true }: { date: ISODate; showPeriodActions?: boolean }) {
+export function DayEditor({
+  date,
+  showPeriodActions = true,
+  onChooseTrackers,
+}: {
+  date: ISODate;
+  showPeriodActions?: boolean;
+  onChooseTrackers?: () => void;
+}) {
   const store = useStore();
   const { t } = useI18n();
   const entry = useTide((s) => s.days[date]);
+  const trackerIds = useTide((s) => s.settings.enabledTrackers);
   const { periods, today } = useCycle();
   const [error, setError] = useState<string | null>(null);
 
@@ -79,6 +90,24 @@ export function DayEditor({ date, showPeriodActions = true }: { date: ISODate; s
             onChange={(v) => store.updateDay(date, { symptoms: { [key]: v } })}
           />
         ))}
+      </section>
+
+      <section className="day-editor__trackers">
+        <h3 className="section-label">{t.trackers.section}</h3>
+        {enabledTrackers(trackerIds).map((def) => (
+          <TrackerField
+            key={def.id}
+            def={def}
+            value={entry?.metrics?.[def.id]}
+            onChange={(v) => store.updateDay(date, { metrics: { [def.id]: v } })}
+          />
+        ))}
+        {trackerIds.length === 0 && <p className="muted small">{t.trackers.noneEnabled}</p>}
+        {onChooseTrackers && (
+          <button type="button" className="button button--ghost button--small day-editor__more" onClick={onChooseTrackers}>
+            {t.trackers.choose}
+          </button>
+        )}
       </section>
 
       <NoteField key={date} date={date} initial={entry?.note ?? ''} />

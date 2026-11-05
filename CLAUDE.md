@@ -51,6 +51,15 @@ Jos muutit värejä: myös `pnpm contrast`.**
 - Muutokset salaukseen vaativat testit (`src/crypto/*.test.ts`) ja selaintestin: käyttöönotto, väärä PIN,
   avaus, palautuskoodi, poisto käytöstä.
 
+## Hyvinvointiseuranta (vaihe 3)
+
+- Seurattavat määritellään vain `src/trackers/registry.ts`:ssä (id, tyyppi, rajat, ryhmä, oletuksena päällä).
+  Tekstit `i18n`:n `trackers.items[id]`. Arvot tallentuvat `DayEntry.metrics[id]`, joka **ei vaadi migraatiota**.
+- Tracker-id:tä ei saa koskaan vaihtaa eikä käyttää uudelleen: vanha data ja varmuuskopiot viittaavat siihen.
+- Kaikki arvot kulkevat `sanitizeMetric()`-funktion läpi ennen tallennusta.
+- Vaihevertailu (`domain/phaseStats.ts`) luokittelee päivät syklin todellisen pituuden mukaan. Havainnot eivät
+  koskaan nosta esiin vaihetta tasapelin sattuessa.
+
 ## Datamalli ja skeemamuutokset
 
 - Päivämäärät ovat merkkijonoja `yyyy-MM-dd` (`ISODate`), ei `Date`-olioita tallennettuna. Käytä `domain/dates.ts`-apureita.

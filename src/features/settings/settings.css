@@ -65,3 +65,20 @@
   font-weight: 550;
   text-align: right;
 }
+
+.tracker-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tracker-settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tracker-settings .section-label {
+  padding-left: var(--space-4);
+  margin-bottom: 0;
+}

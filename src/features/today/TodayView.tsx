@@ -19,9 +19,10 @@ type Undo = { kind: 'start' | 'end'; period: Period };
 interface Props {
   onOpenCalendar: () => void;
   onOpenSettings: () => void;
+  onOpenTrackers: () => void;
 }
 
-export function TodayView({ onOpenCalendar, onOpenSettings }: Props) {
+export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Props) {
   const store = useStore();
   const { t, f } = useI18n();
   const lastBackupAt = useTide((s) => s.settings.lastBackupAt);
@@ -118,7 +119,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings }: Props) {
 
       <section className="card enter" style={{ '--i': 3 } as CSSProperties}>
         <h2 className="card__title">{t.today.todayLog}</h2>
-        <DayEditor date={today} showPeriodActions={false} />
+        <DayEditor date={today} showPeriodActions={false} onChooseTrackers={onOpenTrackers} />
       </section>
 
       <OtherDaySheet key={otherDay ?? 'closed'} mode={otherDay} today={today} onClose={() => setOtherDay(null)} />

@@ -36,7 +36,15 @@ export function App() {
           </div>
         )}
         {route === 'today' && (
-          <TodayView onOpenCalendar={() => navigate('calendar')} onOpenSettings={() => navigate('settings')} />
+          <TodayView
+            onOpenCalendar={() => navigate('calendar')}
+            onOpenSettings={() => navigate('settings')}
+            onOpenTrackers={() => {
+              navigate('settings');
+              // after the view transition has swapped the page in
+              window.setTimeout(() => document.getElementById('trackers')?.scrollIntoView({ behavior: 'smooth' }), 350);
+            }}
+          />
         )}
         {route === 'calendar' && <CalendarView />}
         {route === 'stats' && <StatsView />}

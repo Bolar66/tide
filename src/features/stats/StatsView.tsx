@@ -5,6 +5,7 @@ import type { Period } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
 import { useI18n } from '../../i18n';
 import { PeriodSheet } from './PeriodSheet';
+import { PhaseComparison } from './PhaseComparison';
 import './stats.css';
 
 /** Cycles within this many days of each other count as regular (common clinical rule of thumb). */
@@ -115,6 +116,8 @@ export function StatsView() {
           {t.stats.addPast}
         </button>
       </section>
+
+      <PhaseComparison />
 
       <PeriodSheet
         key={editing === null ? 'closed' : editing === 'new' ? 'new' : editing.id}
