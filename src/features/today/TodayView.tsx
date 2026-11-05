@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { diffDays, todayISO } from '../../domain/dates';
-import { findPeriodOn, openPeriod } from '../../domain/periods';
+import { openPeriod, periodToday } from '../../domain/periods';
 import type { Period } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
 import { capitalize, useI18n } from '../../i18n';
@@ -43,12 +43,9 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
   const open = openPeriod(periods);
   // Today may also fall inside a period that already has an end date (auto-ended, edited in the
   // calendar or synced from another device). Then the main action is to end it today.
-  const current = findPeriodOn(periods, today, today);
+  const { current, day: periodDay, endedToday } = periodToday(periods, today);
   const inPeriod = current !== undefined;
-  const periodDay = current ? diffDays(today, current.start) + 1 : 0;
   const [error, setError] = useState<string | null>(null);
-  // Already marked as ending today: offer to reopen it instead of a button that changes nothing.
-  const endedToday = current?.end === today;
   const next = prediction.upcoming[0];
 
   const backupAge = lastBackupAt ? diffDays(today, todayISO(new Date(lastBackupAt))) : null;
@@ -144,7 +141,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
             <button type="button" className="button button--ghost button--small" onClick={() => setOtherDay(inPeriod ? 'end' : 'start')}>
               {inPeriod ? t.today.endedOther : t.today.startedOther}
             </button>
-            {undo && (
+            {undo && !endedToday && (
               <button type="button" className="button button--ghost button--small" onClick={revert}>
                 {t.common.undo}
               </button>

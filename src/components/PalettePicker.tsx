@@ -1,7 +1,5 @@
-import type { PaletteName } from '../domain/types';
+import { PALETTE_NAMES, type PaletteName } from '../domain/types';
 import { useI18n } from '../i18n';
-
-const PALETTE_NAMES: readonly PaletteName[] = ['meri', 'ruusu', 'salvia', 'laventeli'];
 
 /** Swatches rendered with each palette's own tokens (data-palette on the swatch scopes the variables). */
 export function PalettePicker({ value, onChange }: { value: PaletteName; onChange: (p: PaletteName) => void }) {

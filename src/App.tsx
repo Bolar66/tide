@@ -1,4 +1,7 @@
 import { TabBar } from './components/TabBar';
+import { tabOf, visibleTabs } from './components/tabs';
+import { swipeHandlers } from './hooks/useSwipe';
+import { isSubPageEntry } from './hooks/useSubPage';
 import { AboutView } from './features/about/AboutView';
 import { CycleView } from './features/calendar/CycleView';
 import { LearnView } from './features/learn/LearnView';
@@ -64,6 +67,21 @@ export function App() {
     window.setTimeout(() => document.getElementById('trackers')?.scrollIntoView({ behavior: 'smooth' }), 350);
   };
 
+  // Sideways swipes: back out of a sub page, otherwise move to the neighbouring tab.
+  const swipe = swipeHandlers((dir) => {
+    if (isSubPageEntry()) {
+      if (dir === 'right') window.history.back();
+      return;
+    }
+    if (route === 'about') {
+      if (dir === 'right') navigate('settings');
+      return;
+    }
+    const tabs = visibleTabs(profile, following);
+    const next = tabs[tabs.indexOf(tabOf(route)) + (dir === 'left' ? 1 : -1)];
+    if (next) navigate(next);
+  });
+
   if (status === 'loading') return <div className="center-screen" aria-busy="true" />;
   if (status === 'error') return <div className="center-screen">{t.common.loadError}</div>;
   if (invite) {
@@ -90,7 +108,7 @@ export function App() {
 
   return (
     <>
-      <main className="app">
+      <main className="app" {...swipe}>
         {saveError && (
           <div className="banner" role="alert" style={{ marginBottom: 16 }}>
             <span>{t.common.saveError}</span>

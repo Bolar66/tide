@@ -148,3 +148,22 @@ export function autoEndPeriods(
   }
   return changed;
 }
+
+export interface PeriodToday {
+  /** The period today belongs to, open or already closed. */
+  current: Period | undefined;
+  /** 1-based day of that period, 0 when not in a period. */
+  day: number;
+  /** Today is marked as the period's last day: the main action reopens it. */
+  endedToday: boolean;
+}
+
+/** What the home screen's main period button should do today. */
+export function periodToday(periods: readonly Period[], today: ISODate): PeriodToday {
+  const current = findPeriodOn(periods, today, today);
+  return {
+    current,
+    day: current ? diffDays(today, current.start) + 1 : 0,
+    endedToday: current?.end === today,
+  };
+}

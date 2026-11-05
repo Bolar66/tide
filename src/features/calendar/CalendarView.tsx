@@ -1,5 +1,6 @@
+import { swipeHandlers } from '../../hooks/useSwipe';
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, getISODay, isSameMonth, startOfMonth, startOfWeek } from 'date-fns';
-import { useRef, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { IconChevronLeft, IconChevronRight } from '../../components/icons';
 import type { DayMark } from '../../domain/calendar';
 import { addDaysISO, fromISO, toISO, type ISODate } from '../../domain/dates';
@@ -10,7 +11,6 @@ import { useTide } from '../../store/context';
 import { DaySheet } from '../day/DaySheet';
 import './calendar.css';
 
-const SWIPE_PX = 50;
 
 /** Someone else's shared data shown read-only in the same calendar. */
 export interface CalendarSource {
@@ -39,7 +39,6 @@ export function CalendarView({ source, eyebrow, above }: Props = {}) {
   const [month, setMonth] = useState(() => startOfMonth(fromISO(today)));
   const [direction, setDirection] = useState<'next' | 'prev' | null>(null);
   const [selected, setSelected] = useState<ISODate | null>(null);
-  const touchX = useRef<number | null>(null);
 
   const cells = eachDayOfInterval({
     start: startOfWeek(month, { weekStartsOn: 1 }),
@@ -73,15 +72,8 @@ export function CalendarView({ source, eyebrow, above }: Props = {}) {
 
       <div
         className="card calendar"
-        onTouchStart={(e) => (touchX.current = e.touches[0]?.clientX ?? null)}
-        onTouchEnd={(e) => {
-          const startX = touchX.current;
-          const endX = e.changedTouches[0]?.clientX;
-          touchX.current = null;
-          if (startX === null || endX === undefined) return;
-          const dx = endX - startX;
-          if (Math.abs(dx) > SWIPE_PX) shift(dx < 0 ? 1 : -1);
-        }}
+        data-swipe="own"
+        {...swipeHandlers((dir) => shift(dir === 'left' ? 1 : -1), { ownArea: true })}
       >
         <div className="calendar__weekdays" aria-hidden>
           {f.weekdaysShort().map((d) => (

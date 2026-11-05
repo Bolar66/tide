@@ -11,6 +11,7 @@ import {
   IconLock,
   IconSparkle,
   IconSun,
+  IconUser,
 } from '../../components/icons';
 import { useSession } from '../../session/context';
 import { Segmented } from '../../components/Segmented';
@@ -18,7 +19,8 @@ import { Sheet } from '../../components/Sheet';
 import { PalettePicker } from '../../components/PalettePicker';
 import { ProfilePicker } from '../../components/ProfilePicker';
 import { Switch } from '../../components/Switch';
-import { profileOf } from '../../domain/profile';
+import { profileOf, type Profile } from '../../domain/profile';
+import { useSubPage } from '../../hooks/useSubPage';
 import { parseBackup } from '../../db/backup';
 import type { Snapshot } from '../../db/persistence';
 import { todayISO } from '../../domain/dates';
@@ -33,7 +35,7 @@ import { LockSettings } from './LockSettings';
 import { TrackerSettings } from './TrackerSettings';
 import './settings.css';
 
-type Page = 'menu' | 'account' | 'use' | 'appearance' | 'security' | 'backup';
+type Page = 'menu' | 'account' | 'use' | 'appearance' | 'security' | 'backup' | 'profile';
 const MENU = [
   { page: 'account', Icon: IconHeart },
   { page: 'use', Icon: IconSparkle },
@@ -50,26 +52,29 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
   const { t, f } = useI18n();
   const settings = useTide((s) => s.settings);
   const session = useSession();
-  const [page, setPage] = useState<Page>(() => {
+  const [initialPage] = useState<Page>(() => {
     try {
       const p = sessionStorage.getItem(SETTINGS_PAGE_KEY) as Page | null;
       sessionStorage.removeItem(SETTINGS_PAGE_KEY);
       if (sessionStorage.getItem(BACKUP_GUIDE_FLAG) === '1') return 'backup';
-      return p && ['account', 'use', 'appearance', 'security', 'backup'].includes(p) ? p : 'menu';
+      return p && ['account', 'use', 'appearance', 'security', 'backup', 'profile'].includes(p) ? p : 'menu';
     } catch {
       return 'menu';
     }
   });
-  const go = (p: Page) => {
-    setPage(p);
-    window.scrollTo(0, 0);
-  };
+  // Sub pages are history entries: the back swipe returns to the menu, not to another tab.
+  const nav = useSubPage<Page>('menu', initialPage);
+  const page = nav.page;
+  const go = (p: Page) => (p === 'menu' ? nav.back() : nav.go(p));
+  const [profileChoice, setProfileChoice] = useState<Profile | null>(null);
   const subtitle = (p: Exclude<Page, 'menu'>): string => {
     switch (p) {
       case 'account':
         return session.account ? `${session.account.email}${session.shares.length + session.followed.length ? ` · ${t.settings.pages.account.sharing(session.shares.length + session.followed.length)}` : ''}` : t.account.rowOff;
       case 'use':
-        return `${t.settings.profiles[profileOf(settings)].title} · ${t.settings.pages.use.trackers(settings.enabledTrackers.length)}`;
+        return t.settings.pages.use.trackers(settings.enabledTrackers.length);
+      case 'profile':
+        return t.settings.profiles[profileOf(settings)].title;
       case 'appearance':
         return `${t.settings.palettes[settings.palette ?? 'meri']} · ${t.settings.themes[settings.theme]}`;
       case 'security':
@@ -141,10 +146,10 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
   };
 
   return (
-    <div className="stack stack--lg">
+    <div key={page} className={`stack stack--lg subpage--${nav.dir}`}>
       {page !== 'menu' && (
         <header className="about-nav">
-          <button type="button" className="icon-button icon-button--filled" onClick={() => go('menu')} aria-label={t.common.back}>
+          <button type="button" className="icon-button icon-button--filled" onClick={nav.back} aria-label={t.common.back}>
             <IconChevronLeft />
           </button>
         </header>
@@ -184,6 +189,61 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         </ul>
       )}
 
+      {/* Changing how the app is used is rare, so it sits apart at the bottom. */}
+      {page === 'menu' && (
+        <ul className="list settings-menu">
+          <li>
+            <button type="button" className="list__row" onClick={() => go('profile')}>
+              <span className="list__icon">
+                <IconUser />
+              </span>
+              <span className="list__text">
+                {t.settings.pages.profile.title}
+                <span className="list__sub">{subtitle('profile')}</span>
+              </span>
+              <IconChevronRight className="list__chevron" />
+            </button>
+          </li>
+        </ul>
+      )}
+
+      {page === 'profile' && (
+        <section className="settings-section stack">
+          {message && <p className="success-text" role="status">{message.text}</p>}
+          <p className="muted settings-note">{t.settings.profileIntro}</p>
+          <ProfilePicker
+            value={profileChoice ?? profileOf(settings)}
+            onChange={(p) => {
+              setMessage(null);
+              setProfileChoice(p === profileOf(settings) ? null : p);
+            }}
+          />
+          {profileChoice && (
+            <div
+              ref={(el) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              className="card stack settings-confirm"
+              role="alertdialog" aria-label={t.settings.profileConfirmTitle}>
+              <h2 className="card__title">{t.settings.profileConfirmTitle}</h2>
+              <p className="muted">{t.settings.profileConfirmText(t.settings.profiles[profileChoice].title)}</p>
+              <button
+                type="button"
+                className="button"
+                onClick={() => {
+                  store.updateSettings({ profile: profileChoice });
+                  setProfileChoice(null);
+                  setMessage({ text: t.settings.profileChanged });
+                }}
+              >
+                {t.settings.profileConfirm}
+              </button>
+              <button type="button" className="button button--ghost" onClick={() => setProfileChoice(null)}>
+                {t.common.cancel}
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
       {page === 'account' && (
         <>
       <section className="settings-section">
@@ -201,19 +261,6 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
 
       {page === 'use' && (
         <>
-          {message && page === 'use' && <p className="success-text">{message.text}</p>}
-      <section className="settings-section">
-        <h2 className="section-label">{t.settings.profile}</h2>
-        <ProfilePicker
-          value={profileOf(settings)}
-          onChange={(profile) => {
-            if (profile === profileOf(settings)) return;
-            store.updateSettings({ profile });
-            setMessage({ text: t.settings.profileChanged });
-          }}
-        />
-      </section>
-
       <section className="settings-section">
         <h2 className="section-label">{t.settings.cycle}</h2>
         <ul className="list">

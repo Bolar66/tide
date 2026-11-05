@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { autoEndPeriods, effectiveEnd, endPeriod, includeDayInPeriods, startPeriod, validatePeriodEdit } from './periods';
+import { autoEndPeriods, effectiveEnd, endPeriod, includeDayInPeriods, startPeriod, validatePeriodEdit, periodToday } from './periods';
 import type { Period } from './types';
 
 const p = (id: string, start: string, end?: string): Period => ({ id, start, ...(end ? { end } : {}) });
@@ -127,5 +127,38 @@ describe('autoEndPeriods', () => {
 
   it('leaves closed and future periods alone', () => {
     expect(autoEndPeriods([p('a', '2026-10-01', '2026-10-04'), p('b', '2026-12-01')], flow(), '2026-11-20', 5)).toEqual([]);
+  });
+});
+
+describe('periodToday', () => {
+  const closed = { id: 'a', start: '2026-11-15', end: '2026-11-19' };
+
+  it('is outside a period between periods', () => {
+    expect(periodToday([closed], '2026-11-25')).toEqual({ current: undefined, day: 0, endedToday: false });
+  });
+
+  it('counts a closed period that covers today (auto-ended or synced)', () => {
+    const r = periodToday([closed], '2026-11-17');
+    expect(r.current?.id).toBe('a');
+    expect(r.day).toBe(3);
+    expect(r.endedToday).toBe(false);
+  });
+
+  it('recognises an open period', () => {
+    const r = periodToday([{ id: 'b', start: '2026-11-16' }], '2026-11-17');
+    expect(r.current?.id).toBe('b');
+    expect(r.day).toBe(2);
+  });
+
+  it('flags a period that ends today so the button can reopen it', () => {
+    const r = periodToday([{ id: 'c', start: '2026-11-17', end: '2026-11-17' }], '2026-11-17');
+    expect(r.endedToday).toBe(true);
+    expect(r.day).toBe(1);
+  });
+
+  it('end then start on the same day is not possible, but end works on a closed period', () => {
+    const ended = endPeriod([closed], '2026-11-17');
+    expect(ended.ok && ended.changed.end).toBe('2026-11-17');
+    expect(startPeriod([closed], '2026-11-17', () => 'x').ok).toBe(false);
   });
 });

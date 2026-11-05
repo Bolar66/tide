@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { PaletteName, ThemeSetting } from '../domain/types';
+import { PALETTE_NAMES, type PaletteName, type ThemeSetting } from '../domain/types';
 
 const THEME_KEY = 'tide.theme';
 const PALETTE_KEY = 'tide.palette';
@@ -17,7 +17,7 @@ export function storedTheme(): ThemeSetting {
 export function storedPalette(): PaletteName | undefined {
   try {
     const v = localStorage.getItem(PALETTE_KEY);
-    return v === 'meri' || v === 'ruusu' || v === 'salvia' || v === 'laventeli' ? v : undefined;
+    return (PALETTE_NAMES as readonly string[]).includes(v ?? '') ? (v as PaletteName) : undefined;
   } catch {
     return undefined;
   }

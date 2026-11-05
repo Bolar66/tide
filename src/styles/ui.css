@@ -62,10 +62,9 @@
 
 /* ---------- Card ---------- */
 .card {
-  /* Slightly see-through so the theme's backdrop glows through. */
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  /* Slightly see-through so the theme's backdrop shows. No backdrop-filter: it glitches with
+     view transitions on iOS and costs a lot while the backdrop animates. */
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow-1);
@@ -196,14 +195,16 @@
   gap: var(--space-3);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
   border-radius: var(--radius);
-  background: var(--warning-bg);
-  color: var(--warning-text);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  color: var(--text);
   font-size: var(--text-md);
   animation: fade-up var(--dur-slow) var(--ease-out);
 }
 
 .banner .button {
-  color: var(--warning-text);
+  color: var(--accent);
   flex-shrink: 0;
 }
 
@@ -815,19 +816,55 @@ button.list__row:active {
   }
 }
 
-/* ---------- Theme backdrop ---------- */
+/* ---------- Theme backdrop ----------
+   Everything moves slowly (tens of seconds) so the app feels calm, never busy. */
 .backdrop {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(90% 55% at 85% -5%, rgb(var(--glow-rgb) / 30%), transparent 70%),
-    radial-gradient(70% 45% at 0% 100%, rgb(var(--glow-rgb) / 18%), transparent 70%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+}
+
+/* Two soft glows that drift very slowly across the screen. */
+.backdrop::before,
+.backdrop::after {
+  content: '';
+  position: absolute;
+  width: 120vmax;
+  height: 120vmax;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--glow-rgb) / 30%), transparent);
+}
+
+.backdrop::before {
+  top: -70vmax;
+  right: -60vmax;
+  animation: glow-drift-a 70s ease-in-out infinite alternate;
+}
+
+.backdrop::after {
+  bottom: -80vmax;
+  left: -70vmax;
+  opacity: 0.7;
+  animation: glow-drift-b 90s ease-in-out infinite alternate;
+}
+
+@keyframes glow-drift-a {
+  to {
+    transform: translate(-25vw, 20vh) scale(1.1);
+  }
+}
+
+@keyframes glow-drift-b {
+  to {
+    transform: translate(30vw, -15vh) scale(0.95);
+  }
 }
 
 .backdrop__art {
+  position: relative;
   width: 100%;
   height: 100%;
 }
@@ -839,6 +876,10 @@ button.list__row:active {
 
 .backdrop__wave--rev {
   animation-direction: reverse;
+}
+
+.backdrop__dune {
+  fill: rgb(var(--glow-rgb) / 16%);
 }
 
 @keyframes backdrop-drift {
@@ -868,10 +909,10 @@ button.list__row:active {
 
 @keyframes backdrop-sway {
   from {
-    transform: rotate(-6deg);
+    transform: rotate(-5deg);
   }
   to {
-    transform: rotate(8deg);
+    transform: rotate(6deg);
   }
 }
 
@@ -882,15 +923,47 @@ button.list__row:active {
 
 @keyframes backdrop-twinkle {
   from {
-    opacity: 0.15;
+    opacity: 0.2;
   }
   to {
-    opacity: 0.9;
+    opacity: 0.85;
   }
 }
 
 .backdrop__moon {
   fill: rgb(var(--glow-rgb) / 30%);
+}
+
+.backdrop__aurora {
+  /* Blur and move the whole group so the browser can keep it as one composited layer. */
+  filter: blur(14px);
+  animation: aurora-sway 48s ease-in-out infinite alternate;
+}
+
+.backdrop__ribbon {
+  fill: none;
+  stroke: rgb(var(--glow-rgb) / 24%);
+  stroke-width: 46;
+  stroke-linecap: round;
+}
+
+.backdrop__ribbon--2 {
+  stroke: color-mix(in srgb, var(--fertile) 22%, transparent);
+  stroke-width: 34;
+}
+
+.backdrop__ribbon--3 {
+  stroke-width: 24;
+  opacity: 0.7;
+}
+
+@keyframes aurora-sway {
+  from {
+    transform: translate(-30px, 0) skewX(-6deg);
+  }
+  to {
+    transform: translate(40px, 24px) skewX(8deg);
+  }
 }
 
 /* ---------- Phase illustrations ---------- */
@@ -1011,4 +1084,41 @@ button.list__row:active {
 
 .phase-art__star--2 {
   animation-delay: -1.2s;
+}
+
+/* Drag the sheet's top edge down to close. */
+.sheet__drag {
+  touch-action: none;
+  cursor: grab;
+}
+
+.sheet {
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.sheet.is-dragging {
+  transition: none;
+}
+
+/* In-view pages slide in from the side they come from. */
+.subpage--forward {
+  animation: subpage-in-right var(--dur-slow) var(--ease-out);
+}
+
+.subpage--back {
+  animation: subpage-in-left var(--dur-slow) var(--ease-out);
+}
+
+@keyframes subpage-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+@keyframes subpage-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
 }

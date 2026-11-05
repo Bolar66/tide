@@ -1,3 +1,4 @@
+import { useSubPage } from '../../hooks/useSubPage';
 import { useState, type CSSProperties, type ComponentType, type SVGProps } from 'react';
 import { IconBook, IconChevronLeft, IconChevronRight, IconFlask, IconHeart, IconSprout } from '../../components/icons';
 import { useI18n } from '../../i18n';
@@ -21,11 +22,12 @@ const ICONS: Record<LearnSection, ComponentType<SVGProps<SVGSVGElement>>> = {
 };
 
 type View = { kind: 'home' } | { kind: 'section'; section: LearnSection } | { kind: 'article'; id: string; from: LearnSection };
+const HOME: View = { kind: 'home' };
 
 export function LearnView() {
   const { t } = useI18n();
   const follower = useTide((s) => profileOf(s.settings) === 'follower');
-  const [view, setView] = useState<View>(() => {
+  const [initial] = useState<View>(() => {
     try {
       const id = sessionStorage.getItem(OPEN_ARTICLE_KEY);
       sessionStorage.removeItem(OPEN_ARTICLE_KEY);
@@ -34,25 +36,32 @@ export function LearnView() {
     } catch {
       /* ignore */
     }
-    return { kind: 'home' };
+    return HOME;
   });
-  const go = (v: View) => {
-    setView(v);
-    window.scrollTo(0, 0);
-  };
+  // Sections and articles are history entries, so the back swipe steps out of them.
+  const nav = useSubPage<View>(HOME, initial);
+  const view = nav.page;
+  const go = nav.go;
+  const anim = `subpage--${nav.dir}`;
 
   if (view.kind === 'article') {
     const article = ARTICLES.find((a) => a.id === view.id);
-    if (article) return <ArticleView article={article} onBack={() => go({ kind: 'section', section: view.from })} />;
+    if (article) {
+      return (
+        <div key={article.id} className={anim}>
+          <ArticleView article={article} onBack={nav.back} />
+        </div>
+      );
+    }
   }
 
   if (view.kind === 'section') {
     const section = SECTIONS[view.section];
     const Icon = ICONS[view.section];
     return (
-      <div className="stack stack--lg">
+      <div key={view.section} className={`stack stack--lg ${anim}`}>
         <header className="learn-nav">
-          <button type="button" className="icon-button icon-button--filled" onClick={() => go({ kind: 'home' })} aria-label={t.learn.back}>
+          <button type="button" className="icon-button icon-button--filled" onClick={nav.back} aria-label={t.learn.back}>
             <IconChevronLeft />
           </button>
         </header>
@@ -83,7 +92,7 @@ export function LearnView() {
   }
 
   return (
-    <div className="stack stack--lg">
+    <div key="home" className={`stack stack--lg ${nav.depth === 0 && nav.dir === 'back' ? anim : ''}`}>
       <header className="page-header">
         <div>
           <h1 className="display">{t.learn.title}</h1>

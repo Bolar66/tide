@@ -36,7 +36,8 @@ export interface Period {
 }
 
 export type ThemeSetting = 'system' | 'light' | 'dark';
-export type PaletteName = 'meri' | 'ruusu' | 'salvia' | 'laventeli';
+export const PALETTE_NAMES = ['meri', 'ruusu', 'salvia', 'laventeli', 'hiekka', 'persikka', 'grafiitti', 'revontuli'] as const;
+export type PaletteName = (typeof PALETTE_NAMES)[number];
 
 export interface Settings {
   theme: ThemeSetting;

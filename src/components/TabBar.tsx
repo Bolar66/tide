@@ -1,6 +1,7 @@
 import type { Profile } from '../domain/profile';
 import type { Route } from '../hooks/useHashRoute';
 import { useI18n } from '../i18n';
+import { tabOf, visibleTabs } from './tabs';
 import { IconBook, IconCalendar, IconChart, IconHeart, IconSettings, IconWave } from './icons';
 
 const ALL = [
@@ -22,13 +23,9 @@ interface Props {
 
 export function TabBar({ route, onNavigate, profile, following }: Props) {
   const { t } = useI18n();
-  const active = route === 'about' ? 'settings' : route === 'stats' ? 'calendar' : route;
-  const tabs = ALL.filter(({ route: r }) => {
-    // Statistics live under the "Kierto" tab (calendar route) for own-cycle users.
-    if (r === 'stats') return false;
-    if (r === 'followed') return profile === 'own' && following;
-    return true;
-  });
+  const active = tabOf(route);
+  const visible = visibleTabs(profile, following);
+  const tabs = ALL.filter(({ route: r }) => visible.includes(r));
   return (
     <nav className="tabbar" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
       {tabs.map(({ route: r, Icon }) => (

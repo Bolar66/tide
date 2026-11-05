@@ -27,6 +27,8 @@ export function JoinView({ shareId, secret, onDone }: Props) {
   const [name, setName] = useState(savedName);
   const [state, setState] = useState<'form' | 'busy' | 'done' | 'invalid'>('form');
   const [recovery, setRecovery] = useState<string | null>(null);
+  // The server never lets an account join its own invite; say so instead of "expired".
+  const ownInvite = useTide((s) => (s.settings.shares ?? []).some((x) => x.id === shareId));
 
   return (
     <main className="join">
@@ -42,10 +44,10 @@ export function JoinView({ shareId, secret, onDone }: Props) {
             {sh.openApp}
           </button>
         </>
-      ) : state === 'invalid' ? (
+      ) : state === 'invalid' || (ownInvite && session.account) ? (
         <>
           <h1 className="display join__title">{sh.joinTitle}</h1>
-          <p className="error-text">{sh.inviteInvalid}</p>
+          <p className={ownInvite ? 'muted' : 'error-text'}>{ownInvite ? sh.ownInvite : sh.inviteInvalid}</p>
           <button type="button" className="button" onClick={onDone}>
             {sh.openApp}
           </button>
