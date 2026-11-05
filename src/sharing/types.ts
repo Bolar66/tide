@@ -15,6 +15,19 @@ export interface OwnedShare {
   createdAt: number;
   /** Link secret while the invite is open, so the link can be shown again. Removed once accepted. */
   inviteSecret?: string;
+  /** Reverse share created while joining someone: approve them automatically once verified. */
+  autoApprove?: boolean;
+  /** Send a message when a new period is logged as started. */
+  notifyPeriodStart?: boolean;
+  /** Start date of the last period announced, to announce each one once. */
+  lastPeriodNotified?: string;
+}
+
+/** Encrypted with the share key by the person joining; proves they had the link. */
+export interface PartnerInfo {
+  name: string;
+  /** Invite to the joiner's own data ("Jaa myös omat tietoni"). */
+  reverse?: { id: string; secret: string };
 }
 
 /** Partner side, kept in the partner's settings. */

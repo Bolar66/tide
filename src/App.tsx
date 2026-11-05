@@ -6,7 +6,12 @@ import { Onboarding } from './features/onboarding/Onboarding';
 import { SettingsView } from './features/settings/SettingsView';
 import { StatsView } from './features/stats/StatsView';
 import { JoinView } from './features/sharing/JoinView';
-import { HomeView } from './features/today/HomeView';
+import { FollowedCalendar } from './features/followed/FollowedCalendar';
+import { FollowedTab } from './features/followed/FollowedCards';
+import { FollowerHome } from './features/followed/FollowerHome';
+import { TodayView } from './features/today/TodayView';
+import { profileOf } from './domain/profile';
+import { useSession } from './session/context';
 import { parseInviteHash } from './sharing/crypto';
 import { useEffect, useState } from 'react';
 import { useHashRoute } from './hooks/useHashRoute';
@@ -21,7 +26,9 @@ export function App() {
   const status = useTide((s) => s.status);
   const theme = useTide((s) => s.settings.theme);
   const onboarded = useTide((s) => s.settings.onboarded);
-  const ownTracking = useTide((s) => s.settings.ownTracking !== false);
+  const profile = useTide((s) => profileOf(s.settings));
+  const session = useSession();
+  const following = session.followed.length > 0;
   // An invite link opens the join flow before anything else (also before onboarding).
   const [invite, setInvite] = useState(() => parseInviteHash(window.location.hash));
   const saveError = useTide((s) => s.saveError);
@@ -33,6 +40,12 @@ export function App() {
   useEffect(() => {
     if (status === 'ready') store.autoEnd(today);
   }, [store, status, today]);
+
+  const openTrackers = () => {
+    navigate('settings');
+    // after the view transition has swapped the page in
+    window.setTimeout(() => document.getElementById('trackers')?.scrollIntoView({ behavior: 'smooth' }), 350);
+  };
 
   if (status === 'loading') return <div className="center-screen" aria-busy="true" />;
   if (status === 'error') return <div className="center-screen">{t.common.loadError}</div>;
@@ -61,24 +74,20 @@ export function App() {
             </button>
           </div>
         )}
-        {route === 'today' && (
-          <HomeView
-            onOpenCalendar={() => navigate('calendar')}
-            onOpenSettings={() => navigate('settings')}
-            onOpenTrackers={() => {
-              navigate('settings');
-              // after the view transition has swapped the page in
-              window.setTimeout(() => document.getElementById('trackers')?.scrollIntoView({ behavior: 'smooth' }), 350);
-            }}
-          />
-        )}
-        {route === 'calendar' && ownTracking && <CalendarView />}
-        {route === 'stats' && ownTracking && <StatsView />}
+        {route === 'today' &&
+          (profile === 'follower' ? (
+            <FollowerHome onOpenLearn={() => navigate('learn')} onOpenTrackers={openTrackers} />
+          ) : (
+            <TodayView onOpenCalendar={() => navigate('calendar')} onOpenSettings={() => navigate('settings')} onOpenTrackers={openTrackers} />
+          ))}
+        {route === 'calendar' && (profile === 'follower' ? <FollowedCalendar /> : <CalendarView />)}
+        {route === 'stats' && profile === 'own' && <StatsView />}
+        {route === 'followed' && <FollowedTab />}
         {route === 'learn' && <LearnView />}
         {route === 'settings' && <SettingsView onOpenAbout={() => navigate('about')} />}
         {route === 'about' && <AboutView onBack={() => navigate('settings')} />}
       </main>
-      <TabBar route={route} onNavigate={navigate} ownTracking={ownTracking} />
+      <TabBar route={route} onNavigate={navigate} profile={profile} following={following} />
     </>
   );
 }

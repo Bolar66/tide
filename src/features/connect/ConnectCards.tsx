@@ -23,6 +23,8 @@ function useLabels() {
         return c.ack;
       case 'redeem':
         return c.redeemed;
+      case 'cycle':
+        return t.followed.started;
     }
   };
 }
@@ -134,7 +136,10 @@ export function PartnerConnectCard({ shareId, name }: { shareId: string; name: s
   const mine = session.messages.filter((m) => m.shareId === shareId);
   const acked = ackedIds(mine);
   const requests = mine.filter((m) => !m.fromMe && m.body.type === 'need' && now - Date.parse(m.createdAt) < RECENT_MS).reverse();
-  const inbox = mine.filter((m) => !m.fromMe && m.body.type === 'cheer' && now - Date.parse(m.createdAt) < RECENT_MS).slice(-3).reverse();
+  const inbox = mine
+    .filter((m) => !m.fromMe && (m.body.type === 'cheer' || m.body.type === 'cycle') && now - Date.parse(m.createdAt) < RECENT_MS)
+    .slice(-3)
+    .reverse();
   const given = couponsFrom(mine).filter((x) => x.fromMe);
 
   const send = async (body: Parameters<typeof session.sendMessage>[1]) => {

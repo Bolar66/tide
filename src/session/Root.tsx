@@ -9,12 +9,12 @@ import { DexiePersistence } from '../db/persistence';
 import { LockScreen } from '../features/lock/LockScreen';
 import { StoreContext } from '../store/context';
 import { createStore, type Store } from '../store/store';
-import { todayISO } from '../domain/dates';
+import { addDaysISO, todayISO } from '../domain/dates';
 import { buildSharedSnapshot } from '../sharing/build';
 import { createInvite, inviteLink, newShareKey, openForShare, openInvite, sealForShare } from '../sharing/crypto';
 import { ShareError } from '../sharing/errors';
 import { parseMessageBody, type Message } from '../sharing/messages';
-import { DEFAULT_SCOPES, type SharedCache } from '../sharing/types';
+import { DEFAULT_SCOPES, type PartnerInfo, type SharedCache } from '../sharing/types';
 import { EMPTY_SYNC_STATE, syncOnce } from '../sync/engine';
 import { canonical } from '../sync/merge';
 import { AuthError, type ShareRow } from '../sync/remote';
@@ -133,13 +133,29 @@ export function Root() {
         continue;
       }
       if (row.partner_info) {
-        names[os.id] = await openForShare<{ name: string }>(os.key, row.partner_info).then(
+        names[os.id] = await openForShare<PartnerInfo>(os.key, row.partner_info).then(
           (x) => x.name,
           () => null, // not encrypted with our key: whoever claimed it never had the link
         );
       }
+      // Reverse share from "Jaa myös omat tietoni": approve the verified person automatically.
+      if (os.autoApprove && row.status === 'pending' && names[os.id]) {
+        await remote.activateShare(os.id);
+        row.status = 'active';
+        ownedNext = ownedNext.map((x) => (x.id === os.id ? { ...x, autoApprove: undefined } : x));
+      }
       if (row.status !== 'invited' && os.inviteSecret) {
         ownedNext = ownedNext.map((x) => (x.id === os.id ? { ...x, inviteSecret: undefined } : x));
+      }
+      if (row.status === 'active' && os.notifyPeriodStart && os.scopes.includes('cycle')) {
+        // Announce a newly started period once (only a recent one, never old history).
+        const latest = store.getState().periods.at(-1)?.start;
+        const recent = latest && latest >= addDaysISO(todayISO(), -1);
+        if (latest && recent && os.lastPeriodNotified !== latest) {
+          const sealed = await sealForShare(os.key, { type: 'cycle', event: 'periodStarted', date: latest });
+          await remote.sendMessage(os.id, sealed.iv, sealed.data);
+          ownedNext = ownedNext.map((x) => (x.id === os.id ? { ...x, lastPeriodNotified: latest } : x));
+        }
       }
       if (row.status === 'active') {
         const shared = buildSharedSnapshot(store.snapshot(), os.scopes, settings.displayName ?? '', todayISO());
@@ -375,6 +391,7 @@ export function Root() {
           scopes: os.scopes,
           expiresAt: row?.expires_at ?? null,
           link: os.inviteSecret ? inviteLink(appBaseUrl(), os.id, os.inviteSecret) : null,
+          notifyPeriodStart: os.notifyPeriodStart === true,
         };
       }),
       followed: (settings?.following ?? []).map((fs): FollowedView => {
@@ -400,7 +417,31 @@ export function Root() {
       async approveShare(id) {
         await remote.activateShare(id);
         delete lastPushed.current[id];
+        // They asked to share back: join their share too (its invite came encrypted with our share key).
+        const own = (settings?.shares ?? []).find((x) => x.id === id);
+        const row = shareRows.find((r) => r.id === id);
+        const info = own && row?.partner_info ? await openForShare<PartnerInfo>(own.key, row.partner_info).catch(() => null) : null;
+        if (info?.reverse) {
+          const wrapped = await remote.getInvite(info.reverse.id);
+          if (wrapped) {
+            const key = await openInvite(info.reverse.secret, wrapped);
+            const myName = store.getState().settings.displayName ?? '';
+            if (await remote.acceptInvite(info.reverse.id, await sealForShare(key, { name: myName } satisfies PartnerInfo))) {
+              const following = store.getState().settings.following ?? [];
+              store.updateSettings({ following: [...following.filter((x) => x.id !== info.reverse!.id), { id: info.reverse.id, key }] });
+            }
+          }
+        }
         await runSync();
+      },
+      setShareNotifyPeriod(id, on) {
+        const latest = store.getState().periods.at(-1)?.start;
+        store.updateSettings({
+          shares: (store.getState().settings.shares ?? []).map((x) =>
+            // Turning it on marks the current period as already announced: only new ones notify.
+            x.id === id ? { ...x, notifyPeriodStart: on, lastPeriodNotified: on ? latest : x.lastPeriodNotified } : x,
+          ),
+        });
       },
       async removeShare(id) {
         await remote.deleteShare(id).catch(() => undefined);
@@ -410,20 +451,32 @@ export function Root() {
       setShareScopes(id, scopes) {
         store.updateSettings({ shares: (store.getState().settings.shares ?? []).map((x) => (x.id === id ? { ...x, scopes } : x)) });
       },
-      async joinShare(shareId, secret, myName) {
+      async joinShare(shareId, secret, myName, shareBack = false) {
         if (!acct) throw new ShareError('no-account');
         const wrapped = await remote.getInvite(shareId);
         if (!wrapped) throw new ShareError('invite-invalid');
         const key = await openInvite(secret, wrapped).catch(() => {
           throw new ShareError('invite-invalid');
         });
-        if (!(await remote.acceptInvite(shareId, await sealForShare(key, { name: myName })))) throw new ShareError('invite-invalid');
+        // "Jaa myös omat tietoni": create our own share and pass its invite inside the encrypted reply.
+        let reverse: PartnerInfo['reverse'];
+        let ownedAdd: NonNullable<typeof settings>['shares'] = [];
+        if (shareBack) {
+          const backKey = newShareKey();
+          const invite = await createInvite(backKey);
+          const backId = await remote.createShare(invite.wrapped);
+          reverse = { id: backId, secret: invite.secret };
+          ownedAdd = [{ id: backId, key: backKey, scopes: DEFAULT_SCOPES, createdAt: Date.now(), autoApprove: true }];
+        }
+        const info: PartnerInfo = { name: myName, ...(reverse ? { reverse } : {}) };
+        if (!(await remote.acceptInvite(shareId, await sealForShare(key, info)))) throw new ShareError('invite-invalid');
         const s = store.getState().settings;
         store.updateSettings({
           displayName: myName,
           following: [...(s.following ?? []).filter((x) => x.id !== shareId), { id: shareId, key }],
+          ...(ownedAdd.length ? { shares: [...(s.shares ?? []), ...ownedAdd] } : {}),
           // Someone joining from an invite on a fresh install follows a partner and skips own tracking.
-          ...(s.onboarded ? {} : { onboarded: true, ownTracking: false }),
+          ...(s.onboarded ? {} : { onboarded: true, profile: 'follower' as const }),
         });
         await runSync();
       },

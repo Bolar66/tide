@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 
-export type Route = 'today' | 'calendar' | 'stats' | 'learn' | 'settings' | 'about';
-const ROUTES: Route[] = ['today', 'calendar', 'stats', 'learn', 'settings', 'about'];
+export type Route = 'today' | 'calendar' | 'stats' | 'followed' | 'learn' | 'settings' | 'about';
+const ROUTES: Route[] = ['today', 'calendar', 'stats', 'followed', 'learn', 'settings', 'about'];
 
 const read = (): Route => {
   const r = window.location.hash.replace(/^#\/?/, '') as Route;

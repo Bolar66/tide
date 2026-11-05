@@ -1,20 +1,33 @@
+import type { Profile } from '../domain/profile';
 import type { Route } from '../hooks/useHashRoute';
 import { useI18n } from '../i18n';
-import { IconBook, IconCalendar, IconChart, IconSettings, IconWave } from './icons';
+import { IconBook, IconCalendar, IconChart, IconHeart, IconSettings, IconWave } from './icons';
 
-const TABS = [
+const ALL = [
   { route: 'today', Icon: IconWave },
   { route: 'calendar', Icon: IconCalendar },
   { route: 'stats', Icon: IconChart },
+  { route: 'followed', Icon: IconHeart },
   { route: 'learn', Icon: IconBook },
   { route: 'settings', Icon: IconSettings },
 ] as const;
 
-export function TabBar({ route, onNavigate, ownTracking = true }: { route: Route; onNavigate: (r: Route) => void; ownTracking?: boolean }) {
+interface Props {
+  route: Route;
+  onNavigate: (r: Route) => void;
+  profile: Profile;
+  /** Someone shares with this user: own-profile users get the "Seuratut" tab. */
+  following: boolean;
+}
+
+export function TabBar({ route, onNavigate, profile, following }: Props) {
   const { t } = useI18n();
   const active = route === 'about' ? 'settings' : route;
-  // Someone who only follows a partner has no own calendar or stats.
-  const tabs = ownTracking ? TABS : TABS.filter((tab) => tab.route !== 'calendar' && tab.route !== 'stats');
+  const tabs = ALL.filter(({ route: r }) => {
+    if (r === 'stats') return profile === 'own';
+    if (r === 'followed') return profile === 'own' && following;
+    return true;
+  });
   return (
     <nav className="tabbar" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
       {tabs.map(({ route: r, Icon }) => (
@@ -26,7 +39,7 @@ export function TabBar({ route, onNavigate, ownTracking = true }: { route: Route
           onClick={() => onNavigate(r)}
         >
           <Icon />
-          <span>{t.tabs[r]}</span>
+          <span>{r === 'followed' ? t.followed.tab : t.tabs[r]}</span>
         </button>
       ))}
     </nav>

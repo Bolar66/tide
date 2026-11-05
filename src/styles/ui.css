@@ -634,3 +634,61 @@ button.list__row:active {
 [aria-checked='true'] > .switch .switch__thumb {
   transform: translateX(20px);
 }
+
+/* ---------- Profile picker ---------- */
+.profile-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.profile-card {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  text-align: left;
+  color: var(--text);
+  transition:
+    border-color var(--dur) var(--ease-out),
+    background-color var(--dur) var(--ease-out);
+}
+
+.profile-card[aria-checked='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.profile-card__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.profile-card[aria-checked='true'] .profile-card__icon {
+  background: var(--surface);
+}
+
+.profile-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-card__text strong {
+  font-size: var(--text-base);
+}
+
+.profile-card__text span {
+  font-size: var(--text-md);
+  color: var(--text-muted);
+}

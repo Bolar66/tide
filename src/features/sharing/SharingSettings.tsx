@@ -249,6 +249,18 @@ function ShareDetail({ share, name, onClosed }: { share: OwnedShareView; name: s
         ))}
       </ul>
       <p className="muted small">{sh.neverShared}</p>
+      {share.scopes.includes('cycle') && (
+        <ul className="list">
+          <li>
+            <Switch
+              label={t.followed.notifyPeriod}
+              hint={t.followed.notifyPeriodHint}
+              checked={share.notifyPeriodStart}
+              onChange={(on) => session.setShareNotifyPeriod(share.id, on)}
+            />
+          </li>
+        </ul>
+      )}
       <button type="button" className="button button--danger" disabled={busy} onClick={() => void remove(sh.stopConfirm(name))}>
         {sh.stop}
       </button>

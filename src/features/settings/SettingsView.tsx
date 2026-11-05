@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { IconChevronRight, IconDatabase, IconExport, IconImport, IconInfo, IconKey } from '../../components/icons';
 import { Segmented } from '../../components/Segmented';
 import { Sheet } from '../../components/Sheet';
+import { ProfilePicker } from '../../components/ProfilePicker';
 import { Switch } from '../../components/Switch';
+import { profileOf } from '../../domain/profile';
 import { parseBackup } from '../../db/backup';
 import type { Snapshot } from '../../db/persistence';
 import { todayISO } from '../../domain/dates';
@@ -98,6 +100,18 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         </ul>
       </section>
 
+      <section className="settings-section">
+        <h2 className="section-label">{t.settings.profile}</h2>
+        <ProfilePicker
+          value={profileOf(settings)}
+          onChange={(profile) => {
+            if (profile === profileOf(settings)) return;
+            store.updateSettings({ profile });
+            setMessage({ text: t.settings.profileChanged });
+          }}
+        />
+      </section>
+
       <SharingSettings />
 
       <section className="settings-section">
@@ -115,16 +129,6 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
       <section className="settings-section">
         <h2 className="section-label">{t.settings.cycle}</h2>
         <ul className="list">
-          {settings.ownTracking === false && (
-            <li>
-              <Switch
-                label={t.settings.ownTracking}
-                hint={t.settings.ownTrackingHint}
-                checked={false}
-                onChange={() => store.updateSettings({ ownTracking: true })}
-              />
-            </li>
-          )}
           <li>
             <Switch
               label={t.settings.showFertility}

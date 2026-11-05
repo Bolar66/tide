@@ -27,5 +27,11 @@ describe('messages', () => {
     const long = parseMessageBody({ type: 'cheer', text: 'a'.repeat(1000) });
     expect(long?.type === 'cheer' && long.text?.length).toBe(300);
     expect(parseMessageBody({ type: 'need', need: 'hug' })).toEqual({ type: 'need', need: 'hug', text: undefined });
+    expect(parseMessageBody({ type: 'cycle', event: 'periodStarted', date: '2026-11-05' })).toEqual({
+      type: 'cycle',
+      event: 'periodStarted',
+      date: '2026-11-05',
+    });
+    expect(parseMessageBody({ type: 'cycle', event: 'other', date: '2026-11-05' })).toBeNull();
   });
 });

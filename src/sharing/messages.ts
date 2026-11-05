@@ -4,7 +4,9 @@ export type MessageBody =
   | { type: 'need'; need: string; text?: string }
   | { type: 'ack'; replyTo: string }
   | { type: 'coupon'; preset?: string; text?: string }
-  | { type: 'redeem'; couponId: string };
+  | { type: 'redeem'; couponId: string }
+  /** Automatic, from the owner's device (opt-in per share). */
+  | { type: 'cycle'; event: 'periodStarted'; date: string };
 
 export interface Message {
   id: string;
@@ -60,6 +62,10 @@ export function parseMessageBody(raw: unknown): MessageBody | null {
       return typeof b.replyTo === 'string' ? { type: 'ack', replyTo: b.replyTo } : null;
     case 'redeem':
       return typeof b.couponId === 'string' ? { type: 'redeem', couponId: b.couponId } : null;
+    case 'cycle':
+      return b.event === 'periodStarted' && typeof b.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(b.date)
+        ? { type: 'cycle', event: 'periodStarted', date: b.date }
+        : null;
     default:
       return null;
   }

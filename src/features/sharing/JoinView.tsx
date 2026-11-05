@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { IconHeart } from '../../components/icons';
 import { useI18n } from '../../i18n';
 import { useSession } from '../../session/context';
+import { profileOf } from '../../domain/profile';
 import { useTide } from '../../store/context';
 import { AccountForm } from '../account/AccountForm';
 import { RecoveryCode } from '../settings/LockSettings';
@@ -19,6 +20,9 @@ export function JoinView({ shareId, secret, onDone }: Props) {
   const sh = t.sharing;
   const session = useSession();
   const savedName = useTide((s) => s.settings.displayName ?? '');
+  // Only someone who tracks their own cycle has anything to share back.
+  const canShareBack = useTide((s) => s.settings.onboarded && profileOf(s.settings) === 'own');
+  const [shareBack, setShareBack] = useState(false);
   const [mode, setMode] = useState<'create' | 'signin'>('create');
   const [name, setName] = useState(savedName);
   const [state, setState] = useState<'form' | 'busy' | 'done' | 'invalid'>('form');
@@ -64,7 +68,7 @@ export function JoinView({ shareId, secret, onDone }: Props) {
                 e.preventDefault();
                 setState('busy');
                 try {
-                  await session.joinShare(shareId, secret, name.trim());
+                  await session.joinShare(shareId, secret, name.trim(), canShareBack && shareBack);
                   setState('done');
                 } catch (err) {
                   console.error(err);
@@ -77,6 +81,17 @@ export function JoinView({ shareId, secret, onDone }: Props) {
                 <input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} autoComplete="given-name" />
                 <span className="muted small">{sh.yourNameHint}</span>
               </label>
+              {canShareBack && (
+                <label className="checkbox">
+                  <input type="checkbox" checked={shareBack} onChange={(e) => setShareBack(e.target.checked)} />
+                  <span>
+                    {t.followed.shareBack('')}
+                    <span className="muted small" style={{ display: 'block' }}>
+                      {t.followed.shareBackHint}
+                    </span>
+                  </span>
+                </label>
+              )}
               <button type="submit" className="button" disabled={state === 'busy' || !name.trim()}>
                 {state === 'busy' ? sh.joining : sh.join}
               </button>

@@ -56,7 +56,9 @@ export interface Settings {
   shares?: OwnedShare[];
   /** Shares from others this user follows (partner side). */
   following?: FollowedShare[];
-  /** False for someone who only follows a partner and does not track their own cycle. */
+  /** How the app is used; see domain/profile.ts. */
+  profile?: 'own' | 'follower';
+  /** @deprecated older follower-only flag, read through profileOf(). */
   ownTracking?: boolean;
   /** Tracker ids shown in the day editor (phase 3). */
   enabledTrackers: string[];

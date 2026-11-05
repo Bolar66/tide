@@ -1,7 +1,9 @@
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, getISODay, isSameMonth, startOfMonth, startOfWeek } from 'date-fns';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { IconChevronLeft, IconChevronRight } from '../../components/icons';
+import type { DayMark } from '../../domain/calendar';
 import { addDaysISO, fromISO, toISO, type ISODate } from '../../domain/dates';
+import type { DayEntry } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
 import { capitalize, useI18n } from '../../i18n';
 import { useTide } from '../../store/context';
@@ -10,10 +12,30 @@ import './calendar.css';
 
 const SWIPE_PX = 50;
 
-export function CalendarView() {
+/** Someone else's shared data shown read-only in the same calendar. */
+export interface CalendarSource {
+  marks: ReadonlyMap<ISODate, DayMark>;
+  days: Readonly<Record<ISODate, DayEntry>>;
+  showFertile: boolean;
+}
+
+interface Props {
+  source?: CalendarSource;
+  /** Replaces the default eyebrow, e.g. the person's name. */
+  eyebrow?: string;
+  /** Content between the header and the calendar (e.g. a person picker). */
+  above?: ReactNode;
+}
+
+export function CalendarView({ source, eyebrow, above }: Props = {}) {
   const { t, f } = useI18n();
-  const { today, marks, fertile } = useCycle();
-  const days = useTide((s) => s.days);
+  const own = useCycle();
+  const ownDays = useTide((s) => s.days);
+  const today = own.today;
+  const marks = source?.marks ?? own.marks;
+  const days = source?.days ?? ownDays;
+  const fertile = source ? (source.showFertile ? [null] : []) : own.fertile;
+  const readOnly = source !== undefined;
   const [month, setMonth] = useState(() => startOfMonth(fromISO(today)));
   const [direction, setDirection] = useState<'next' | 'prev' | null>(null);
   const [selected, setSelected] = useState<ISODate | null>(null);
@@ -34,7 +56,7 @@ export function CalendarView() {
       <header className="page-header">
         <div>
           <p className="eyebrow">
-            {t.tabs.calendar} · {f.year(month)}
+            {eyebrow ?? t.tabs.calendar} · {f.year(month)}
           </p>
           <h1 className="display calendar-title">{capitalize(f.monthName(month))}</h1>
         </div>
@@ -47,6 +69,7 @@ export function CalendarView() {
           </button>
         </div>
       </header>
+      {above}
 
       <div
         className="card calendar"
@@ -103,7 +126,7 @@ export function CalendarView() {
                 type="button"
                 role="gridcell"
                 className={classes}
-                disabled={iso > today}
+                disabled={readOnly || iso > today}
                 aria-label={[f.longDate(iso), markLabel].filter(Boolean).join(', ')}
                 aria-current={iso === today ? 'date' : undefined}
                 onClick={() => setSelected(iso)}
@@ -153,7 +176,7 @@ export function CalendarView() {
 
       {fertile.length > 0 && <p className="muted small calendar__disclaimer">{t.phases.fertileNote}</p>}
 
-      <DaySheet date={selected} onClose={() => setSelected(null)} />
+      {!readOnly && <DaySheet date={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 }

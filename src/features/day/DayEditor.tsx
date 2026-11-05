@@ -18,10 +18,13 @@ export function DayEditor({
   date,
   showPeriodActions = true,
   onChooseTrackers,
+  wellbeingOnly = false,
 }: {
   date: ISODate;
   showPeriodActions?: boolean;
   onChooseTrackers?: () => void;
+  /** For people who do not track a cycle: mood, energy and wellbeing trackers only. */
+  wellbeingOnly?: boolean;
 }) {
   const store = useStore();
   const { t } = useI18n();
@@ -45,7 +48,7 @@ export function DayEditor({
 
   return (
     <div className="day-editor">
-      {showPeriodActions && (
+      {showPeriodActions && !wellbeingOnly && (
         <section className="day-editor__period">
           {period ? (
             <span className="pill">{t.day.inPeriod}</span>
@@ -67,6 +70,7 @@ export function DayEditor({
         </section>
       )}
 
+      {!wellbeingOnly && (
       <section>
         <h3 className="section-label">{t.day.flow}</h3>
         <div className="segmented--flow">
@@ -78,10 +82,11 @@ export function DayEditor({
           />
         </div>
       </section>
+      )}
 
       <section>
         <h3 className="section-label">{t.day.symptoms}</h3>
-        {SYMPTOM_KEYS.map((key) => (
+        {SYMPTOM_KEYS.filter((key) => !wellbeingOnly || key === 'mood' || key === 'energy').map((key) => (
           <Scale
             key={key}
             label={t.symptoms[key].label}

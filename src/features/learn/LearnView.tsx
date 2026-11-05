@@ -3,10 +3,16 @@ import { IconBook, IconChevronLeft, IconChevronRight, IconFlask, IconHeart, Icon
 import { useI18n } from '../../i18n';
 import { ARTICLES, SECTIONS } from '../../learn/fi';
 import type { LearnSection } from '../../learn/types';
+import { profileOf } from '../../domain/profile';
+import { useTide } from '../../store/context';
 import { ArticleView } from './ArticleView';
 import './learn.css';
 
 const SECTION_ORDER: LearnSection[] = ['basics', 'young', 'partner', 'deeper'];
+/** Followers see the partner section first. */
+const FOLLOWER_ORDER: LearnSection[] = ['partner', 'basics', 'young', 'deeper'];
+/** sessionStorage key: open this article when the view mounts (from the daily read on home). */
+export const OPEN_ARTICLE_KEY = 'tide.openArticle';
 const ICONS: Record<LearnSection, ComponentType<SVGProps<SVGSVGElement>>> = {
   basics: IconBook,
   young: IconSprout,
@@ -18,7 +24,18 @@ type View = { kind: 'home' } | { kind: 'section'; section: LearnSection } | { ki
 
 export function LearnView() {
   const { t } = useI18n();
-  const [view, setView] = useState<View>({ kind: 'home' });
+  const follower = useTide((s) => profileOf(s.settings) === 'follower');
+  const [view, setView] = useState<View>(() => {
+    try {
+      const id = sessionStorage.getItem(OPEN_ARTICLE_KEY);
+      sessionStorage.removeItem(OPEN_ARTICLE_KEY);
+      const a = ARTICLES.find((x) => x.id === id);
+      if (a) return { kind: 'article', id: a.id, from: a.section };
+    } catch {
+      /* ignore */
+    }
+    return { kind: 'home' };
+  });
   const go = (v: View) => {
     setView(v);
     window.scrollTo(0, 0);
@@ -74,7 +91,7 @@ export function LearnView() {
         </div>
       </header>
       <div className="learn-grid">
-        {SECTION_ORDER.map((key, i) => {
+        {(follower ? FOLLOWER_ORDER : SECTION_ORDER).map((key, i) => {
           const Icon = ICONS[key];
           const count = ARTICLES.filter((a) => a.section === key).length;
           return (

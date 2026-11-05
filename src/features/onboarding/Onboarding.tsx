@@ -6,6 +6,8 @@ import { addDaysISO } from '../../domain/dates';
 import { DEFAULT_CYCLE_LENGTH, DEFAULT_PERIOD_LENGTH } from '../../domain/prediction';
 import { useToday } from '../../hooks/useToday';
 import { useI18n } from '../../i18n';
+import { ProfilePicker } from '../../components/ProfilePicker';
+import type { Profile } from '../../domain/profile';
 import { useStore } from '../../store/context';
 import { DEFAULT_TRACKERS } from '../../trackers/registry';
 import { AccountComparison, AccountForm } from '../account/AccountForm';
@@ -13,8 +15,10 @@ import { RecoveryCode } from '../settings/LockSettings';
 import { TrackerSettings } from '../settings/TrackerSettings';
 import './onboarding.css';
 
-const STEPS = ['welcome', 'privacy', 'account', 'lastPeriod', 'lengths', 'trackers', 'done'] as const;
-type Step = (typeof STEPS)[number];
+const OWN_STEPS = ['welcome', 'profile', 'privacy', 'account', 'lastPeriod', 'lengths', 'trackers', 'done'] as const;
+/** "Haluan ymmärtää ja pysyä mukana": no cycle questions. */
+const FOLLOWER_STEPS = ['welcome', 'profile', 'privacy', 'account', 'done'] as const;
+type Step = (typeof OWN_STEPS)[number];
 
 const PRIVACY_ICONS = [IconUserOff, IconCloudOff, IconLock];
 
@@ -23,6 +27,8 @@ export function Onboarding() {
   const { t } = useI18n();
   const today = useToday();
   const [index, setIndex] = useState(0);
+  const [profile, setProfile] = useState<Profile>('own');
+  const STEPS: readonly Step[] = profile === 'follower' ? FOLLOWER_STEPS : OWN_STEPS;
   const [lastStart, setLastStart] = useState('');
   const [cycle, setCycle] = useState(DEFAULT_CYCLE_LENGTH);
   const [period, setPeriod] = useState(DEFAULT_PERIOD_LENGTH);
@@ -51,7 +57,8 @@ export function Onboarding() {
   const back = () => setIndex((i) => Math.max(i - 1, 0));
 
   const finish = () => {
-    store.updateSettings({ enabledTrackers: trackers });
+    store.updateSettings({ profile, ...(profile === 'own' ? { enabledTrackers: trackers } : {}) });
+    if (profile === 'follower') return store.completeOnboarding({});
     store.completeOnboarding({
       lastPeriodStart: lastStart && lastStart <= today ? lastStart : undefined,
       ...(useDefaults ? {} : { cycleLength: cycle, periodLength: period }),
@@ -91,6 +98,21 @@ export function Onboarding() {
             </p>
           )}
         </>
+      );
+      break;
+
+    case 'profile':
+      content = (
+        <>
+          <h1 className="onboarding__title display">{t.onboarding.profileTitle}</h1>
+          <p className="onboarding__text">{t.onboarding.profileText}</p>
+          <ProfilePicker value={profile} onChange={setProfile} />
+        </>
+      );
+      actions = (
+        <button type="button" className="button" onClick={next}>
+          {t.common.next}
+        </button>
       );
       break;
 

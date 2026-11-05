@@ -12,6 +12,7 @@ export interface OwnedShareView {
   scopes: ShareScope[];
   expiresAt: string | null;
   link: string | null;
+  notifyPeriodStart: boolean;
 }
 
 export interface FollowedView {
@@ -60,7 +61,8 @@ export interface Session {
   /** Reject a request, cancel an invite or stop sharing. */
   removeShare(id: string): Promise<void>;
   setShareScopes(id: string, scopes: ShareScope[]): void;
-  joinShare(shareId: string, secret: string, myName: string): Promise<void>;
+  joinShare(shareId: string, secret: string, myName: string, shareBack?: boolean): Promise<void>;
+  setShareNotifyPeriod(id: string, on: boolean): void;
   leaveShare(id: string): Promise<void>;
 
   /** Messages of all active shares, oldest first. */
