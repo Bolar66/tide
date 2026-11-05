@@ -1,5 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { IconChevronRight, IconDatabase, IconExport, IconImport, IconInfo, IconKey } from '../../components/icons';
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconDatabase,
+  IconExport,
+  IconHeart,
+  IconImport,
+  IconInfo,
+  IconKey,
+  IconLock,
+  IconSparkle,
+  IconSun,
+} from '../../components/icons';
+import { useSession } from '../../session/context';
 import { Segmented } from '../../components/Segmented';
 import { Sheet } from '../../components/Sheet';
 import { PalettePicker } from '../../components/PalettePicker';
@@ -20,10 +33,51 @@ import { LockSettings } from './LockSettings';
 import { TrackerSettings } from './TrackerSettings';
 import './settings.css';
 
+type Page = 'menu' | 'account' | 'use' | 'appearance' | 'security' | 'backup';
+const MENU = [
+  { page: 'account', Icon: IconHeart },
+  { page: 'use', Icon: IconSparkle },
+  { page: 'appearance', Icon: IconSun },
+  { page: 'security', Icon: IconLock },
+  { page: 'backup', Icon: IconExport },
+] as const;
+
+/** sessionStorage key: open this settings page on mount (e.g. "Valitse seurattavat" from home). */
+export const SETTINGS_PAGE_KEY = 'tide.settingsPage';
+
 export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
   const store = useStore();
   const { t, f } = useI18n();
   const settings = useTide((s) => s.settings);
+  const session = useSession();
+  const [page, setPage] = useState<Page>(() => {
+    try {
+      const p = sessionStorage.getItem(SETTINGS_PAGE_KEY) as Page | null;
+      sessionStorage.removeItem(SETTINGS_PAGE_KEY);
+      if (sessionStorage.getItem(BACKUP_GUIDE_FLAG) === '1') return 'backup';
+      return p && ['account', 'use', 'appearance', 'security', 'backup'].includes(p) ? p : 'menu';
+    } catch {
+      return 'menu';
+    }
+  });
+  const go = (p: Page) => {
+    setPage(p);
+    window.scrollTo(0, 0);
+  };
+  const subtitle = (p: Exclude<Page, 'menu'>): string => {
+    switch (p) {
+      case 'account':
+        return session.account ? `${session.account.email}${session.shares.length + session.followed.length ? ` · ${t.settings.pages.account.sharing(session.shares.length + session.followed.length)}` : ''}` : t.account.rowOff;
+      case 'use':
+        return `${t.settings.profiles[profileOf(settings)].title} · ${t.settings.pages.use.trackers(settings.enabledTrackers.length)}`;
+      case 'appearance':
+        return `${t.settings.palettes[settings.palette ?? 'meri']} · ${t.settings.themes[settings.theme]}`;
+      case 'security':
+        return session.lock ? t.settings.lockOn : t.settings.lockOff;
+      case 'backup':
+        return settings.lastBackupAt ? t.settings.lastBackup(f.fullDate(todayISO(new Date(settings.lastBackupAt)))) : t.settings.exportHint;
+    }
+  };
   const [message, setMessage] = useState<{ text: string; error?: boolean } | null>(null);
   const [pending, setPending] = useState<Snapshot | null>(null);
   const [persisted, setPersisted] = useState<boolean | null>(null);
@@ -88,10 +142,50 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
 
   return (
     <div className="stack stack--lg">
+      {page !== 'menu' && (
+        <header className="about-nav">
+          <button type="button" className="icon-button icon-button--filled" onClick={() => go('menu')} aria-label={t.common.back}>
+            <IconChevronLeft />
+          </button>
+        </header>
+      )}
       <header className="page-header">
-        <h1 className="display">{t.settings.title}</h1>
+        <h1 className="display">{page === 'menu' ? t.settings.title : t.settings.pages[page].title}</h1>
       </header>
 
+      {page === 'menu' && (
+        <ul className="list settings-menu">
+          {MENU.map(({ page: p, Icon }) => (
+            <li key={p}>
+              <button type="button" className="list__row" onClick={() => go(p)}>
+                <span className="list__icon">
+                  <Icon />
+                </span>
+                <span className="list__text">
+                  {t.settings.pages[p].title}
+                  <span className="list__sub">{subtitle(p)}</span>
+                </span>
+                <IconChevronRight className="list__chevron" />
+              </button>
+            </li>
+          ))}
+          <li>
+            <button type="button" className="list__row" onClick={onOpenAbout}>
+              <span className="list__icon">
+                <IconInfo />
+              </span>
+              <span className="list__text">
+                {t.settings.about}
+                <span className="list__sub">{t.settings.aboutHint}</span>
+              </span>
+              <IconChevronRight className="list__chevron" />
+            </button>
+          </li>
+        </ul>
+      )}
+
+      {page === 'account' && (
+        <>
       <section className="settings-section">
         <h2 className="section-label">{t.account.section}</h2>
         <ul className="list">
@@ -101,6 +195,13 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         </ul>
       </section>
 
+          <SharingSettings />
+        </>
+      )}
+
+      {page === 'use' && (
+        <>
+          {message && page === 'use' && <p className="success-text">{message.text}</p>}
       <section className="settings-section">
         <h2 className="section-label">{t.settings.profile}</h2>
         <ProfilePicker
@@ -111,21 +212,6 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
             setMessage({ text: t.settings.profileChanged });
           }}
         />
-      </section>
-
-      <SharingSettings />
-
-      <section className="settings-section">
-        <h2 className="section-label">{t.settings.appearance}</h2>
-        <div className="card stack">
-          <PalettePicker value={settings.palette ?? 'meri'} onChange={(palette) => store.updateSettings({ palette })} />
-          <Segmented<ThemeSetting>
-            label={t.settings.theme}
-            options={themeOptions}
-            value={settings.theme}
-            onChange={(theme) => store.updateSettings({ theme })}
-          />
-        </div>
       </section>
 
       <section className="settings-section">
@@ -148,6 +234,28 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         <TrackerSettings enabled={settings.enabledTrackers} onChange={(enabledTrackers) => store.updateSettings({ enabledTrackers })} />
       </section>
 
+        </>
+      )}
+
+      {page === 'appearance' && (
+        <>
+      <section className="settings-section">
+        <div className="card stack">
+          <PalettePicker value={settings.palette ?? 'meri'} onChange={(palette) => store.updateSettings({ palette })} />
+          <Segmented<ThemeSetting>
+            label={t.settings.theme}
+            options={themeOptions}
+            value={settings.theme}
+            onChange={(theme) => store.updateSettings({ theme })}
+          />
+        </div>
+      </section>
+
+        </>
+      )}
+
+      {page === 'security' && (
+        <>
       <section className="settings-section">
         <h2 className="section-label">{t.settings.security}</h2>
         <ul className="list">
@@ -157,8 +265,12 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         </ul>
       </section>
 
+        </>
+      )}
+
+      {page === 'backup' && (
+        <>
       <section className="settings-section">
-        <h2 className="section-label">{t.settings.data}</h2>
         <ul className="list">
           <li>
             <button type="button" className="list__row" onClick={onExport}>
@@ -228,22 +340,8 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         <p className="muted small settings-note">{t.settings.exportWarning}</p>
       </section>
 
-      <section className="settings-section">
-        <ul className="list">
-          <li>
-            <button type="button" className="list__row" onClick={onOpenAbout}>
-              <span className="list__icon">
-                <IconInfo />
-              </span>
-              <span className="list__text">
-                {t.settings.about}
-                <span className="list__sub">{t.settings.aboutHint}</span>
-              </span>
-              <IconChevronRight className="list__chevron" />
-            </button>
-          </li>
-        </ul>
-      </section>
+        </>
+      )}
 
       <BackupGuide
         open={guideOpen}

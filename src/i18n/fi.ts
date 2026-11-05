@@ -15,7 +15,7 @@ const inDays = (n: number) => (n === 0 ? 'tänään' : n === 1 ? 'huomenna' : `$
 export const fi = {
   days,
   inDays,
-  tabs: { today: 'Tänään', calendar: 'Kalenteri', stats: 'Tilastot', learn: 'Opi', settings: 'Asetukset' },
+  tabs: { today: 'Tänään', calendar: 'Kalenteri', cycle: 'Kierto', stats: 'Tilastot', learn: 'Opi', settings: 'Asetukset' },
   learn: {
     title: 'Opi',
     intro: 'Tietoa kuukautiskierrosta, kehosta ja toistemme ymmärtämisestä.',
@@ -157,6 +157,16 @@ export const fi = {
     backupReminder: (n: number | null) =>
       n === null ? 'Tietojasi ei ole vielä varmuuskopioitu.' : `Edellisestä varmuuskopiosta on ${days(n)}.`,
     backupAction: 'Tee nyt',
+  },
+  log: {
+    title: 'Kirjaa',
+    button: 'Kirjaa päivän tiedot',
+    sheetTitle: (date: string) => `Kirjaa · ${date}`,
+    tabs: { cycle: 'Kierto', mind: 'Mieli', body: 'Keho', life: 'Arki', note: 'Muistio' },
+    summaryEmpty: 'Et ole vielä kirjannut mitään tänään.',
+    more: (n: number) => `+${n} muuta`,
+    note: 'Muistiinpano',
+    saved: 'Tallennettu',
   },
   day: {
     flow: 'Vuoto',
@@ -383,6 +393,13 @@ export const fi = {
     cycle: 'Sykli',
     trackers: 'Seurattavat',
     trackersHint: 'Valitse, mitä haluat kirjata päivittäin. Kuukautiset ja oireet ovat aina mukana.',
+    pages: {
+      account: { title: 'Tili ja jakaminen', sharing: (n: number) => (n === 1 ? '1 jako' : `${n} jakoa`) },
+      use: { title: 'Käyttö ja seurattavat', trackers: (n: number) => (n === 1 ? '1 seurattava' : `${n} seurattavaa`) },
+      appearance: { title: 'Ulkoasu' },
+      security: { title: 'Lukitus' },
+      backup: { title: 'Varmuuskopio' },
+    },
     profile: 'Käyttötapa',
     profiles: {
       own: { title: 'Seuraan omaa kiertoani', text: 'Kirjaa kuukautiset, oireet ja hyvinvointi, ja saat ennusteet.' },

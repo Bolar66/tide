@@ -1,10 +1,9 @@
 import { TabBar } from './components/TabBar';
 import { AboutView } from './features/about/AboutView';
-import { CalendarView } from './features/calendar/CalendarView';
+import { CycleView } from './features/calendar/CycleView';
 import { LearnView } from './features/learn/LearnView';
 import { Onboarding } from './features/onboarding/Onboarding';
-import { SettingsView } from './features/settings/SettingsView';
-import { StatsView } from './features/stats/StatsView';
+import { SettingsView, SETTINGS_PAGE_KEY } from './features/settings/SettingsView';
 import { JoinView } from './features/sharing/JoinView';
 import { FollowedCalendar } from './features/followed/FollowedCalendar';
 import { FollowedTab } from './features/followed/FollowedCards';
@@ -52,6 +51,11 @@ export function App() {
   }, [store, status, today]);
 
   const openTrackers = () => {
+    try {
+      sessionStorage.setItem(SETTINGS_PAGE_KEY, 'use');
+    } catch {
+      /* ignore */
+    }
     navigate('settings');
     // after the view transition has swapped the page in
     window.setTimeout(() => document.getElementById('trackers')?.scrollIntoView({ behavior: 'smooth' }), 350);
@@ -90,8 +94,8 @@ export function App() {
           ) : (
             <TodayView onOpenCalendar={() => navigate('calendar')} onOpenSettings={() => navigate('settings')} onOpenTrackers={openTrackers} />
           ))}
-        {route === 'calendar' && (profile === 'follower' ? <FollowedCalendar /> : <CalendarView />)}
-        {route === 'stats' && profile === 'own' && <StatsView />}
+        {route === 'calendar' && (profile === 'follower' ? <FollowedCalendar /> : <CycleView key="c" initial="calendar" />)}
+        {route === 'stats' && profile === 'own' && <CycleView key="s" initial="stats" />}
         {route === 'followed' && <FollowedTab />}
         {route === 'learn' && <LearnView />}
         {route === 'settings' && <SettingsView onOpenAbout={() => navigate('about')} />}

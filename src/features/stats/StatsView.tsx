@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { IconPlus } from '../../components/icons';
 import { getCycles, periodLength } from '../../domain/prediction';
 import type { Period } from '../../domain/types';
@@ -11,7 +11,7 @@ import './stats.css';
 /** Cycles within this many days of each other count as regular (common clinical rule of thumb). */
 const REGULAR_RANGE = 7;
 
-export function StatsView() {
+export function StatsView({ above }: { above?: ReactNode } = {}) {
   const { t, f } = useI18n();
   const { today, periods, stats, hasHints, cycleDay } = useCycle();
   const [editing, setEditing] = useState<Period | 'new' | null>(null);
@@ -33,6 +33,7 @@ export function StatsView() {
       <header className="page-header">
         <h1 className="display">{t.stats.title}</h1>
       </header>
+      {above}
 
       <section className="card stats-hero enter">
         <span className="eyebrow">{t.stats.avgCycle}</span>

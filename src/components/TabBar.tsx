@@ -22,9 +22,10 @@ interface Props {
 
 export function TabBar({ route, onNavigate, profile, following }: Props) {
   const { t } = useI18n();
-  const active = route === 'about' ? 'settings' : route;
+  const active = route === 'about' ? 'settings' : route === 'stats' ? 'calendar' : route;
   const tabs = ALL.filter(({ route: r }) => {
-    if (r === 'stats') return profile === 'own';
+    // Statistics live under the "Kierto" tab (calendar route) for own-cycle users.
+    if (r === 'stats') return false;
     if (r === 'followed') return profile === 'own' && following;
     return true;
   });
@@ -39,7 +40,7 @@ export function TabBar({ route, onNavigate, profile, following }: Props) {
           onClick={() => onNavigate(r)}
         >
           <Icon />
-          <span>{r === 'followed' ? t.followed.tab : t.tabs[r]}</span>
+          <span>{r === 'followed' ? t.followed.tab : r === 'calendar' && profile === 'own' ? t.tabs.cycle : t.tabs[r]}</span>
         </button>
       ))}
     </nav>

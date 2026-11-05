@@ -40,21 +40,21 @@ export function PhaseCard({ phase, cycleDay, showFertileNote, ovulation }: Props
               <li key={n}>{n}</li>
             ))}
           </ul>
+      {tip && (
+            <div className="phase-card__tip">
+              <IconSparkle width={18} height={18} aria-hidden />
+              <div>
+                <p className="phase-card__tip-title">{p.tipTitle}</p>
+                <p>{tip}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <button type="button" className="button button--ghost button--small phase-card__toggle" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         {open ? p.readLess : p.readMore}
       </button>
 
-      {tip && (
-        <div className="phase-card__tip">
-          <IconSparkle width={18} height={18} aria-hidden />
-          <div>
-            <p className="phase-card__tip-title">{p.tipTitle}</p>
-            <p>{tip}</p>
-          </div>
-        </div>
-      )}
       {(showFertileNote || ovulation) && <p className="phase-card__note">{p.fertileNote}</p>}
     </section>
   );

@@ -5,7 +5,7 @@ import type { Period } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
 import { capitalize, useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
-import { DayEditor } from '../day/DayEditor';
+import { TodaySummary } from './TodaySummary';
 import { BACKUP_GUIDE_FLAG, exportBackup } from '../settings/backupIO';
 import { OwnerConnectCard } from '../connect/ConnectCards';
 import { CycleRing } from './CycleRing';
@@ -135,7 +135,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
         )}
       </section>
 
-      <OwnerConnectCard />
+      <TodaySummary date={today} onChooseTrackers={onOpenTrackers} />
 
       <PatternWarnings warnings={warnings} />
 
@@ -148,10 +148,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings, onOpenTrackers }: Pr
         />
       )}
 
-      <section className="card enter" style={{ '--i': 3 } as CSSProperties}>
-        <h2 className="card__title">{t.today.todayLog}</h2>
-        <DayEditor date={today} showPeriodActions={false} onChooseTrackers={onOpenTrackers} />
-      </section>
+      <OwnerConnectCard />
 
       <OtherDaySheet key={otherDay ?? 'closed'} mode={otherDay} today={today} onClose={() => setOtherDay(null)} />
     </div>

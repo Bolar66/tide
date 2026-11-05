@@ -18,7 +18,7 @@ export const PALETTES = {
       period: '#b84a35', 'on-period': '#ffffff', 'period-soft': '#f6dcd5',
       predicted: '#dc9c8e', 'predicted-soft': '#fbefeb',
       fertile: '#4f4fa6', 'fertile-soft': '#e6e6f7',
-      wave: '14, 106, 112',
+      wave: '14 106 112',
     },
     dark: {
       bg: '#0d1618', surface: '#142023', 'surface-2': '#1c2b2f', 'surface-3': '#25373b', border: '#233438',
@@ -27,7 +27,7 @@ export const PALETTES = {
       period: '#ef8a73', 'on-period': '#2a0b05', 'period-soft': '#4a281f',
       predicted: '#9c5a4c', 'predicted-soft': '#2b1e1b',
       fertile: '#a8a8f0', 'fertile-soft': '#25254a',
-      wave: '92, 196, 190',
+      wave: '92 196 190',
     },
   },
   ruusu: {
@@ -39,7 +39,7 @@ export const PALETTES = {
       period: '#c4445f', 'on-period': '#ffffff', 'period-soft': '#f7d9df',
       predicted: '#e29aab', 'predicted-soft': '#fbeef1',
       fertile: '#6650a8', 'fertile-soft': '#ece7f8',
-      wave: '210, 79, 108',
+      wave: '210 79 108',
     },
     dark: {
       bg: '#141011', surface: '#1e1719', 'surface-2': '#281f22', 'surface-3': '#33282c', border: '#33292c',
@@ -48,7 +48,7 @@ export const PALETTES = {
       period: '#e5728b', 'on-period': '#22070f', 'period-soft': '#4a2630',
       predicted: '#a35a6d', 'predicted-soft': '#2c1d21',
       fertile: '#b3a3ea', 'fertile-soft': '#2d2640',
-      wave: '229, 114, 139',
+      wave: '229 114 139',
     },
   },
   salvia: {
@@ -60,7 +60,7 @@ export const PALETTES = {
       period: '#ad4c34', 'on-period': '#ffffff', 'period-soft': '#f2dbd2',
       predicted: '#d79e8c', 'predicted-soft': '#f9eee9',
       fertile: '#5f50a0', 'fertile-soft': '#e9e5f5',
-      wave: '74, 106, 77',
+      wave: '74 106 77',
     },
     dark: {
       bg: '#111510', surface: '#192018', 'surface-2': '#212a20', 'surface-3': '#2b3629', border: '#293327',
@@ -69,7 +69,7 @@ export const PALETTES = {
       period: '#e68a6f', 'on-period': '#2a0b04', 'period-soft': '#46281e',
       predicted: '#995b49', 'predicted-soft': '#2a1d18',
       fertile: '#b2a5ee', 'fertile-soft': '#292440',
-      wave: '156, 194, 154',
+      wave: '156 194 154',
     },
   },
   laventeli: {
@@ -81,7 +81,7 @@ export const PALETTES = {
       period: '#bd4760', 'on-period': '#ffffff', 'period-soft': '#f6d8de',
       predicted: '#df98a7', 'predicted-soft': '#fbeef1',
       fertile: '#226d74', 'fertile-soft': '#dbeff0',
-      wave: '102, 76, 159',
+      wave: '102 76 159',
     },
     dark: {
       bg: '#13111a', surface: '#1b1825', 'surface-2': '#24202f', 'surface-3': '#2e2a3b', border: '#2d2838',
@@ -90,7 +90,7 @@ export const PALETTES = {
       period: '#ea7c92', 'on-period': '#2a0710', 'period-soft': '#492430',
       predicted: '#a0566a', 'predicted-soft': '#2c1c22',
       fertile: '#7ecfd2', 'fertile-soft': '#163536',
-      wave: '184, 161, 240',
+      wave: '184 161 240',
     },
   },
 };
