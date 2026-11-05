@@ -65,7 +65,7 @@ Jos muutit värejä: myös `pnpm contrast`.**
 
 ## Opi-osio
 
-- Artikkelit: `src/learn/fi.ts` (osiot Perusteet, Nuorille, Kumppanille, Syvemmälle). Rakenne `learn/types.ts`.
+- Artikkelit: `src/learn/fi.ts` (osiot Perusteet, Nuorille, Läheisille, Syvemmälle). Rakenne `learn/types.ts`.
 - Terveystiedon on perustuttava luotettaviin lähteisiin (Terveyskirjasto, THL, Väestöliitto, Käypä hoito).
   Lähteisiin linkitetään vain etusivuille (`SOURCE_LINKS`), jotta linkit eivät vanhene.
 - Ei hoito- tai annostusohjeita, ei ravintolisäsuosituksia. Sisältö tarkistetaan ammattilaisella ennen julkista julkaisua.

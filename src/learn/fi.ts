@@ -9,7 +9,7 @@ import type { Article, LearnSection } from './types';
 export const SECTIONS: Record<LearnSection, { title: string; description: string }> = {
   basics: { title: 'Perusteet', description: 'Kuukautiskierto, mikä on normaalia ja miten oireita voi helpottaa.' },
   young: { title: 'Nuorille', description: 'Ensimmäiset kuukautiset, suojat ja keho muutoksessa.' },
-  partner: { title: 'Kumppanille', description: 'Miten ymmärtää ja tukea toista kierron eri vaiheissa.' },
+  partner: { title: 'Läheisille', description: 'Miten ymmärtää ja tukea läheistä kierron eri vaiheissa.' },
   deeper: { title: 'Syvemmälle', description: 'Hormonit, tutkimustieto ja tavallisimmat sairaudet.' },
 };
 
@@ -254,11 +254,11 @@ export const ARTICLES: Article[] = [
     sources: ['Väestöliitto', 'Nuorten mielenterveystalo'],
   },
 
-  // ---------------------------------------------------------------- Kumppanille
+  // ---------------------------------------------------------------- Läheisille
   {
     id: 'support',
     section: 'partner',
-    title: 'Näin tuet kumppaniasi kierron eri vaiheissa',
+    title: 'Näin tuet läheistäsi kierron eri vaiheissa',
     summary: 'Pienet teot oikeaan aikaan merkitsevät paljon.',
     minutes: 3,
     blocks: [
