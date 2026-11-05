@@ -1,0 +1,19 @@
+.settings__meta {
+  font-size: 15px;
+  font-weight: 550;
+}
+
+.settings__ok {
+  color: var(--primary);
+  font-weight: 550;
+}
+
+.settings__privacy {
+  margin-top: 8px;
+}
+
+.settings__version {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}

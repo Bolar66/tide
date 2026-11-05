@@ -1,0 +1,82 @@
+/* Light theme is the default; dark follows the system unless data-theme="light" forces light. */
+:root {
+  --bg: #fdf6f7;
+  --surface: #ffffff;
+  --surface-2: #fbecef;
+  --border: #f0dce1;
+  --text: #3a2a2f;
+  --text-muted: #86686f;
+  --primary: #c7385d;
+  --primary-hover: #b02f51;
+  --on-primary: #ffffff;
+  --primary-soft: #fbe1e8;
+  --period: #e0557a;
+  --on-period: #ffffff;
+  --period-soft: #f9d4de;
+  --predicted: #f3a3b8;
+  --predicted-bg: #fdeef2;
+  --fertile: #8b74d0;
+  --fertile-soft: #ece6fa;
+  --warning-bg: #fff3df;
+  --warning-text: #7a4d00;
+  --danger: #b3261e;
+  --shadow: 0 1px 2px rgb(58 42 47 / 6%), 0 4px 16px rgb(58 42 47 / 6%);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+  --tap: 44px;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1a1215;
+    --surface: #251a1e;
+    --surface-2: #31232a;
+    --border: #3d2c33;
+    --text: #f6e9ec;
+    --text-muted: #c0a3aa;
+    --primary: #f07c99;
+    --primary-hover: #f594ac;
+    --on-primary: #2a0b15;
+    --primary-soft: #4a2230;
+    --period: #e8698d;
+    --on-period: #22070f;
+    --period-soft: #55283a;
+    --predicted: #a85470;
+    --predicted-bg: #2f1d24;
+    --fertile: #b4a2ee;
+    --fertile-soft: #2f2742;
+    --warning-bg: #3a2c12;
+    --warning-text: #f4d38f;
+    --danger: #ff8a80;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #1a1215;
+  --surface: #251a1e;
+  --surface-2: #31232a;
+  --border: #3d2c33;
+  --text: #f6e9ec;
+  --text-muted: #c0a3aa;
+  --primary: #f07c99;
+  --primary-hover: #f594ac;
+  --on-primary: #2a0b15;
+  --primary-soft: #4a2230;
+  --period: #e8698d;
+  --on-period: #22070f;
+  --period-soft: #55283a;
+  --predicted: #a85470;
+  --predicted-bg: #2f1d24;
+  --fertile: #b4a2ee;
+  --fertile-soft: #2f2742;
+  --warning-bg: #3a2c12;
+  --warning-text: #f4d38f;
+  --danger: #ff8a80;
+  --shadow: none;
+  color-scheme: dark;
+}

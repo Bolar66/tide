@@ -1,0 +1,27 @@
+.day-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.day-editor__period {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pill--period {
+  background: var(--period-soft);
+  color: var(--text);
+}

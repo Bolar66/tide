@@ -1,0 +1,118 @@
+.calendar__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.calendar {
+  padding: 12px 10px 14px;
+  touch-action: pan-y;
+}
+
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px 0;
+}
+
+.calendar__weekday {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.calendar__day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 48px;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.calendar__num {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  border: 2px solid transparent;
+}
+
+.calendar__day--outside .calendar__num {
+  opacity: 0.4;
+}
+
+.calendar__day:disabled {
+  cursor: default;
+  color: var(--text-muted);
+}
+
+.calendar__day--period .calendar__num {
+  background: var(--period);
+  color: var(--on-period);
+  font-weight: 650;
+}
+
+.calendar__day--predicted .calendar__num {
+  background: var(--predicted-bg);
+  border: 2px dashed var(--predicted);
+}
+
+.calendar__day--today .calendar__num {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text);
+  font-weight: 700;
+}
+
+.calendar__dot {
+  position: absolute;
+  bottom: 1px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
+.calendar__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.calendar__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.legend--period {
+  background: var(--period);
+}
+
+.legend--predicted {
+  background: var(--predicted-bg);
+  border: 2px dashed var(--predicted);
+}
+
+.legend--logged {
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+}
