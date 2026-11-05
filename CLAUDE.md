@@ -88,6 +88,13 @@ Jos muutit värejä: myös `pnpm contrast`.**
   eikä niitä saa lisätä. Testi `sharing.test.ts` varmistaa tämän.
 - Jakotiedot (`shares`, `following`) ovat käyttäjän omissa salatuissa asetuksissa ja synkronoituvat hänen laitteilleen.
 
+## Profiilit
+
+- `profileOf(settings)` (`domain/profile.ts`): `own` = oma kierto, `follower` = "Haluan ymmärtää ja pysyä mukana"
+  (ei kuukautisosiota; etusivuna seuratut, tietoisku ja oma hyvinvointi). Alapalkki rakentuu profiilin mukaan.
+- Sanasto: toista osapuolta ei kutsuta kumppaniksi. Käytä nimeä, muuten neutraalia ilmausta.
+- Vastajako: liittyjä voi luoda käänteisen jaon; sen kutsu kulkee salattuna `partner_info.reverse`-kentässä.
+
 ## Ilmoitukset (vaihe 5c)
 
 - Web Push: tietokantaliipaisin (`0004_tide_push.sql`) → Edge Function `notify` (`supabase/functions/notify`) → push.

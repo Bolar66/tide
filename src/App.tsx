@@ -31,6 +31,15 @@ export function App() {
   const following = session.followed.length > 0;
   // An invite link opens the join flow before anything else (also before onboarding).
   const [invite, setInvite] = useState(() => parseInviteHash(window.location.hash));
+  // Also when the app is already open and only the "#…" part changes (link opened in the same window).
+  useEffect(() => {
+    const onHash = () => {
+      const found = parseInviteHash(window.location.hash);
+      if (found) setInvite(found);
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
   const saveError = useTide((s) => s.saveError);
   const [route, navigate] = useHashRoute();
   const today = useToday();
