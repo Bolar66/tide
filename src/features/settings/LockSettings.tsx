@@ -166,7 +166,7 @@ function FaceIdOffer({ onDone }: { onDone: (note?: string) => void }) {
 }
 
 /** Shows a fresh recovery code once and makes the user confirm they stored it. */
-function RecoveryCode({ code, onContinue }: { code: string; onContinue: () => void }) {
+export function RecoveryCode({ code, onContinue }: { code: string; onContinue: () => void }) {
   const { t } = useI18n();
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);

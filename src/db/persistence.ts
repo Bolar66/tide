@@ -1,4 +1,5 @@
 import { DEFAULT_SETTINGS, type DayEntry, type Period, type Settings } from '../domain/types';
+import type { SyncState } from '../sync/engine';
 import { TideDB } from './db';
 
 export interface Snapshot {
@@ -16,7 +17,12 @@ export interface Persistence {
   deleteDay(date: string): Promise<void>;
   putSettings(settings: Settings): Promise<void>;
   replaceAll(snapshot: Snapshot): Promise<void>;
+  /** Last state agreed with the server (account sync). Contains health data, so it is stored like the data. */
+  loadSyncState(): Promise<SyncState | null>;
+  saveSyncState(state: SyncState | null): Promise<void>;
 }
+
+const SYNC_STATE_KEY = 'syncState';
 
 export class DexiePersistence implements Persistence {
   constructor(private readonly db: TideDB = new TideDB()) {}
@@ -49,6 +55,15 @@ export class DexiePersistence implements Persistence {
 
   async putSettings(settings: Settings) {
     await this.db.settings.bulkPut(Object.entries(settings).map(([key, value]) => ({ key, value })));
+  }
+
+  async loadSyncState() {
+    return ((await this.db.meta.get(SYNC_STATE_KEY))?.value as SyncState | undefined) ?? null;
+  }
+
+  async saveSyncState(state: SyncState | null) {
+    if (state) await this.db.meta.put({ key: SYNC_STATE_KEY, value: state });
+    else await this.db.meta.delete(SYNC_STATE_KEY);
   }
 
   async replaceAll(snapshot: Snapshot) {

@@ -1,7 +1,7 @@
 import type { TideDB } from '../db/db';
 import { DexiePersistence, type Snapshot } from '../db/persistence';
 import { fromBase64, randomBytes, toBase64 } from './encoding';
-import { openSnapshot, sealSnapshot } from './encryptedPersistence';
+import { EncryptedPersistence, openSnapshot, sealSnapshot } from './encryptedPersistence';
 import { deriveDataKeys, generateMasterSecret, kekFromPin, kekFromSecret, open, PIN_ITERATIONS, seal, type Sealed } from './keys';
 import { createPasskey, passkeySecret } from './passkey';
 import { generateRecoveryCode, normalizeRecoveryCode, recoverySecret } from './recovery';
@@ -48,10 +48,13 @@ async function wrapWithRecovery(master: Master) {
  * Turn the lock on: create a master secret, wrap it with the PIN and a new recovery code,
  * encrypt the current data and remove the plaintext copy, all in one transaction.
  */
-export async function enableLock(db: TideDB, pin: string, iterations = PIN_ITERATIONS) {
-  const master = generateMasterSecret();
+export async function enableLock(db: TideDB, pin: string, iterations = PIN_ITERATIONS, existingMaster?: Master) {
+  // With an account the master secret already exists (it also unlocks the cloud copy): reuse it.
+  const master = existingMaster ?? generateMasterSecret();
   const keys = await deriveDataKeys(master);
-  const plaintext = await new DexiePersistence(db).load();
+  const plainPersistence = new DexiePersistence(db);
+  const plaintext = await plainPersistence.load();
+  const syncState = await plainPersistence.loadSyncState();
   const [pinPart, { code, recovery }, rows] = await Promise.all([
     wrapWithPin(master, pin, iterations),
     wrapWithRecovery(master),
@@ -64,14 +67,22 @@ export async function enableLock(db: TideDB, pin: string, iterations = PIN_ITERA
     await db.sealed.bulkPut(rows);
     await db.meta.put({ key: LOCK_KEY, value: config });
     await db.meta.delete(ATTEMPTS_KEY);
+    await db.meta.delete(ACCOUNT_MASTER_KEY);
+    await plainPersistence.saveSyncState(null);
     await Promise.all([db.periods.clear(), db.days.clear(), db.settings.clear()]);
   });
+  if (syncState) await new EncryptedPersistence(db, keys).saveSyncState(syncState);
   return { config, master, recoveryCode: code };
 }
 
-/** Decrypt everything back into the plaintext tables and forget the lock. Needs the unlocked master secret. */
-export async function disableLock(db: TideDB, master: Master) {
-  const snapshot: Snapshot = await openSnapshot(await deriveDataKeys(master), await db.sealed.toArray());
+/**
+ * Decrypt everything back into the plaintext tables and forget the lock. Needs the unlocked master secret.
+ * With `keepMaster` (an account exists) the master secret stays on the device, as unprotected as the data.
+ */
+export async function disableLock(db: TideDB, master: Master, keepMaster = false) {
+  const keys = await deriveDataKeys(master);
+  const snapshot: Snapshot = await openSnapshot(keys, await db.sealed.toArray());
+  const syncState = await new EncryptedPersistence(db, keys).loadSyncState();
   await db.transaction('rw', [db.meta, db.sealed, db.periods, db.days, db.settings], async () => {
     await Promise.all([db.periods.clear(), db.days.clear(), db.settings.clear()]);
     await db.periods.bulkPut(snapshot.periods);
@@ -80,7 +91,27 @@ export async function disableLock(db: TideDB, master: Master) {
     await db.sealed.clear();
     await db.meta.delete(LOCK_KEY);
     await db.meta.delete(ATTEMPTS_KEY);
+    if (keepMaster) await db.meta.put({ key: ACCOUNT_MASTER_KEY, value: toBase64(master) });
+    if (syncState) await db.meta.put({ key: 'syncState', value: syncState });
   });
+}
+
+/** Master secret kept in plaintext meta when an account exists but the PIN lock is off. */
+export const ACCOUNT_MASTER_KEY = 'accountMaster';
+
+export async function readPlainMaster(db: TideDB): Promise<Master | null> {
+  const v = (await db.meta.get(ACCOUNT_MASTER_KEY))?.value;
+  return typeof v === 'string' ? fromBase64(v) : null;
+}
+
+export async function writePlainMaster(db: TideDB, master: Master | null) {
+  if (master) await db.meta.put({ key: ACCOUNT_MASTER_KEY, value: toBase64(master) });
+  else await db.meta.delete(ACCOUNT_MASTER_KEY);
+}
+
+/** Wrap an existing master secret with a fresh recovery code (e.g. when creating an account without a PIN lock). */
+export async function newRecoveryFor(master: Master) {
+  return wrapWithRecovery(master);
 }
 
 /** Returns the master secret, or null for a wrong PIN. */

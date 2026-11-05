@@ -8,10 +8,12 @@ import { useToday } from '../../hooks/useToday';
 import { useI18n } from '../../i18n';
 import { useStore } from '../../store/context';
 import { DEFAULT_TRACKERS } from '../../trackers/registry';
+import { AccountComparison, AccountForm } from '../account/AccountForm';
+import { RecoveryCode } from '../settings/LockSettings';
 import { TrackerSettings } from '../settings/TrackerSettings';
 import './onboarding.css';
 
-const STEPS = ['welcome', 'privacy', 'lastPeriod', 'lengths', 'trackers', 'done'] as const;
+const STEPS = ['welcome', 'privacy', 'account', 'lastPeriod', 'lengths', 'trackers', 'done'] as const;
 type Step = (typeof STEPS)[number];
 
 const PRIVACY_ICONS = [IconUserOff, IconCloudOff, IconLock];
@@ -26,6 +28,7 @@ export function Onboarding() {
   const [period, setPeriod] = useState(DEFAULT_PERIOD_LENGTH);
   const [useDefaults, setUseDefaults] = useState(false);
   const [trackers, setTrackers] = useState<string[]>(DEFAULT_TRACKERS);
+  const [accountView, setAccountView] = useState<'choose' | 'create' | 'signin' | { code: string }>('choose');
   const [restoreState, setRestoreState] = useState<{ busy: boolean; error: string | null }>({ busy: false, error: null });
 
   /** New phone: restore everything from a backup file instead of answering the questions. */
@@ -118,6 +121,47 @@ export function Onboarding() {
           {t.common.next}
         </button>
       );
+      break;
+
+    case 'account':
+      if (accountView === 'choose') {
+        content = (
+          <>
+            <h1 className="onboarding__title display">{t.account.introTitle}</h1>
+            <AccountComparison />
+          </>
+        );
+        actions = (
+          <>
+            <button type="button" className="button" onClick={next}>
+              {t.account.continueWithout}
+            </button>
+            <button type="button" className="button button--secondary" onClick={() => setAccountView('create')}>
+              {t.account.create}
+            </button>
+            <button type="button" className="button button--ghost" onClick={() => setAccountView('signin')}>
+              {t.account.haveAccount}
+            </button>
+          </>
+        );
+      } else if (typeof accountView === 'object') {
+        content = <RecoveryCode code={accountView.code} onContinue={next} />;
+        actions = null;
+      } else {
+        content = (
+          <>
+            <h1 className="onboarding__title display">{accountView === 'create' ? t.account.create : t.account.signIn}</h1>
+            <AccountForm
+              key={accountView}
+              mode={accountView}
+              onSwitch={() => setAccountView(accountView === 'create' ? 'signin' : 'create')}
+              // After signing in, sync brings the existing data (and onboarded = true) from the account.
+              onDone={(code) => (code ? setAccountView({ code }) : next())}
+            />
+          </>
+        );
+        actions = null;
+      }
       break;
 
     case 'lastPeriod':

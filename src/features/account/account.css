@@ -1,0 +1,60 @@
+.account-form__hint {
+  font-weight: 400;
+}
+
+.account-form__consent {
+  align-items: flex-start;
+}
+
+.account-form__consent input {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.account-compare {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.account-compare__card {
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  font-size: var(--text-md);
+}
+
+.account-compare__card--with {
+  background: var(--accent-soft);
+}
+
+.account-compare__card h3 {
+  font-size: var(--text-md);
+  font-weight: 650;
+  margin-bottom: var(--space-2);
+}
+
+.account-compare__card ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+}
+
+.account-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.account-card__sync {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.account-card__sync--error,
+.account-card__sync--signed-out {
+  color: var(--danger);
+}

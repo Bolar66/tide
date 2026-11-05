@@ -220,6 +220,16 @@ export function createStore(initialPersistence: Persistence, now: () => Date = (
       persistence = next;
     },
 
+    getPersistence() {
+      return persistence;
+    },
+
+    /** Replace everything with a merged result from account sync, exactly as given. */
+    async applySynced(next: Snapshot) {
+      await persistence.replaceAll(next);
+      applySnapshot(next);
+    },
+
     dismissSaveError() {
       set({ saveError: false });
     },

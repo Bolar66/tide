@@ -11,6 +11,7 @@ import { useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
 import { BACKUP_GUIDE_FLAG, exportBackup } from './backupIO';
 import { BackupGuide } from './BackupGuide';
+import { AccountSettings } from '../account/AccountSettings';
 import { LockSettings } from './LockSettings';
 import { TrackerSettings } from './TrackerSettings';
 import './settings.css';
@@ -86,6 +87,15 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
       <header className="page-header">
         <h1 className="display">{t.settings.title}</h1>
       </header>
+
+      <section className="settings-section">
+        <h2 className="section-label">{t.account.section}</h2>
+        <ul className="list">
+          <li>
+            <AccountSettings />
+          </li>
+        </ul>
+      </section>
 
       <section className="settings-section">
         <h2 className="section-label">{t.settings.appearance}</h2>

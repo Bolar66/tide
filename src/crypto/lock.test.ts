@@ -5,6 +5,7 @@ import { DexiePersistence } from '../db/persistence';
 import { DEFAULT_SETTINGS } from '../domain/types';
 import { EncryptedPersistence } from './encryptedPersistence';
 import { deriveDataKeys } from './keys';
+import { generateMasterSecret } from './keys';
 import {
   changePin,
   disableLock,
@@ -12,6 +13,8 @@ import {
   nextBlock,
   readAttempts,
   readLockConfig,
+  readPlainMaster,
+  writePlainMaster,
   recordFailure,
   regenerateRecovery,
   unlockWithPin,
@@ -114,5 +117,25 @@ describe('lock', () => {
     expect((await recordFailure(db, 0)).blockedUntil).toBe(30_000);
     expect(nextBlock(6, 0)).toBe(60_000);
     expect(nextBlock(50, 0)).toBe(3_600_000);
+  });
+
+  it('reuses an existing (account) master secret and carries the sync state both ways', async () => {
+    const db = await seeded();
+    const plain = new DexiePersistence(db);
+    const base = await plain.load();
+    await plain.saveSyncState({ version: 3, base });
+    const accountMaster = generateMasterSecret();
+    await writePlainMaster(db, accountMaster);
+
+    const { master } = await enableLock(db, '123456', IT, accountMaster);
+    expect(master).toEqual(accountMaster);
+    expect(await readPlainMaster(db)).toBeNull(); // no unprotected copy once the lock is on
+    const enc = new EncryptedPersistence(db, await deriveDataKeys(master));
+    expect((await enc.loadSyncState())?.version).toBe(3);
+    expect(JSON.stringify(await db.meta.toArray())).not.toContain('2026-10-07');
+
+    await disableLock(db, master, true);
+    expect(await readPlainMaster(db)).toEqual(accountMaster);
+    expect((await plain.loadSyncState())?.version).toBe(3);
   });
 });
