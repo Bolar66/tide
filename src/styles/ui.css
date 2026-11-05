@@ -518,9 +518,9 @@ button.list__row:active {
   left: 50%;
   bottom: calc(env(safe-area-inset-bottom) + var(--space-3));
   transform: translateX(-50%);
-  width: min(calc(100% - 2 * var(--space-4)), 420px);
+  width: min(calc(100% - 2 * var(--space-4)), 460px);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   padding: var(--space-1);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--surface) 94%, transparent);

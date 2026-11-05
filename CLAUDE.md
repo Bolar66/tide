@@ -63,6 +63,13 @@ Jos muutit värejä: myös `pnpm contrast`.**
 - Vaihevertailu (`domain/phaseStats.ts`) luokittelee päivät syklin todellisen pituuden mukaan. Havainnot eivät
   koskaan nosta esiin vaihetta tasapelin sattuessa.
 
+## Opi-osio
+
+- Artikkelit: `src/learn/fi.ts` (osiot Perusteet, Nuorille, Kumppanille, Syvemmälle). Rakenne `learn/types.ts`.
+- Terveystiedon on perustuttava luotettaviin lähteisiin (Terveyskirjasto, THL, Väestöliitto, Käypä hoito).
+  Lähteisiin linkitetään vain etusivuille (`SOURCE_LINKS`), jotta linkit eivät vanhene.
+- Ei hoito- tai annostusohjeita, ei ravintolisäsuosituksia. Sisältö tarkistetaan ammattilaisella ennen julkista julkaisua.
+
 ## Datamalli ja skeemamuutokset
 
 - Päivämäärät ovat merkkijonoja `yyyy-MM-dd` (`ISODate`), ei `Date`-olioita tallennettuna. Käytä `domain/dates.ts`-apureita.

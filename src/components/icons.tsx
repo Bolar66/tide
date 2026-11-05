@@ -129,3 +129,25 @@ export const IconSparkle = (p: P) => (
     <path d="M18.5 15.5c.3 1.6 1 2.3 2.5 2.5-1.6.3-2.3 1-2.5 2.5-.3-1.6-1-2.3-2.5-2.5 1.6-.3 2.3-1 2.5-2.5Z" />
   </svg>
 );
+export const IconBook = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M12 6.5c-1.8-1.3-4.3-2-7-2v13c2.7 0 5.2.7 7 2 1.8-1.3 4.3-2 7-2v-13c-2.7 0-5.2.7-7 2Z" />
+    <path d="M12 6.5v13" />
+  </svg>
+);
+export const IconHeart = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M12 19.5s-7-4.3-7-9.4A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.1c0 5.1-7 9.4-7 9.4Z" />
+  </svg>
+);
+export const IconSprout = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M12 20v-8M12 12c0-3.5-2.5-6-6.5-6 0 3.5 2.5 6 6.5 6ZM12 12c0-3 2.2-5.5 6-5.5 0 3-2.2 5.5-6 5.5Z" />
+  </svg>
+);
+export const IconFlask = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M9.5 3.5h5M10.5 3.5v5.5L5.3 17.6A2 2 0 0 0 7 20.5h10a2 2 0 0 0 1.7-2.9L13.5 9V3.5" />
+    <path d="M7.5 14.5h9" />
+  </svg>
+);

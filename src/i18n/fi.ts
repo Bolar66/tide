@@ -15,7 +15,18 @@ const inDays = (n: number) => (n === 0 ? 'tänään' : n === 1 ? 'huomenna' : `$
 export const fi = {
   days,
   inDays,
-  tabs: { today: 'Tänään', calendar: 'Kalenteri', stats: 'Tilastot', settings: 'Asetukset' },
+  tabs: { today: 'Tänään', calendar: 'Kalenteri', stats: 'Tilastot', learn: 'Opi', settings: 'Asetukset' },
+  learn: {
+    title: 'Opi',
+    intro: 'Tietoa kuukautiskierrosta, kehosta ja toistemme ymmärtämisestä.',
+    minutes: (n: number) => `${n} min`,
+    articles: (n: number) => (n === 1 ? '1 artikkeli' : `${n} artikkelia`),
+    sources: 'Lähteet',
+    disclaimer: 'Sisältö on yleistä terveystietoa eikä korvaa terveydenhuollon ammattilaisen arviota.',
+    back: 'Takaisin',
+    tip: 'Vinkki',
+    care: 'Hae apua',
+  },
   common: {
     save: 'Tallenna',
     cancel: 'Peruuta',

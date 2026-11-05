@@ -1,6 +1,7 @@
 import { TabBar } from './components/TabBar';
 import { AboutView } from './features/about/AboutView';
 import { CalendarView } from './features/calendar/CalendarView';
+import { LearnView } from './features/learn/LearnView';
 import { Onboarding } from './features/onboarding/Onboarding';
 import { SettingsView } from './features/settings/SettingsView';
 import { StatsView } from './features/stats/StatsView';
@@ -56,6 +57,7 @@ export function App() {
         )}
         {route === 'calendar' && <CalendarView />}
         {route === 'stats' && <StatsView />}
+        {route === 'learn' && <LearnView />}
         {route === 'settings' && <SettingsView onOpenAbout={() => navigate('about')} />}
         {route === 'about' && <AboutView onBack={() => navigate('settings')} />}
       </main>

@@ -1,11 +1,12 @@
 import type { Route } from '../hooks/useHashRoute';
 import { useI18n } from '../i18n';
-import { IconCalendar, IconChart, IconSettings, IconWave } from './icons';
+import { IconBook, IconCalendar, IconChart, IconSettings, IconWave } from './icons';
 
 const TABS = [
   { route: 'today', Icon: IconWave },
   { route: 'calendar', Icon: IconCalendar },
   { route: 'stats', Icon: IconChart },
+  { route: 'learn', Icon: IconBook },
   { route: 'settings', Icon: IconSettings },
 ] as const;
 
