@@ -1,11 +1,13 @@
 import type { SealedRow, TideDB } from '../db/db';
 import type { Persistence, Snapshot } from '../db/persistence';
+import type { SharedCache } from '../sharing/types';
 import type { SyncState } from '../sync/engine';
 import { DEFAULT_SETTINGS, type DayEntry, type Period, type Settings } from '../domain/types';
 import { opaqueId, openJSON, sealJSON, type DataKeys } from './keys';
 
 type Record_ = { kind: 'period'; value: Period } | { kind: 'day'; value: DayEntry } | { kind: 'settings'; value: Settings };
 type SyncRecord = { kind: 'sync'; value: SyncState };
+type CacheRecord = { kind: 'sharedCache'; value: SharedCache };
 
 const idFor = (keys: DataKeys, r: Record_) =>
   opaqueId(keys.mac, r.kind, r.kind === 'period' ? r.value.id : r.kind === 'day' ? r.value.date : 'main');
@@ -25,7 +27,7 @@ export async function sealSnapshot(keys: DataKeys, s: Snapshot): Promise<SealedR
 }
 
 export async function openSnapshot(keys: DataKeys, rows: SealedRow[]): Promise<Snapshot> {
-  const records = await Promise.all(rows.map((row) => openJSON<Record_ | SyncRecord>(keys.enc, row)));
+  const records = await Promise.all(rows.map((row) => openJSON<Record_ | SyncRecord | CacheRecord>(keys.enc, row)));
   const snapshot: Snapshot = { periods: [], days: [], settings: DEFAULT_SETTINGS };
   for (const r of records) {
     if (r.kind === 'period') snapshot.periods.push(r.value);
@@ -83,6 +85,17 @@ export class EncryptedPersistence implements Persistence {
   async loadSyncState() {
     const row = await this.db.sealed.get(await opaqueId(this.keys.mac, 'sync', 'state'));
     return row ? (await openJSON<SyncRecord>(this.keys.enc, row)).value : null;
+  }
+
+  async loadSharedCache() {
+    const row = await this.db.sealed.get(await opaqueId(this.keys.mac, 'sharedCache', 'main'));
+    return row ? (await openJSON<CacheRecord>(this.keys.enc, row)).value : {};
+  }
+
+  async saveSharedCache(cache: SharedCache) {
+    const id = await opaqueId(this.keys.mac, 'sharedCache', 'main');
+    const sealed = await sealJSON(this.keys.enc, { kind: 'sharedCache', value: cache } satisfies CacheRecord);
+    await this.db.sealed.put({ id, ...sealed });
   }
 
   async saveSyncState(state: SyncState | null) {

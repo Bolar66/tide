@@ -10,12 +10,14 @@ const TABS = [
   { route: 'settings', Icon: IconSettings },
 ] as const;
 
-export function TabBar({ route, onNavigate }: { route: Route; onNavigate: (r: Route) => void }) {
+export function TabBar({ route, onNavigate, ownTracking = true }: { route: Route; onNavigate: (r: Route) => void; ownTracking?: boolean }) {
   const { t } = useI18n();
   const active = route === 'about' ? 'settings' : route;
+  // Someone who only follows a partner has no own calendar or stats.
+  const tabs = ownTracking ? TABS : TABS.filter((tab) => tab.route !== 'calendar' && tab.route !== 'stats');
   return (
-    <nav className="tabbar">
-      {TABS.map(({ route: r, Icon }) => (
+    <nav className="tabbar" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
+      {tabs.map(({ route: r, Icon }) => (
         <button
           key={r}
           type="button"

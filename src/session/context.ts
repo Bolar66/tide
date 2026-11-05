@@ -1,6 +1,24 @@
 import { createContext, useContext } from 'react';
 import type { AccountInfo } from '../account/service';
 import type { LockConfig } from '../crypto/lock';
+import type { SharedSnapshot, ShareScope } from '../sharing/types';
+
+export interface OwnedShareView {
+  id: string;
+  status: 'invited' | 'pending' | 'active' | 'unknown';
+  /** Partner's name, decrypted with the share key; null if it cannot be verified. */
+  partnerName: string | null;
+  scopes: ShareScope[];
+  expiresAt: string | null;
+  link: string | null;
+}
+
+export interface FollowedView {
+  id: string;
+  status: 'pending' | 'active' | 'unknown';
+  data: SharedSnapshot | null;
+  fetchedAt: number | null;
+}
 
 export type SyncStatus =
   | { state: 'off' }
@@ -32,6 +50,17 @@ export interface Session {
   deleteAccount(): Promise<void>;
   changePassword(newPassword: string): Promise<void>;
   syncNow(): Promise<void>;
+
+  shares: OwnedShareView[];
+  followed: FollowedView[];
+  /** Create an invite and return the link (secret in the fragment). */
+  createInvite(): Promise<string>;
+  approveShare(id: string): Promise<void>;
+  /** Reject a request, cancel an invite or stop sharing. */
+  removeShare(id: string): Promise<void>;
+  setShareScopes(id: string, scopes: ShareScope[]): void;
+  joinShare(shareId: string, secret: string, myName: string): Promise<void>;
+  leaveShare(id: string): Promise<void>;
 }
 
 export const SessionContext = createContext<Session | null>(null);

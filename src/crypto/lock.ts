@@ -68,6 +68,7 @@ export async function enableLock(db: TideDB, pin: string, iterations = PIN_ITERA
     await db.meta.put({ key: LOCK_KEY, value: config });
     await db.meta.delete(ATTEMPTS_KEY);
     await db.meta.delete(ACCOUNT_MASTER_KEY);
+    await db.meta.delete('sharedCache'); // partners' data is refetched into encrypted storage
     await plainPersistence.saveSyncState(null);
     await Promise.all([db.periods.clear(), db.days.clear(), db.settings.clear()]);
   });

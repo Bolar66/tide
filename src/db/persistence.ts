@@ -1,4 +1,5 @@
 import { DEFAULT_SETTINGS, type DayEntry, type Period, type Settings } from '../domain/types';
+import type { SharedCache } from '../sharing/types';
 import type { SyncState } from '../sync/engine';
 import { TideDB } from './db';
 
@@ -20,6 +21,9 @@ export interface Persistence {
   /** Last state agreed with the server (account sync). Contains health data, so it is stored like the data. */
   loadSyncState(): Promise<SyncState | null>;
   saveSyncState(state: SyncState | null): Promise<void>;
+  /** Partners' shared data, cached for offline use. Health data, so stored like the user's own. */
+  loadSharedCache(): Promise<SharedCache>;
+  saveSharedCache(cache: SharedCache): Promise<void>;
 }
 
 const SYNC_STATE_KEY = 'syncState';
@@ -64,6 +68,14 @@ export class DexiePersistence implements Persistence {
   async saveSyncState(state: SyncState | null) {
     if (state) await this.db.meta.put({ key: SYNC_STATE_KEY, value: state });
     else await this.db.meta.delete(SYNC_STATE_KEY);
+  }
+
+  async loadSharedCache() {
+    return ((await this.db.meta.get('sharedCache'))?.value as SharedCache | undefined) ?? {};
+  }
+
+  async saveSharedCache(cache: SharedCache) {
+    await this.db.meta.put({ key: 'sharedCache', value: cache });
   }
 
   async replaceAll(snapshot: Snapshot) {

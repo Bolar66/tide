@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../account/config';
-import { AuthError, type Remote, type RemoteSnapshot, type RemoteUser, type VaultRow } from './remote';
+import type { Sealed } from '../crypto/keys';
+import { AuthError, type Remote, type RemoteSnapshot, type RemoteUser, type SharedRow, type ShareRow, type VaultRow } from './remote';
 
 let clientPromise: Promise<SupabaseClient> | null = null;
 
@@ -84,6 +85,44 @@ export const supabaseRemote: Remote = {
       await (await client()).rpc('push_snapshot', { expected_version: expectedVersion, new_iv: iv, new_data: data }),
     );
     return typeof result === 'number' ? result : null;
+  },
+
+  async createShare(wrappedKey) {
+    const rows = check(await (await client()).from('shares').insert({ wrapped_key: wrappedKey }).select('id'));
+    return (rows as { id: string }[])[0]!.id;
+  },
+
+  async listShares() {
+    const rows = check(
+      await (await client()).from('shares').select('id, owner_id, partner_id, status, partner_info, expires_at, created_at'),
+    );
+    return (rows ?? []) as ShareRow[];
+  },
+
+  async activateShare(id) {
+    check(await (await client()).from('shares').update({ status: 'active' }).eq('id', id).eq('status', 'pending'));
+  },
+
+  async deleteShare(id) {
+    check(await (await client()).from('shares').delete().eq('id', id));
+  },
+
+  async getInvite(id) {
+    const result = check(await (await client()).rpc('get_invite', { invite_id: id }));
+    return (result as Sealed | null) ?? null;
+  },
+
+  async acceptInvite(id, info) {
+    return check(await (await client()).rpc('accept_invite', { invite_id: id, info })) === true;
+  },
+
+  async pushShared(id, iv, data) {
+    check(await (await client()).from('shared_snapshots').upsert({ share_id: id, iv, data, updated_at: new Date().toISOString() }));
+  },
+
+  async pullShared(id) {
+    const rows = check(await (await client()).from('shared_snapshots').select('iv, data, updated_at').eq('share_id', id).limit(1));
+    return (rows?.[0] as SharedRow | undefined) ?? null;
   },
 
   async deleteAccount() {

@@ -12,6 +12,22 @@ export interface VaultRow {
   recovery: { salt: string; wrapped: Sealed };
 }
 
+export interface ShareRow {
+  id: string;
+  owner_id: string;
+  partner_id: string | null;
+  status: 'invited' | 'pending' | 'active';
+  partner_info: Sealed | null;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface SharedRow {
+  iv: string;
+  data: string;
+  updated_at: string;
+}
+
 export interface RemoteUser {
   id: string;
   email: string;
@@ -39,6 +55,17 @@ export interface Remote {
   /** Returns the new version, or null when someone else pushed first. */
   push(expectedVersion: number, iv: string, data: string): Promise<number | null>;
   deleteAccount(): Promise<void>;
+
+  // --- Sharing (phase 5) ---
+  createShare(wrappedKey: Sealed): Promise<string>;
+  /** Shares where this user is the owner or the partner. */
+  listShares(): Promise<ShareRow[]>;
+  activateShare(id: string): Promise<void>;
+  deleteShare(id: string): Promise<void>;
+  getInvite(id: string): Promise<Sealed | null>;
+  acceptInvite(id: string, info: Sealed): Promise<boolean>;
+  pushShared(id: string, iv: string, data: string): Promise<void>;
+  pullShared(id: string): Promise<SharedRow | null>;
 }
 
 /** In-memory server with the same semantics as the SQL functions. Used in tests. */
@@ -46,6 +73,9 @@ export class MemoryServer {
   users = new Map<string, { id: string; email: string; secret: string }>();
   vaults = new Map<string, VaultRow>();
   snapshots = new Map<string, RemoteSnapshot>();
+  shares = new Map<string, ShareRow & { wrapped_key: Sealed }>();
+  shared = new Map<string, SharedRow>();
+  now = () => Date.now();
 
   client(): Remote {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -99,7 +129,66 @@ export class MemoryServer {
         server.users.delete(id);
         server.vaults.delete(id);
         server.snapshots.delete(id);
+        for (const [sid, row] of server.shares) {
+          if (row.owner_id === id || row.partner_id === id) {
+            server.shares.delete(sid);
+            server.shared.delete(sid);
+          }
+        }
         session = null;
+      },
+
+      async createShare(wrapped) {
+        const id = crypto.randomUUID();
+        server.shares.set(id, {
+          id,
+          owner_id: uid(),
+          partner_id: null,
+          status: 'invited',
+          partner_info: null,
+          wrapped_key: wrapped,
+          expires_at: new Date(server.now() + 24 * 3600_000).toISOString(),
+          created_at: new Date(server.now()).toISOString(),
+        });
+        return id;
+      },
+      async listShares() {
+        const me = uid();
+        return [...server.shares.values()]
+          .filter((r) => r.owner_id === me || r.partner_id === me)
+          .map(({ wrapped_key: _w, ...row }) => row);
+      },
+      async activateShare(id) {
+        const row = server.shares.get(id);
+        if (row && row.owner_id === uid() && row.status === 'pending') row.status = 'active';
+      },
+      async deleteShare(id) {
+        const row = server.shares.get(id);
+        if (row && (row.owner_id === uid() || row.partner_id === uid())) {
+          server.shares.delete(id);
+          server.shared.delete(id);
+        }
+      },
+      async getInvite(id) {
+        const row = server.shares.get(id);
+        const ok = row && row.status === 'invited' && !row.partner_id && Date.parse(row.expires_at) > server.now() && row.owner_id !== uid();
+        return ok ? row.wrapped_key : null;
+      },
+      async acceptInvite(id, info) {
+        const row = server.shares.get(id);
+        if (!row || row.status !== 'invited' || row.partner_id || Date.parse(row.expires_at) <= server.now() || row.owner_id === uid()) return false;
+        Object.assign(row, { partner_id: uid(), status: 'pending', partner_info: info });
+        return true;
+      },
+      async pushShared(id, iv, data) {
+        const row = server.shares.get(id);
+        if (!row || row.owner_id !== uid() || row.status !== 'active') throw new Error('permission denied');
+        server.shared.set(id, { iv, data, updated_at: new Date(server.now()).toISOString() });
+      },
+      async pullShared(id) {
+        const row = server.shares.get(id);
+        if (!row || row.partner_id !== uid() || row.status !== 'active') return null;
+        return server.shared.get(id) ?? null;
       },
     };
   }

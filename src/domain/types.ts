@@ -1,3 +1,4 @@
+import type { FollowedShare, OwnedShare } from '../sharing/types';
 import { DEFAULT_TRACKERS } from '../trackers/registry';
 import type { ISODate } from './dates';
 
@@ -49,6 +50,14 @@ export interface Settings {
   lastBackupAt?: number;
   /** Show the estimated fertile window on the ring and calendar. */
   showFertility: boolean;
+  /** Name shown to partners. */
+  displayName?: string;
+  /** Shares this user has created (owner side). */
+  shares?: OwnedShare[];
+  /** Shares from others this user follows (partner side). */
+  following?: FollowedShare[];
+  /** False for someone who only follows a partner and does not track their own cycle. */
+  ownTracking?: boolean;
   /** Tracker ids shown in the day editor (phase 3). */
   enabledTrackers: string[];
 }

@@ -12,6 +12,7 @@ import { useStore, useTide } from '../../store/context';
 import { BACKUP_GUIDE_FLAG, exportBackup } from './backupIO';
 import { BackupGuide } from './BackupGuide';
 import { AccountSettings } from '../account/AccountSettings';
+import { SharingSettings } from '../sharing/SharingSettings';
 import { LockSettings } from './LockSettings';
 import { TrackerSettings } from './TrackerSettings';
 import './settings.css';
@@ -97,6 +98,8 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
         </ul>
       </section>
 
+      <SharingSettings />
+
       <section className="settings-section">
         <h2 className="section-label">{t.settings.appearance}</h2>
         <div className="card">
@@ -112,6 +115,16 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
       <section className="settings-section">
         <h2 className="section-label">{t.settings.cycle}</h2>
         <ul className="list">
+          {settings.ownTracking === false && (
+            <li>
+              <Switch
+                label={t.settings.ownTracking}
+                hint={t.settings.ownTrackingHint}
+                checked={false}
+                onChange={() => store.updateSettings({ ownTracking: true })}
+              />
+            </li>
+          )}
           <li>
             <Switch
               label={t.settings.showFertility}

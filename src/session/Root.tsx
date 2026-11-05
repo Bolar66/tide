@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { App } from '../App';
 import * as account from '../account/service';
 import { EncryptedPersistence } from '../crypto/encryptedPersistence';
@@ -9,10 +9,18 @@ import { DexiePersistence } from '../db/persistence';
 import { LockScreen } from '../features/lock/LockScreen';
 import { StoreContext } from '../store/context';
 import { createStore, type Store } from '../store/store';
+import { todayISO } from '../domain/dates';
+import { buildSharedSnapshot } from '../sharing/build';
+import { createInvite, inviteLink, newShareKey, openForShare, openInvite, sealForShare } from '../sharing/crypto';
+import { ShareError } from '../sharing/errors';
+import { DEFAULT_SCOPES, type SharedCache } from '../sharing/types';
 import { EMPTY_SYNC_STATE, syncOnce } from '../sync/engine';
-import { AuthError } from '../sync/remote';
+import { canonical } from '../sync/merge';
+import { AuthError, type ShareRow } from '../sync/remote';
 import { supabaseRemote as remote } from '../sync/supabaseRemote';
-import { SessionContext, type Session, type SyncStatus } from './context';
+import { SessionContext, type FollowedView, type OwnedShareView, type Session, type SyncStatus } from './context';
+
+const appBaseUrl = () => `${window.location.origin}${import.meta.env.BASE_URL}`;
 
 /** Lock again after the app has been in the background this long. */
 const AUTO_LOCK_MS = 60_000;
@@ -41,12 +49,17 @@ export function Root() {
   const [sync, setSync] = useState<SyncStatus>({ state: 'off' });
   const master = useRef<Master | null>(null);
   const syncing = useRef(false);
+  const [shareRows, setShareRows] = useState<ShareRow[]>([]);
+  const [partnerNames, setPartnerNames] = useState<Record<string, string | null>>({});
+  const [sharedCache, setSharedCache] = useState<SharedCache>({});
+  const lastPushed = useRef<Record<string, string>>({});
 
   const openStore = useCallback(async (config: lock.LockConfig | null, secret: Master | null) => {
     master.current = secret ?? (await lock.readPlainMaster(db));
     const persistence = config && secret ? new EncryptedPersistence(db, await deriveDataKeys(secret)) : new DexiePersistence(db);
     const store = createStore(persistence);
     await store.load();
+    setSharedCache(await persistence.loadSharedCache().catch(() => ({})));
     setAcct(await account.readAccount(db));
     setPhase({ kind: 'ready', store, config });
   }, []);
@@ -79,6 +92,75 @@ export function Root() {
   }, [phase, lockNow]);
 
   const store = phase.kind === 'ready' ? phase.store : null;
+  // Re-derive the session (share lists) when settings change.
+  const settings = useSyncExternalStore(
+    useCallback((cb: () => void) => (store ? store.subscribe(cb) : () => {}), [store]),
+    () => store?.getState().settings,
+  );
+
+  /**
+   * Sharing round after the own sync: push each active share's filtered, encrypted data, pull the
+   * data of people this user follows, verify partner names and clean up expired or removed shares.
+   */
+  const syncShares = useCallback(async (store: Store) => {
+    const rows = await remote.listShares();
+    const settings = store.getState().settings;
+    const owned = settings.shares ?? [];
+    const following = settings.following ?? [];
+    const names: Record<string, string | null> = {};
+    let ownedNext = owned;
+    let followingNext = following;
+
+    for (const os of owned) {
+      const row = rows.find((r) => r.id === os.id);
+      const expired = row?.status === 'invited' && Date.parse(row.expires_at) < Date.now();
+      if (!row || expired) {
+        if (expired) await remote.deleteShare(os.id);
+        ownedNext = ownedNext.filter((x) => x.id !== os.id);
+        continue;
+      }
+      if (row.partner_info) {
+        names[os.id] = await openForShare<{ name: string }>(os.key, row.partner_info).then(
+          (x) => x.name,
+          () => null, // not encrypted with our key: whoever claimed it never had the link
+        );
+      }
+      if (row.status !== 'invited' && os.inviteSecret) {
+        ownedNext = ownedNext.map((x) => (x.id === os.id ? { ...x, inviteSecret: undefined } : x));
+      }
+      if (row.status === 'active') {
+        const shared = buildSharedSnapshot(store.snapshot(), os.scopes, settings.displayName ?? '', todayISO());
+        const fingerprint = canonical({ ...shared, updatedAt: 0 });
+        if (lastPushed.current[os.id] !== fingerprint) {
+          const sealed = await sealForShare(os.key, shared);
+          await remote.pushShared(os.id, sealed.iv, sealed.data);
+          lastPushed.current[os.id] = fingerprint;
+        }
+      }
+    }
+
+    const cache: SharedCache = { ...(await store.getPersistence().loadSharedCache()) };
+    for (const fs of following) {
+      const row = rows.find((r) => r.id === fs.id);
+      if (!row) {
+        followingNext = followingNext.filter((x) => x.id !== fs.id);
+        delete cache[fs.id];
+        continue;
+      }
+      if (row.status === 'active') {
+        const got = await remote.pullShared(fs.id);
+        if (got) cache[fs.id] = { data: await openForShare(fs.key, got), fetchedAt: Date.now() };
+      }
+    }
+
+    if (ownedNext !== owned || followingNext !== following) {
+      store.updateSettings({ shares: ownedNext, following: followingNext });
+    }
+    await store.getPersistence().saveSharedCache(cache);
+    setShareRows(rows);
+    setPartnerNames(names);
+    setSharedCache(cache);
+  }, []);
 
   /** One sync round. Never throws: the outcome is reflected in `sync`. */
   const runSync = useCallback(async () => {
@@ -100,6 +182,7 @@ export function Root() {
         applyLocal: (s) => store.applySynced(s),
       });
       await persistence.saveSyncState(result.state);
+      await syncShares(store);
       setSync({ state: 'idle', lastSyncedAt: Date.now() });
     } catch (err) {
       console.error('Synkronointi epäonnistui', err);
@@ -108,7 +191,7 @@ export function Root() {
     } finally {
       syncing.current = false;
     }
-  }, [store, acct]);
+  }, [store, acct, syncShares]);
 
   // Sync triggers: on start, back in foreground, online again, after edits and periodically.
   useEffect(() => {
@@ -245,8 +328,78 @@ export function Root() {
         await account.changeAccountPassword(remote, acct.email, newPassword, master.current);
       },
       syncNow: runSync,
+
+      shares: (settings?.shares ?? []).map((os): OwnedShareView => {
+        const row = shareRows.find((r) => r.id === os.id);
+        return {
+          id: os.id,
+          status: row?.status ?? 'unknown',
+          partnerName: partnerNames[os.id] ?? null,
+          scopes: os.scopes,
+          expiresAt: row?.expires_at ?? null,
+          link: os.inviteSecret ? inviteLink(appBaseUrl(), os.id, os.inviteSecret) : null,
+        };
+      }),
+      followed: (settings?.following ?? []).map((fs): FollowedView => {
+        const row = shareRows.find((r) => r.id === fs.id);
+        const cached = sharedCache[fs.id];
+        return {
+          id: fs.id,
+          status: row?.status === 'active' ? 'active' : row?.status === 'pending' ? 'pending' : cached ? 'active' : 'unknown',
+          data: cached?.data ?? null,
+          fetchedAt: cached?.fetchedAt ?? null,
+        };
+      }),
+      async createInvite() {
+        if (!acct) throw new ShareError('no-account');
+        const key = newShareKey();
+        const { secret, wrapped } = await createInvite(key);
+        const id = await remote.createShare(wrapped);
+        const shares = store.getState().settings.shares ?? [];
+        store.updateSettings({ shares: [...shares, { id, key, scopes: DEFAULT_SCOPES, createdAt: Date.now(), inviteSecret: secret }] });
+        void runSync();
+        return inviteLink(appBaseUrl(), id, secret);
+      },
+      async approveShare(id) {
+        await remote.activateShare(id);
+        delete lastPushed.current[id];
+        await runSync();
+      },
+      async removeShare(id) {
+        await remote.deleteShare(id).catch(() => undefined);
+        store.updateSettings({ shares: (store.getState().settings.shares ?? []).filter((x) => x.id !== id) });
+        setShareRows((rows) => rows.filter((r) => r.id !== id));
+      },
+      setShareScopes(id, scopes) {
+        store.updateSettings({ shares: (store.getState().settings.shares ?? []).map((x) => (x.id === id ? { ...x, scopes } : x)) });
+      },
+      async joinShare(shareId, secret, myName) {
+        if (!acct) throw new ShareError('no-account');
+        const wrapped = await remote.getInvite(shareId);
+        if (!wrapped) throw new ShareError('invite-invalid');
+        const key = await openInvite(secret, wrapped).catch(() => {
+          throw new ShareError('invite-invalid');
+        });
+        if (!(await remote.acceptInvite(shareId, await sealForShare(key, { name: myName })))) throw new ShareError('invite-invalid');
+        const s = store.getState().settings;
+        store.updateSettings({
+          displayName: myName,
+          following: [...(s.following ?? []).filter((x) => x.id !== shareId), { id: shareId, key }],
+          // Someone joining from an invite on a fresh install follows a partner and skips own tracking.
+          ...(s.onboarded ? {} : { onboarded: true, ownTracking: false }),
+        });
+        await runSync();
+      },
+      async leaveShare(id) {
+        await remote.deleteShare(id).catch(() => undefined);
+        store.updateSettings({ following: (store.getState().settings.following ?? []).filter((x) => x.id !== id) });
+        const cache = { ...sharedCache };
+        delete cache[id];
+        await store.getPersistence().saveSharedCache(cache);
+        setSharedCache(cache);
+      },
     };
-  }, [phase, lockNow, acct, sync, runSync]);
+  }, [phase, lockNow, acct, sync, runSync, shareRows, partnerNames, sharedCache, settings]);
 
   if (phase.kind === 'checking') return <div className="center-screen" aria-busy="true" />;
   if (phase.kind === 'locked') {
