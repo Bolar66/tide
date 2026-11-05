@@ -402,6 +402,7 @@ export const fi = {
     privacy: [
       `Ilman tiliä ${NAME} tallentaa kaikki tiedot vain tälle laitteelle, eikä mitään lähetetä minnekään.`,
       'Jos luot tilin, tiedot salataan puhelimessa ennen lähettämistä. Palvelin EU:ssa säilyttää vain salattua dataa ja sähköpostiosoitteesi, eikä se pysty avaamaan tietoja.',
+      'Jos jaat tietoja jonkun kanssa, antamasi nimi tallennetaan palvelimelle salaamattomana, jotta se voi näkyä ilmoituksissa. Muuta ei.',
       'Sovelluksessa ei ole mainoksia, analytiikkaa eikä seurantaa. Tili on vapaaehtoinen.',
       'Kukaan muu, sovelluksen tekijä mukaan lukien, ei näe kirjauksiasi.',
       'PIN-lukon ollessa päällä kaikki tiedot salataan laitteella (AES-256). Ilman PIN-koodia, Face ID:tä tai palautuskoodia niitä ei saa auki.',
@@ -552,7 +553,7 @@ export const fi = {
     invite: 'Lähetä kutsu',
     inviteHint: 'Luo kertakäyttöinen kutsulinkki',
     yourName: 'Nimesi',
-    yourNameHint: 'Näkyy henkilölle, jonka kanssa jaat tietoja, esimerkiksi etunimesi.',
+    yourNameHint: 'Näkyy henkilölle, jonka kanssa jaat tietoja, ja hänen ilmoituksissaan. Esimerkiksi etunimesi.',
     createLink: 'Luo kutsulinkki',
     linkTitle: 'Kutsulinkki',
     linkText:
