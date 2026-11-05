@@ -1,19 +1,18 @@
-.settings__meta {
-  font-size: 15px;
-  font-weight: 550;
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-.settings__ok {
-  color: var(--primary);
-  font-weight: 550;
+.settings-section .section-label {
+  padding-left: var(--space-4);
+  margin-bottom: 0;
 }
 
-.settings__privacy {
-  margin-top: 8px;
+.settings-section .card {
+  padding: var(--space-3);
 }
 
-.settings__version {
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-muted);
+.settings-note {
+  padding: 0 var(--space-4);
 }

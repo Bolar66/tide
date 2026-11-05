@@ -66,7 +66,13 @@ export function stdDev(xs: readonly number[]): number | null {
   return Math.sqrt(xs.reduce((acc, x) => acc + (x - m) ** 2, 0) / (xs.length - 1));
 }
 
-export function computeStats(periods: readonly Period[]): CycleStats {
+export interface StatsFallback {
+  /** Used instead of DEFAULT_CYCLE_LENGTH until there is a valid cycle (e.g. given in onboarding). */
+  cycle?: number;
+  period?: number;
+}
+
+export function computeStats(periods: readonly Period[], fallback: StatsFallback = {}): CycleStats {
   const valid = getCycles(periods).filter((c) => c.valid).slice(-RECENT_CYCLES);
   const lengths = valid.map((c) => c.length);
 
@@ -76,8 +82,8 @@ export function computeStats(periods: readonly Period[]): CycleStats {
     .slice(-RECENT_CYCLES);
 
   return {
-    avgCycle: lengths.length ? Math.round(mean(lengths)) : DEFAULT_CYCLE_LENGTH,
-    avgPeriod: periodLengths.length ? Math.round(mean(periodLengths)) : DEFAULT_PERIOD_LENGTH,
+    avgCycle: lengths.length ? Math.round(mean(lengths)) : (fallback.cycle ?? DEFAULT_CYCLE_LENGTH),
+    avgPeriod: periodLengths.length ? Math.round(mean(periodLengths)) : (fallback.period ?? DEFAULT_PERIOD_LENGTH),
     cycleCount: lengths.length,
     sd: stdDev(lengths),
     min: lengths.length ? Math.min(...lengths) : null,

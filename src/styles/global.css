@@ -7,15 +7,18 @@
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
+  background: var(--bg);
 }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font);
-  font-size: 16px;
-  line-height: 1.45;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
 }
 
@@ -25,29 +28,37 @@ textarea,
 select {
   font: inherit;
   color: inherit;
+  letter-spacing: inherit;
 }
 
 /* iOS zooms into inputs smaller than 16px. */
 input,
 textarea,
 select {
-  font-size: 16px;
+  font-size: var(--text-base);
 }
 
 button {
   cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 h1,
 h2,
 h3,
-p {
+p,
+ul {
   margin: 0;
 }
 
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent-soft);
 }
 
 .visually-hidden {
@@ -59,10 +70,68 @@ p {
   white-space: nowrap;
 }
 
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* View transitions between tabs: quick cross-fade with a slight lift. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-new(root) {
+  animation-name: vt-in;
+}
+
+::view-transition-old(root) {
+  animation-name: vt-out;
+}
+
+/* The home ring morphs into the calendar card. */
+::view-transition-group(cycle-hero) {
+  animation-duration: var(--dur-slow);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(cycle-hero),
+::view-transition-new(cycle-hero) {
+  height: 100%;
+  object-fit: contain;
+}
+
+::view-transition-group(tabbar) {
+  animation: none;
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
-  *::after {
+  *::after,
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
     animation: none !important;
     transition: none !important;
   }

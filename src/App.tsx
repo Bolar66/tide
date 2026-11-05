@@ -1,23 +1,28 @@
 import { TabBar } from './components/TabBar';
+import { AboutView } from './features/about/AboutView';
 import { CalendarView } from './features/calendar/CalendarView';
+import { Onboarding } from './features/onboarding/Onboarding';
 import { SettingsView } from './features/settings/SettingsView';
 import { StatsView } from './features/stats/StatsView';
 import { TodayView } from './features/today/TodayView';
 import { useHashRoute } from './hooks/useHashRoute';
 import { useTheme } from './hooks/useTheme';
-import { t } from './i18n/fi';
+import { useI18n } from './i18n';
 import { useStore, useTide } from './store/context';
 
 export function App() {
   const store = useStore();
+  const { t } = useI18n();
   const status = useTide((s) => s.status);
   const theme = useTide((s) => s.settings.theme);
+  const onboarded = useTide((s) => s.settings.onboarded);
   const saveError = useTide((s) => s.saveError);
   const [route, navigate] = useHashRoute();
   useTheme(theme);
 
-  if (status === 'loading') return <div className="center-screen">{t.common.loading}</div>;
+  if (status === 'loading') return <div className="center-screen" aria-busy="true" />;
   if (status === 'error') return <div className="center-screen">{t.common.loadError}</div>;
+  if (!onboarded) return <Onboarding />;
 
   return (
     <>
@@ -30,10 +35,13 @@ export function App() {
             </button>
           </div>
         )}
-        {route === 'today' && <TodayView onOpenSettings={() => navigate('settings')} />}
+        {route === 'today' && (
+          <TodayView onOpenCalendar={() => navigate('calendar')} onOpenSettings={() => navigate('settings')} />
+        )}
         {route === 'calendar' && <CalendarView />}
         {route === 'stats' && <StatsView />}
-        {route === 'settings' && <SettingsView />}
+        {route === 'settings' && <SettingsView onOpenAbout={() => navigate('about')} />}
+        {route === 'about' && <AboutView onBack={() => navigate('settings')} />}
       </main>
       <TabBar route={route} onNavigate={navigate} />
     </>

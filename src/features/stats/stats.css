@@ -1,79 +1,185 @@
+.stats-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: linear-gradient(150deg, var(--surface) 30%, var(--accent-soft));
+}
+
+.stats-hero__value {
+  font-size: var(--text-hero);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.stats-hero__unit {
+  font-size: var(--text-xl);
+  margin-left: var(--space-2);
+  color: var(--text-muted);
+  letter-spacing: 0;
+}
+
+.stats-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .stat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 14px;
-  border-radius: var(--radius);
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
 }
 
 .stat__label {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--text-muted);
+  font-weight: 550;
 }
 
 .stat__value {
-  font-size: 22px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font-size: var(--text-2xl);
+  line-height: 1.1;
+}
+
+.stat__unit {
+  font-size: var(--text-md);
+  color: var(--text-muted);
+  margin-left: var(--space-1);
 }
 
 .stat__note {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 
-.history {
+/* ---------- Cycle history chart ---------- */
+.cycle-chart {
   list-style: none;
-  margin: 0 -8px;
   padding: 0;
+  margin: 0 calc(-1 * var(--space-2));
 }
 
-.history__row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+.cycle-chart__row {
+  display: grid;
+  grid-template-columns: 7.5em 1fr 3.5em;
+  align-items: center;
+  gap: var(--space-3);
   width: 100%;
   min-height: 56px;
-  padding: 8px;
+  padding: var(--space-2);
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
   text-align: left;
 }
 
-.history li + li .history__row {
-  border-top: 1px solid var(--border);
-  border-radius: 0;
+.cycle-chart__row:active {
+  background: var(--surface-2);
 }
 
-@media (hover: hover) {
-  .history__row:hover {
-    background: var(--surface-2);
+.cycle-chart__label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cycle-chart__dates {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.cycle-chart__sub {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cycle-chart__track {
+  position: relative;
+  height: 12px;
+}
+
+/* Average reference: hairline across every row at the same x. */
+.cycle-chart__track::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  left: var(--avg);
+  width: 1px;
+  background: var(--text-faint);
+  opacity: 0.6;
+}
+
+.cycle-chart__bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 0 4px 4px 0;
+  background: var(--accent);
+  animation: bar-grow var(--dur-slow) var(--ease-out) both;
+  transform-origin: left;
+}
+
+.cycle-chart__expected {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 0 4px 4px 0;
+  border: 1.5px dashed var(--predicted);
+  border-left: none;
+}
+
+.cycle-chart__bar--outlier {
+  background: var(--text-faint);
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
   }
 }
 
-.history__dates {
+.cycle-chart__value {
+  font-size: var(--text-md);
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
-.history__meta {
-  font-size: 14px;
-  color: var(--text-muted);
+.stats-add {
+  margin-top: var(--space-4);
 }
 
-.history__outlier {
-  font-style: normal;
+.stats-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-2) var(--space-2);
 }
 
-.history__add {
-  margin-top: 12px;
+.stats-empty__art {
+  width: 120px;
+  fill: none;
+  stroke: var(--predicted);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.stats-empty__title {
+  font-size: var(--text-xl);
 }

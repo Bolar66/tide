@@ -27,6 +27,16 @@ describe('computeStats', () => {
     expect(s).toMatchObject({ avgCycle: 28, avgPeriod: 5, cycleCount: 0, sd: null, usingDefaultCycle: true, usingDefaultPeriod: true });
   });
 
+  it('prefers user-given typical lengths over the defaults', () => {
+    const s = computeStats([], { cycle: 31, period: 4 });
+    expect(s).toMatchObject({ avgCycle: 31, avgPeriod: 4, usingDefaultCycle: true, usingDefaultPeriod: true });
+  });
+
+  it('own history overrides user-given lengths', () => {
+    const s = computeStats([p('a', '2026-01-01', '2026-01-05'), p('b', '2026-01-27')], { cycle: 35, period: 3 });
+    expect(s).toMatchObject({ avgCycle: 26, avgPeriod: 5, usingDefaultCycle: false });
+  });
+
   it('uses own period length before the first full cycle', () => {
     const s = computeStats([p('a', '2026-01-01', '2026-01-04')]);
     expect(s).toMatchObject({ avgCycle: 28, avgPeriod: 4, usingDefaultCycle: true, usingDefaultPeriod: false });

@@ -5,22 +5,16 @@ import type { ISODate } from '../../domain/dates';
 import { findPeriodOn } from '../../domain/periods';
 import type { Flow, Symptoms } from '../../domain/types';
 import { useCycle } from '../../hooks/useCycle';
-import { flowLabels, t } from '../../i18n/fi';
+import { useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
 import './day.css';
-
-const FLOW_OPTIONS = [
-  { value: 'none', label: t.day.noFlow },
-  { value: 'light', label: flowLabels.light },
-  { value: 'medium', label: flowLabels.medium },
-  { value: 'heavy', label: flowLabels.heavy },
-] as const;
 
 const SYMPTOM_KEYS = ['cramps', 'headache', 'mood', 'energy'] as const satisfies readonly (keyof Symptoms)[];
 
 /** Everything that can be logged for one day. Changes save immediately. */
 export function DayEditor({ date, showPeriodActions = true }: { date: ISODate; showPeriodActions?: boolean }) {
   const store = useStore();
+  const { t } = useI18n();
   const entry = useTide((s) => s.days[date]);
   const { periods, today } = useCycle();
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +23,12 @@ export function DayEditor({ date, showPeriodActions = true }: { date: ISODate; s
 
   const period = findPeriodOn(periods, date, today);
   const canEnd = period && period.end !== date;
+  const flowOptions = [
+    { value: 'none', label: t.day.noFlow },
+    { value: 'light', label: t.day.flowLevels.light },
+    { value: 'medium', label: t.day.flowLevels.medium },
+    { value: 'heavy', label: t.day.flowLevels.heavy },
+  ] as const;
 
   const run = (r: { ok: true } | { ok: false; reason: string }) => setError(r.ok ? null : (t.day.errors[r.reason] ?? null));
 
@@ -37,7 +37,7 @@ export function DayEditor({ date, showPeriodActions = true }: { date: ISODate; s
       {showPeriodActions && (
         <section className="day-editor__period">
           {period ? (
-            <span className="pill pill--period">{t.day.inPeriod}</span>
+            <span className="pill">{t.day.inPeriod}</span>
           ) : (
             <button type="button" className="button button--secondary" onClick={() => run(store.startPeriod(date))}>
               {t.day.markStart}
@@ -48,16 +48,20 @@ export function DayEditor({ date, showPeriodActions = true }: { date: ISODate; s
               {t.day.markEnd}
             </button>
           )}
-          {error && <p className="error-text" role="alert">{error}</p>}
+          {error && (
+            <p className="error-text" role="alert">
+              {error}
+            </p>
+          )}
         </section>
       )}
 
       <section>
-        <h3 className="section-title">{t.day.flow}</h3>
+        <h3 className="section-label">{t.day.flow}</h3>
         <div className="segmented--flow">
           <Segmented
             label={t.day.flow}
-            options={FLOW_OPTIONS}
+            options={flowOptions}
             value={entry?.flow ?? 'none'}
             onChange={(v) => store.updateDay(date, { flow: v === 'none' ? undefined : (v as Flow) })}
           />
@@ -65,20 +69,19 @@ export function DayEditor({ date, showPeriodActions = true }: { date: ISODate; s
       </section>
 
       <section>
-        <h3 className="section-title">{t.day.symptoms}</h3>
+        <h3 className="section-label">{t.day.symptoms}</h3>
         {SYMPTOM_KEYS.map((key) => (
           <Scale
             key={key}
-            {...t.symptoms[key]}
+            label={t.symptoms[key].label}
+            levels={t.symptoms[key].levels}
             value={entry?.symptoms?.[key]}
             onChange={(v) => store.updateDay(date, { symptoms: { [key]: v } })}
           />
         ))}
       </section>
 
-      <section>
-        <NoteField key={date} date={date} initial={entry?.note ?? ''} />
-      </section>
+      <NoteField key={date} date={date} initial={entry?.note ?? ''} />
     </div>
   );
 }
@@ -86,6 +89,7 @@ export function DayEditor({ date, showPeriodActions = true }: { date: ISODate; s
 /** Keeps typing local and saves after a short pause and on blur, so every keystroke is not a DB write. */
 function NoteField({ date, initial }: { date: ISODate; initial: string }) {
   const store = useStore();
+  const { t } = useI18n();
   const [value, setValue] = useState(initial);
   const timer = useRef<number | undefined>(undefined);
   const latest = useRef(value);
@@ -96,12 +100,12 @@ function NoteField({ date, initial }: { date: ISODate; initial: string }) {
     if (trimmed !== (store.getState().days[date]?.note ?? '')) store.updateDay(date, { note: trimmed || undefined });
   };
 
-  // Flush a pending save when the sheet closes.
+  // Flush a pending save when the editor unmounts (e.g. the sheet closes).
   useEffect(() => () => save(), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <label className="field">
-      <span className="section-title">{t.day.note}</span>
+      <span className="section-label">{t.day.note}</span>
       <textarea
         className="textarea"
         value={value}

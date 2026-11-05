@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Sheet } from '../../components/Sheet';
 import type { ISODate } from '../../domain/dates';
 import type { Period } from '../../domain/types';
-import { t } from '../../i18n/fi';
+import { useI18n } from '../../i18n';
 import { useStore } from '../../store/context';
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
 
 export function PeriodSheet({ target, today, onClose }: Props) {
   const store = useStore();
+  const { t } = useI18n();
   const existing = target !== 'new' ? target : null;
   const [start, setStart] = useState(existing?.start ?? '');
   const [end, setEnd] = useState(existing?.end ?? '');
@@ -62,7 +63,11 @@ export function PeriodSheet({ target, today, onClose }: Props) {
           <input type="checkbox" checked={ongoing} onChange={(e) => setOngoing(e.target.checked)} />
           {t.stats.noEnd}
         </label>
-        {error && <p className="error-text" role="alert">{error}</p>}
+        {error && (
+          <p className="error-text" role="alert">
+            {error}
+          </p>
+        )}
         <button type="button" className="button" onClick={save} disabled={!start}>
           {t.common.save}
         </button>

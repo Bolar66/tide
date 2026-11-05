@@ -37,6 +37,13 @@ export type ThemeSetting = 'system' | 'light' | 'dark';
 
 export interface Settings {
   theme: ThemeSetting;
+  /** UI language. Only 'fi' exists for now. */
+  locale: 'fi';
+  /** Set when the first-run flow is finished (or skipped because data already existed). */
+  onboarded: boolean;
+  /** Typical lengths the user gave during onboarding, used until there is enough own history. */
+  cycleLengthHint?: number;
+  periodLengthHint?: number;
   /** Epoch ms of the last successful export. */
   lastBackupAt?: number;
   /** Tracker ids shown in the day editor (phase 3). */
@@ -45,5 +52,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
+  locale: 'fi',
+  onboarded: false,
   enabledTrackers: [],
 };

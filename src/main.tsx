@@ -4,6 +4,7 @@ import { App } from './App';
 import { DexiePersistence } from './db/persistence';
 import { StoreContext } from './store/context';
 import { createStore } from './store/store';
+import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/global.css';
 import './styles/ui.css';

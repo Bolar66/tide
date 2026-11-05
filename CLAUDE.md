@@ -18,9 +18,11 @@ pnpm lint         # ESLint
 pnpm exec tsc     # tyyppitarkistus (noEmit)
 pnpm build        # tsc + vite build (PWA)
 pnpm icons        # generoi ikonit public/logo.svg:stä
+pnpm contrast     # tarkistaa tokens.css:n väriparien WCAG-kontrastin (vaalea + tumma)
 ```
 
-**Ennen kuin ilmoitat vaiheen tai muutoksen valmiiksi: `pnpm lint && pnpm exec tsc && pnpm test` ja kaikki läpi.**
+**Ennen kuin ilmoitat vaiheen tai muutoksen valmiiksi: `pnpm lint && pnpm exec tsc && pnpm test` ja kaikki läpi.
+Jos muutit värejä: myös `pnpm contrast`.**
 
 ## Rakenne
 
@@ -31,7 +33,11 @@ pnpm icons        # generoi ikonit public/logo.svg:stä
   Komponentit lukevat tilaa `useTide(selector)`-hookilla ja muuttavat sitä vain storen metodeilla.
 - `src/features/<näkymä>/` – näkymät ja niiden CSS.
 - `src/components/` – yleiskäyttöiset komponentit (Sheet, Scale, Segmented, TabBar, ikonit).
-- `src/i18n/fi.ts` – **kaikki** käyttöliittymätekstit. Ei kovakoodattuja suomenkielisiä merkkijonoja komponentteihin.
+- `src/i18n/` – **kaikki** käyttöliittymätekstit. Komponentit hakevat tekstit `const { t, f } = useI18n()`
+  (`t` = tekstit, `f` = päivämäärämuodot). Ei kovakoodattuja merkkijonoja komponentteihin.
+  Uusi kieli = uusi tiedosto tyyppiä `Messages` + rivi `LOCALES`-olioon (`i18n/index.ts`).
+- `src/brand.ts` – tuotenimi ja teemavärit. Mahdollinen nimenvaihto: `brand.ts`, taivutusmuodot `i18n/fi.ts`:n alussa,
+  `public/logo.svg` (+ `pnpm icons`), `index.html`, `vite.config.ts`:n manifest.
 
 ## Datamalli ja skeemamuutokset
 
@@ -40,6 +46,18 @@ pnpm icons        # generoi ikonit public/logo.svg:stä
   Se ei ole indeksoitu, joten uusi seurattava **ei vaadi** skeemamuutosta.
 - Skeemamuutos (uusi taulu tai indeksi): lisää uusi `this.version(n)` tiedostoon `db/db.ts`. Vanhoja versioita ei muokata.
   Jos varmuuskopion muoto muuttuu, nosta `BACKUP_VERSION` ja pidä vanhojen tiedostojen tuonti toimivana.
+
+## Design (tavoitteena julkaisukelpoinen laatu)
+
+Tyyli: hillitty premium. Otsikot Fraunces (soft, luokka `.display`), leipäteksti Inter. Fontit ovat
+itse hostattuja (`styles/fonts.css`, vain latin-subset), ei CDN:ää.
+
+- Värit, välistykset (`--space-*`), pyöristykset, typografia ja liike (`--ease-*`, `--dur-*`) vain `styles/tokens.css`:stä.
+- Kaikki animaatiot kunnioittavat `prefers-reduced-motion`-asetusta (globaali sääntö `global.css`:ssä).
+- Näkymien vaihdot käyttävät View Transitions -rajapintaa (`useHashRoute`). Etusivun rengas ja kalenterikortti
+  jakavat nimen `cycle-hero`, jolloin rengas muuntuu kalenteriksi.
+- Kaaviot: yksi sarja = yksi väri ilman legendaa, ohuet palkit, 4 px pyöristys datapäässä, arvot tekstiväreillä.
+- Uudet näkymät tarkistetaan kuvakaappauksin iPhone-koossa sekä vaaleassa että tummassa teemassa.
 
 ## UI-käytännöt
 

@@ -1,6 +1,6 @@
 import { mergeSnapshots } from '../db/backup';
 import type { Persistence, Snapshot } from '../db/persistence';
-import { todayISO, type ISODate } from '../domain/dates';
+import { addDaysISO, todayISO, type ISODate } from '../domain/dates';
 import {
   endPeriod as endPeriodOp,
   includeDayInPeriods,
@@ -17,6 +17,12 @@ export interface State {
   settings: Settings;
   /** Set when a write to IndexedDB fails, shown as a banner. */
   saveError: boolean;
+}
+
+export interface OnboardingAnswers {
+  lastPeriodStart?: ISODate;
+  cycleLength?: number;
+  periodLength?: number;
 }
 
 export type DayPatch = Partial<Omit<DayEntry, 'date' | 'updatedAt'>>;
@@ -61,6 +67,7 @@ export function createStore(persistence: Persistence, now: () => Date = () => ne
     });
 
   const today = () => todayISO(now());
+  const fallback = () => ({ cycle: state.settings.cycleLengthHint, period: state.settings.periodLengthHint });
 
   function snapshot(): Snapshot {
     return { periods: state.periods, days: Object.values(state.days), settings: state.settings };
@@ -84,7 +91,12 @@ export function createStore(persistence: Persistence, now: () => Date = () => ne
 
     async load() {
       try {
-        applySnapshot(await persistence.load());
+        const loaded = await persistence.load();
+        applySnapshot(loaded);
+        // Installs that already have data (from before onboarding existed) skip the first-run flow.
+        if (!loaded.settings.onboarded && (loaded.periods.length > 0 || loaded.days.length > 0)) {
+          this.updateSettings({ onboarded: true });
+        }
         set({ status: 'ready' });
       } catch (err) {
         console.error(err);
@@ -93,7 +105,7 @@ export function createStore(persistence: Persistence, now: () => Date = () => ne
     },
 
     startPeriod(date: ISODate = today()): ActionResult {
-      const r = startPeriodOp(state.periods, date, newId, computeStats(state.periods).avgPeriod);
+      const r = startPeriodOp(state.periods, date, newId, computeStats(state.periods, fallback()).avgPeriod);
       if (!r.ok) return r;
       set({ periods: r.periods });
       void write(persistence.putPeriod(r.changed));
@@ -160,6 +172,22 @@ export function createStore(persistence: Persistence, now: () => Date = () => ne
       const settings = { ...state.settings, ...patch };
       set({ settings });
       void write(persistence.putSettings(settings));
+    },
+
+    completeOnboarding(answers: OnboardingAnswers) {
+      const { lastPeriodStart, cycleLength, periodLength } = answers;
+      if (lastPeriodStart && state.periods.length === 0) {
+        const len = periodLength ?? computeStats([]).avgPeriod;
+        const end = addDaysISO(lastPeriodStart, len - 1);
+        const period: Period = { id: newId(), start: lastPeriodStart, ...(end < today() ? { end } : {}) };
+        set({ periods: [period] });
+        void write(persistence.putPeriod(period));
+      }
+      this.updateSettings({
+        onboarded: true,
+        ...(cycleLength ? { cycleLengthHint: cycleLength } : {}),
+        ...(periodLength ? { periodLengthHint: periodLength } : {}),
+      });
     },
 
     async importSnapshot(incoming: Snapshot, mode: 'replace' | 'merge') {

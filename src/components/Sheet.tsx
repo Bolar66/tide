@@ -1,5 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { t } from '../i18n/fi';
+import { useI18n } from '../i18n';
 import { IconClose } from './icons';
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
 
 /** Bottom sheet built on <dialog>: focus trapping, Esc and backdrop closing come for free. */
 export function Sheet({ open, onClose, title, children }: Props) {
+  const { t } = useI18n();
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -39,10 +40,11 @@ export function Sheet({ open, onClose, title, children }: Props) {
     >
       {open && (
         <div className="sheet__inner">
+          <div className="sheet__grabber" aria-hidden />
           <header className="sheet__header">
             <h2>{title}</h2>
-            <button type="button" className="icon-button" onClick={onClose} aria-label={t.common.close}>
-              <IconClose />
+            <button type="button" className="icon-button icon-button--filled" onClick={onClose} aria-label={t.common.close}>
+              <IconClose width={20} height={20} />
             </button>
           </header>
           <div className="sheet__body">{children}</div>

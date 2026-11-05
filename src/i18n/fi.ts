@@ -1,24 +1,20 @@
-import { format } from 'date-fns';
-import { fi as fiLocale } from 'date-fns/locale/fi';
-import { fromISO, type ISODate } from '../domain/dates';
-import type { Flow } from '../domain/types';
+import { BRAND } from '../brand';
 
-export const locale = fiLocale;
+/** Inflected brand name forms. Update these together with BRAND.name if the app is renamed. */
+const NAME = BRAND.name; // nominative: "Tide"
+const NAME_ELATIVE = 'Tidestä'; // "Tietoa Tidestä"
+const NAME_ILLATIVE = 'Tideen'; // "Tervetuloa Tideen"
 
-export const days = (n: number) => `${n} ${n === 1 ? 'päivä' : 'päivää'}`;
-export const inDays = (n: number) => (n === 0 ? 'tänään' : n === 1 ? 'huomenna' : `${n} päivän päästä`);
+const days = (n: number) => `${n} ${n === 1 ? 'päivä' : 'päivää'}`;
+const inDays = (n: number) => (n === 0 ? 'tänään' : n === 1 ? 'huomenna' : `${n} päivän päästä`);
 
-/** "torstai 5. marraskuuta" */
-export const longDate = (d: ISODate) => format(fromISO(d), 'cccc d. MMMM', { locale });
-/** "5.11." */
-export const shortDate = (d: ISODate) => format(fromISO(d), 'd.M.');
-/** "5.11.2026" */
-export const fullDate = (d: ISODate) => format(fromISO(d), 'd.M.yyyy');
-export const monthTitle = (d: Date) => format(d, 'LLLL yyyy', { locale });
-
-export const flowLabels: Record<Flow, string> = { light: 'Vähän', medium: 'Normaali', heavy: 'Runsas' };
-
-export const t = {
+/**
+ * Finnish UI strings. Every other locale must have exactly this shape (see Messages in ./index.ts).
+ * Dates are formatted in ./format.ts, not here.
+ */
+export const fi = {
+  days,
+  inDays,
   tabs: { today: 'Tänään', calendar: 'Kalenteri', stats: 'Tilastot', settings: 'Asetukset' },
   common: {
     save: 'Tallenna',
@@ -26,33 +22,43 @@ export const t = {
     close: 'Sulje',
     delete: 'Poista',
     undo: 'Kumoa',
+    back: 'Takaisin',
+    next: 'Jatka',
+    skip: 'Ohita',
     loading: 'Ladataan…',
     loadError: 'Tietojen lataaminen epäonnistui. Sulje sovellus kokonaan ja avaa se uudelleen.',
     saveError: 'Viimeisintä muutosta ei saatu tallennettua. Tarkista, että laitteella on tilaa.',
   },
+  ring: {
+    openCalendar: 'Avaa kalenteri',
+    cycleDay: 'Syklin päivä',
+    noData: 'Ei vielä tietoja',
+    inPeriod: (n: number) => `Kuukautiset, ${n}. päivä`,
+    next: (n: number) => `Kuukautiset arviolta ${inDays(n)}`,
+    late: (n: number) => `${days(n)} myöhässä ennusteesta`,
+    calendarHint: 'Kalenteri',
+  },
   today: {
-    cycleDay: (n: number) => `Syklin ${n}. päivä`,
-    periodDay: (n: number) => `Kuukautiset, ${n}. päivä`,
     started: 'Kuukautiset alkoivat tänään',
     ended: 'Kuukautiset loppuivat tänään',
-    startedOther: 'Alkoivat toisena päivänä…',
-    endedOther: 'Loppuivat toisena päivänä…',
-    next: (when: string) => `Seuraavat kuukautiset arviolta ${when}`,
-    late: (n: number) => `Kuukautiset ovat ${days(n)} myöhässä ennusteesta`,
-    noHistory: 'Kirjaa kuukautisten alku, niin Tide alkaa ennustaa seuraavia.',
+    startedOther: 'Alkoivat toisena päivänä',
+    endedOther: 'Loppuivat toisena päivänä',
     forgotEnd: (n: number) => `Kuukautiset ovat jatkuneet ${days(n)}. Muistitko merkitä loppumisen?`,
-    defaultsNote: 'Ennuste käyttää oletusarvoja (28 pv sykli, 5 pv kuukautiset), kunnes historiaa kertyy.',
-    todayLog: 'Tämän päivän kirjaukset',
+    noHistory: 'Kirjaa kuukautisten alku, niin ennuste alkaa muodostua.',
+    hintsNote: 'Ennuste perustuu antamiisi tietoihin, kunnes omaa historiaa kertyy.',
+    defaultsNote: 'Ennuste käyttää tyypillisiä arvoja (28 pv sykli, 5 pv kuukautiset), kunnes omaa historiaa kertyy.',
+    todayLog: 'Miltä tänään tuntuu?',
     backupReminder: (n: number | null) =>
-      n === null ? 'Et ole vielä tehnyt varmuuskopiota.' : `Edellisestä varmuuskopiosta on ${days(n)}.`,
-    backupAction: 'Tee varmuuskopio',
+      n === null ? 'Tietojasi ei ole vielä varmuuskopioitu.' : `Edellisestä varmuuskopiosta on ${days(n)}.`,
+    backupAction: 'Varmuuskopioi',
   },
   day: {
     flow: 'Vuoto',
     noFlow: 'Ei',
-    symptoms: 'Oireet',
+    flowLevels: { light: 'Vähän', medium: 'Normaali', heavy: 'Runsas' },
+    symptoms: 'Oireet ja olo',
     note: 'Muistiinpano',
-    notePlaceholder: 'Miltä tänään tuntui?',
+    notePlaceholder: 'Kirjoita mitä haluat muistaa tästä päivästä',
     markStart: 'Kuukautiset alkoivat tänä päivänä',
     markEnd: 'Kuukautiset loppuivat tänä päivänä',
     inPeriod: 'Kuukautispäivä',
@@ -66,35 +72,41 @@ export const t = {
     } as Record<string, string>,
   },
   symptoms: {
-    cramps: { label: 'Kivut', low: 'lievä', high: 'voimakas' },
-    headache: { label: 'Päänsärky', low: 'lievä', high: 'voimakas' },
-    mood: { label: 'Mieliala', low: 'huono', high: 'hyvä' },
-    energy: { label: 'Energia', low: 'matala', high: 'korkea' },
+    cramps: { label: 'Kivut', levels: ['Hyvin lievät', 'Lievät', 'Kohtalaiset', 'Voimakkaat', 'Hyvin voimakkaat'] },
+    headache: { label: 'Päänsärky', levels: ['Hyvin lievä', 'Lievä', 'Kohtalainen', 'Voimakas', 'Hyvin voimakas'] },
+    mood: { label: 'Mieliala', levels: ['Todella huono', 'Huono', 'Neutraali', 'Hyvä', 'Erinomainen'] },
+    energy: { label: 'Energia', levels: ['Todella matala', 'Matala', 'Kohtalainen', 'Hyvä', 'Erinomainen'] },
   },
   calendar: {
     prev: 'Edellinen kuukausi',
     next: 'Seuraava kuukausi',
     today: 'Tänään',
-    weekdays: ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su'],
     legendPeriod: 'Kuukautiset',
     legendPredicted: 'Ennuste',
     legendLogged: 'Kirjauksia',
   },
   stats: {
     title: 'Tilastot',
-    avgCycle: 'Syklin keskipituus',
-    avgPeriod: 'Kuukautisten kesto',
+    avgCycle: 'Sykli keskimäärin',
+    avgPeriod: 'Kuukautiset keskimäärin',
     variation: 'Vaihtelu',
     cycles: 'Kirjattuja syklejä',
+    daysUnit: 'pv',
     range: (min: number, max: number) => `${min}–${max} pv`,
-    sd: (sd: number) => `± ${sd.toFixed(1).replace('.', ',')} pv`,
-    defaults: 'Oletusarvo, kunnes kirjattuna on vähintään yksi kokonainen sykli.',
-    basis: (n: number) => `Laskettu ${n} viimeisimmästä syklistä.`,
+    sd: (sd: number) => `±${sd.toFixed(1).replace('.', ',')}`,
+    regular: 'Säännöllinen',
+    irregular: 'Vaihteleva',
+    defaults: 'Tyypillinen arvo',
+    hints: 'Antamasi arvo',
+    basis: (n: number) => `Laskettu ${n === 1 ? 'viimeisimmästä syklistä' : `${n} viimeisimmästä syklistä`}.`,
     history: 'Historia',
-    empty: 'Ei vielä kirjattuja kuukautisia.',
+    emptyTitle: 'Historia alkaa tästä',
+    empty: 'Kun kirjaat kuukautisia, näet täällä syklien pituudet ja niiden vaihtelun.',
     ongoing: 'käynnissä',
-    cycleLength: (n: number) => `sykli ${n} pv`,
-    outlier: 'ei mukana keskiarvossa',
+    cycleLength: (n: number) => `${n} pv`,
+    periodLength: (n: number) => `kuukautiset ${n} pv`,
+    currentCycle: 'Nykyinen sykli',
+    outlier: 'Ei mukana keskiarvossa',
     addPast: 'Lisää aiemmat kuukautiset',
     editTitle: 'Muokkaa kuukautisia',
     addTitle: 'Lisää kuukautiset',
@@ -109,35 +121,81 @@ export const t = {
   },
   settings: {
     title: 'Asetukset',
+    appearance: 'Ulkoasu',
     theme: 'Teema',
-    themes: { system: 'Järjestelmä', light: 'Vaalea', dark: 'Tumma' },
-    backup: 'Varmuuskopio',
+    themes: { system: 'Automaattinen', light: 'Vaalea', dark: 'Tumma' },
+    data: 'Tiedot',
     backupInfo:
-      'Tiedot ovat vain tällä laitteella. Jos sovelluksen poistaa, tiedot häviävät, joten tee varmuuskopio säännöllisesti ja tallenna se Tiedostoihin.',
-    exportWarning: 'Varmuuskopiotiedosto ei ole salattu. Säilytä se paikassa, johon vain sinulla on pääsy.',
+      'Tiedot ovat vain tällä laitteella. Jos poistat sovelluksen, tiedot poistuvat sen mukana. Tee varmuuskopio säännöllisesti ja tallenna se Tiedostoihin.',
+    exportWarning: 'Varmuuskopiotiedostoa ei ole salattu. Säilytä se paikassa, johon vain sinulla on pääsy.',
     export: 'Vie varmuuskopio',
     import: 'Tuo varmuuskopio',
-    lastBackup: (d: string) => `Edellinen varmuuskopio: ${d}`,
-    neverBackedUp: 'Varmuuskopiota ei ole vielä tehty.',
+    lastBackup: (d: string) => `Edellinen varmuuskopio ${d}`,
+    neverBackedUp: 'Varmuuskopiota ei ole vielä tehty',
     importTitle: 'Tuo varmuuskopio',
     importSummary: (p: number, d: number) => `Tiedostossa on ${p} kuukautisjaksoa ja ${d} päivän kirjaukset.`,
     importMerge: 'Yhdistä nykyisiin',
-    importMergeHint: 'Uudemmat päiväkirjaukset voittavat, päällekkäisiä jaksoja ei tuoda.',
+    importMergeHint: 'Uudemmat päiväkirjaukset säilyvät. Päällekkäisiä jaksoja ei tuoda.',
     importReplace: 'Korvaa kaikki',
     importReplaceHint: 'Nykyiset tiedot poistetaan ja korvataan tiedoston sisällöllä.',
     importDone: 'Varmuuskopio tuotu.',
     exportDone: 'Varmuuskopio tehty.',
     importErrors: {
-      'not-json': 'Tiedosto ei ole kelvollinen JSON-tiedosto.',
-      'not-tide': 'Tiedosto ei ole Tiden varmuuskopio.',
-      'too-new': 'Varmuuskopio on tehty uudemmalla Tide-versiolla. Päivitä sovellus ensin.',
+      'not-json': 'Tiedosto ei ole kelvollinen varmuuskopio.',
+      'not-tide': `Tiedosto ei ole ${NAME}-varmuuskopio.`,
+      'too-new': `Varmuuskopio on tehty uudemmalla ${NAME}-versiolla. Päivitä sovellus ensin.`,
       invalid: 'Varmuuskopiossa on virheellisiä tietoja, eikä sitä voitu tuoda.',
     },
     storage: 'Tallennus',
-    persisted: 'Pysyvä tallennus on käytössä.',
-    notPersisted: 'Selain voi tyhjentää tiedot tilan loppuessa. Lisää Tide Koti-valikkoon ja tee varmuuskopioita.',
-    privacy: 'Tide ei lähetä mitään tietoja minnekään. Ei tiliä, ei pilveä, ei analytiikkaa.',
+    persisted: 'Pysyvä tallennus käytössä',
+    notPersisted: 'Selain voi tyhjentää tiedot tilan loppuessa. Tee varmuuskopioita säännöllisesti.',
+    about: `Tietoa ${NAME_ELATIVE}`,
+    aboutHint: 'Yksityisyys, terveystiedot ja lisenssit',
+  },
+  about: {
+    title: `Tietoa ${NAME_ELATIVE}`,
+    tagline: 'Kuukautisten ja hyvinvoinnin seuranta, joka pysyy sinun puhelimessasi.',
+    version: (v: string) => `Versio ${v}`,
+    privacyTitle: 'Yksityisyys',
+    privacy: [
+      `${NAME} tallentaa kaikki tiedot vain tälle laitteelle. Tietoja ei lähetetä mihinkään palvelimelle.`,
+      'Sovelluksessa ei ole käyttäjätiliä, mainoksia, analytiikkaa eikä seurantaa.',
+      'Kukaan muu, sovelluksen tekijä mukaan lukien, ei näe kirjauksiasi.',
+      'Varmuuskopion tekeminen ja sen säilyttäminen on sinun päätöksesi.',
+    ],
+    healthTitle: 'Terveystiedoista',
+    health: [
+      `${NAME} on hyvinvointisovellus, ei lääkinnällinen laite.`,
+      'Ennusteet ovat arvioita aiempien kirjaustesi perusteella. Niitä ei voi käyttää raskauden ehkäisyyn eikä sen suunnitteluun.',
+      'Jos kuukautisissasi tai voinnissasi on jotain, mikä huolettaa, käänny terveydenhuollon ammattilaisen puoleen.',
+    ],
+    licensesTitle: 'Avoimen lähdekoodin ohjelmistot',
+    licensesIntro: `${NAME} on tehty näiden avoimen lähdekoodin projektien avulla:`,
+  },
+  onboarding: {
+    welcomeTitle: `Tervetuloa ${NAME_ILLATIVE}`,
+    welcomeText: 'Seuraa kuukautisiasi ja hyvinvointiasi rauhassa. Kaikki tiedot pysyvät sinun puhelimessasi.',
+    start: 'Aloitetaan',
+    privacyTitle: 'Sinun tietosi ovat vain sinun',
+    privacyPoints: [
+      { title: 'Ei tiliä', text: 'Rekisteröitymistä ei tarvita, eikä sähköpostiasi kysytä.' },
+      { title: 'Ei pilveä', text: 'Kirjaukset tallentuvat vain tälle laitteelle, eivät minnekään muualle.' },
+      { title: 'Sinun hallinnassasi', text: 'Voit viedä tai poistaa tietosi milloin tahansa.' },
+    ],
+    lastPeriodTitle: 'Milloin viimeisimmät kuukautiset alkoivat?',
+    lastPeriodText: 'Arviokin riittää. Voit tarkentaa tietoja myöhemmin kalenterissa.',
+    lastPeriodLabel: 'Alkupäivä',
+    dontRemember: 'En muista',
+    lengthsTitle: 'Millainen syklisi yleensä on?',
+    lengthsText: 'Näitä käytetään ennusteeseen, kunnes omaa historiaa kertyy.',
+    cycleLength: 'Syklin pituus',
+    periodLength: 'Kuukautisten kesto',
+    dontKnow: 'En tiedä, käytä tyypillisiä arvoja',
+    decrease: 'Vähennä',
+    increase: 'Lisää',
+    doneTitle: 'Valmista',
+    doneText: 'Kirjaa päivittäin vaikka vain yksi asia. Mitä enemmän kirjauksia kertyy, sitä tarkemmaksi ennuste muuttuu.',
+    finish: `Avaa ${NAME}`,
+    step: (n: number, total: number) => `Vaihe ${n}/${total}`,
   },
 };
-
-export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
