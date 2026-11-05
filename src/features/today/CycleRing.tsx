@@ -24,7 +24,8 @@ interface Props {
   ring: Ring;
   cycleLength: number;
   status: string;
-  onOpen: () => void;
+  /** Opens the calendar. Without it the ring is display-only (e.g. a partner's cycle). */
+  onOpen?: () => void;
 }
 
 /**
@@ -37,14 +38,22 @@ export function CycleRing({ ring, cycleLength, status, onOpen }: Props) {
   // Keep a little water even on day 1 and never fill the disc completely.
   const level = C + DISC_R - (0.14 + ring.progress * 0.68) * DISC_R * 2;
 
+  const Root = onOpen ? 'button' : 'div';
+  const rootProps = onOpen
+    ? { type: 'button' as const, onClick: onOpen, 'aria-label': undefined as string | undefined }
+    : { role: 'img' as const, 'aria-label': undefined as string | undefined };
+
   const label = [
     t.ring.openCalendar,
     ring.cycleDay ? `${t.ring.cycleDay} ${ring.cycleDay} ${t.ring.ofLength(Math.max(cycleLength, ring.cycleDay))}` : t.ring.noData,
     status,
-  ].join('. ');
+  ]
+    .filter((x) => onOpen || x !== t.ring.openCalendar)
+    .join('. ');
+  rootProps['aria-label'] = label;
 
   return (
-    <button type="button" className="cycle-ring" onClick={onOpen} aria-label={label}>
+    <Root className="cycle-ring" {...rootProps}>
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="cycle-ring__svg" aria-hidden>
         <defs>
           <clipPath id="cycle-ring-disc">
@@ -97,11 +106,13 @@ export function CycleRing({ ring, cycleLength, status, onOpen }: Props) {
           <span className="cycle-ring__empty display">{t.ring.noData}</span>
         )}
         <span className="cycle-ring__status">{status}</span>
-        <span className="cycle-ring__hint">
-          {t.ring.calendarHint}
-          <IconChevronRight width={14} height={14} />
-        </span>
+        {onOpen && (
+          <span className="cycle-ring__hint">
+            {t.ring.calendarHint}
+            <IconChevronRight width={14} height={14} />
+          </span>
+        )}
       </span>
-    </button>
+    </Root>
   );
 }

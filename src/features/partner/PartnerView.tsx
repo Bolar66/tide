@@ -70,7 +70,7 @@ export function PartnerView({ followed }: { followed: FollowedView }) {
 
   return (
     <div className="stack stack--lg">
-      {data.scopes.includes('cycle') && <CycleRing ring={cycle.ring} cycleLength={cycle.stats.avgCycle} status={status} onOpen={() => undefined} />}
+      {data.scopes.includes('cycle') && <CycleRing ring={cycle.ring} cycleLength={cycle.stats.avgCycle} status={status} />}
       {!data.scopes.includes('cycle') && <p className="muted">{status}</p>}
 
       {cycle.phase && data.scopes.includes('cycle') && (

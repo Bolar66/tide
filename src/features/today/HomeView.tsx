@@ -27,6 +27,19 @@ export function HomeView(props: Props) {
   const current = options.some((o) => o.value === selected) ? selected : (options[0]?.value ?? 'me');
 
   if (options.length <= 1 && ownTracking) return <TodayView {...props} />;
+  if (options.length === 0) {
+    return (
+      <div className="stack stack--lg">
+        <header className="page-header">
+          <h1 className="display">{t.partner.noneTitle}</h1>
+        </header>
+        <p className="muted">{t.partner.none}</p>
+        <button type="button" className="button button--secondary" onClick={props.onOpenSettings}>
+          {t.tabs.settings}
+        </button>
+      </div>
+    );
+  }
 
   const followed = session.followed.find((fw) => fw.id === current);
   return (

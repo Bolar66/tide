@@ -4,6 +4,7 @@ import { useI18n } from '../../i18n';
 import { useSession } from '../../session/context';
 import { useTide } from '../../store/context';
 import { AccountForm } from '../account/AccountForm';
+import { RecoveryCode } from '../settings/LockSettings';
 import './sharing.css';
 
 interface Props {
@@ -21,6 +22,7 @@ export function JoinView({ shareId, secret, onDone }: Props) {
   const [mode, setMode] = useState<'create' | 'signin'>('create');
   const [name, setName] = useState(savedName);
   const [state, setState] = useState<'form' | 'busy' | 'done' | 'invalid'>('form');
+  const [recovery, setRecovery] = useState<string | null>(null);
 
   return (
     <main className="join">
@@ -48,10 +50,12 @@ export function JoinView({ shareId, secret, onDone }: Props) {
         <>
           <h1 className="display join__title">{sh.joinTitle}</h1>
           <p className="muted">{sh.joinText}</p>
-          {!session.account ? (
+          {recovery ? (
+            <RecoveryCode code={recovery} onContinue={() => setRecovery(null)} />
+          ) : !session.account ? (
             <>
               <p>{sh.joinAccount}</p>
-              <AccountForm key={mode} mode={mode} onSwitch={() => setMode(mode === 'create' ? 'signin' : 'create')} onDone={() => undefined} />
+              <AccountForm key={mode} mode={mode} onSwitch={() => setMode(mode === 'create' ? 'signin' : 'create')} onDone={setRecovery} />
             </>
           ) : (
             <form

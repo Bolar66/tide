@@ -80,6 +80,14 @@ Jos muutit värejä: myös `pnpm contrast`.**
 - Testit: `MemoryServer` (`sync/remote.ts`) jäljittelee SQL-funktioita. Muutokset synkronointiin testataan myös
   kahdella laitteella oikeaa palvelinta vasten.
 
+## Kumppanijako (vaihe 5)
+
+- Kutsulinkin salaisuus on URL:n `#`-osassa (ei koskaan palvelimelle). Sillä avataan jakoavain, joka salaa kaiken
+  jaetun (`sharing/crypto.ts`). Omistaja hyväksyy liittyjän; nimi on salattu jakoavaimella = todiste linkistä.
+- Mitä jaetaan: `sharing/build.ts` (`SCOPE_METRICS`). Seksuaalisuus- ja lääketietoja ei ole missään scopessa,
+  eikä niitä saa lisätä. Testi `sharing.test.ts` varmistaa tämän.
+- Jakotiedot (`shares`, `following`) ovat käyttäjän omissa salatuissa asetuksissa ja synkronoituvat hänen laitteilleen.
+
 ## Datamalli ja skeemamuutokset
 
 - Päivämäärät ovat merkkijonoja `yyyy-MM-dd` (`ISODate`), ei `Date`-olioita tallennettuna. Käytä `domain/dates.ts`-apureita.

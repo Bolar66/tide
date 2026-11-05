@@ -599,6 +599,8 @@ export const fi = {
   },
   partner: {
     me: 'Minä',
+    noneTitle: 'Et seuraa ketään',
+    none: 'Pyydä kumppaniltasi uusi kutsulinkki, tai ota oma kierron seuranta käyttöön asetuksista.',
     eyebrow: 'Kumppanin kierto',
     waiting: 'Odottaa, että kumppanisi hyväksyy pyyntösi.',
     noData: 'Kumppanisi ei ole vielä jakanut tietoja.',
