@@ -1,0 +1,300 @@
+.welcome {
+  position: relative;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top) + var(--space-3)) var(--space-6) calc(env(safe-area-inset-bottom) + var(--space-6));
+  overflow: hidden;
+}
+
+.welcome__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap);
+}
+
+.welcome__hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-8);
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+}
+
+.welcome__logo-wrap {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+.welcome__logo {
+  position: relative;
+  border-radius: 32px;
+  box-shadow: var(--shadow-2);
+  animation: float 6s ease-in-out infinite;
+}
+
+.welcome__halo {
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--glow-rgb) / 45%), transparent);
+  animation: welcome-breathe 5s ease-in-out infinite alternate;
+}
+
+@keyframes welcome-breathe {
+  from {
+    transform: scale(0.85);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.welcome__name {
+  font-size: calc(var(--text-3xl) * 1.5);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.welcome__name--small {
+  font-size: var(--text-3xl);
+}
+
+.welcome__tagline {
+  max-width: 30ch;
+  font-size: var(--text-lg);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.welcome__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  animation: fade-up var(--dur-slow) var(--ease-out) 150ms both;
+}
+
+.welcome__actions .button--small {
+  align-self: center;
+}
+
+/* Calm waves along the bottom edge, behind the buttons. */
+.welcome__waves {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 34vh;
+  pointer-events: none;
+}
+
+.welcome__wave {
+  fill: rgb(var(--glow-rgb) / 16%);
+  animation: welcome-drift var(--t) linear infinite;
+}
+
+.welcome__wave--rev {
+  animation-direction: reverse;
+}
+
+@keyframes welcome-drift {
+  to {
+    transform: translateX(-400px);
+  }
+}
+
+.welcome--form .welcome__form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-6);
+}
+
+.welcome__logo-small {
+  border-radius: 16px;
+}
+
+.welcome__form-title {
+  font-size: var(--text-3xl);
+}
+
+/* ---------- Intro slides ---------- */
+.intro__track {
+  flex: 1;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * var(--space-6));
+}
+
+.intro__track::-webkit-scrollbar {
+  display: none;
+}
+
+.intro__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+.intro__slide .intro-art {
+  transition:
+    transform var(--dur-slow) var(--ease-spring),
+    opacity var(--dur-slow) var(--ease-out);
+  transform: scale(0.85);
+  opacity: 0.5;
+}
+
+.intro__slide.is-active .intro-art {
+  transform: none;
+  opacity: 1;
+}
+
+.intro__title {
+  font-size: var(--text-3xl);
+  line-height: 1.15;
+  margin-top: var(--space-4);
+}
+
+.intro__text {
+  max-width: 32ch;
+  font-size: var(--text-lg);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.intro__dots {
+  align-self: center;
+  margin-bottom: var(--space-3);
+}
+
+/* ---------- Intro illustrations ---------- */
+.intro-art {
+  width: min(62vw, 240px);
+  height: auto;
+  overflow: visible;
+}
+
+.intro-art__bg {
+  fill: var(--accent-soft);
+}
+
+.intro-art__disc {
+  fill: var(--surface);
+}
+
+.intro-art__dot {
+  fill: var(--text-faint);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dot-in var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i) * 25ms);
+}
+
+.intro-art__dot--period {
+  fill: var(--period);
+}
+
+.intro-art__dot--fertile {
+  fill: var(--fertile);
+}
+
+.intro-art__num {
+  font-size: 36px;
+  fill: var(--text);
+}
+
+.intro-art__step {
+  fill: var(--surface);
+  stroke: var(--border);
+}
+
+.intro-art__step.is-on {
+  fill: var(--accent);
+  stroke: none;
+}
+
+.intro-art__chip {
+  fill: var(--surface);
+}
+
+.intro-art__chip--on {
+  fill: var(--period-soft);
+}
+
+.intro-art__tap {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring-ping 2s var(--ease-out) infinite;
+}
+
+.intro-art__shield {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.intro-art__lock {
+  fill: var(--accent);
+}
+
+.intro-art__shackle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.intro-art__keyhole {
+  fill: var(--on-accent);
+}
+
+.intro-art__heart {
+  fill: var(--period);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heart-beat 2.4s ease-in-out infinite;
+}
+
+.intro-art__heart--2 {
+  fill: var(--accent);
+  opacity: 0.85;
+  animation-delay: -1.2s;
+}
+
+@keyframes heart-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.08);
+  }
+  30% {
+    transform: scale(0.98);
+  }
+}

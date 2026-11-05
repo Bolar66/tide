@@ -9,6 +9,7 @@ import { FollowedCalendar } from './features/followed/FollowedCalendar';
 import { FollowedTab } from './features/followed/FollowedCards';
 import { FollowerHome } from './features/followed/FollowerHome';
 import { TodayView } from './features/today/TodayView';
+import { Welcome } from './features/welcome/Welcome';
 import { profileOf } from './domain/profile';
 import { useSession } from './session/context';
 import { parseInviteHash } from './sharing/crypto';
@@ -41,6 +42,8 @@ export function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
   const saveError = useTide((s) => s.saveError);
+  // First launch: welcome screen and intro, then the onboarding questions.
+  const [introDone, setIntroDone] = useState(false);
   const [route, navigate] = useHashRoute();
   const today = useToday();
   useTheme(theme, palette);
@@ -75,7 +78,15 @@ export function App() {
       />
     );
   }
-  if (!onboarded) return <Onboarding />;
+  if (!onboarded) {
+    return introDone || session.account ? (
+      <Onboarding onBack={() => setIntroDone(false)} />
+    ) : (
+      <Welcome mode="first" onContinue={() => setIntroDone(true)} onAccount={() => setIntroDone(true)} />
+    );
+  }
+  // Signed out: the data stays on the device; sign in again or continue without an account.
+  if (session.signedOut) return <Welcome mode="signedOut" onContinue={() => navigate('today')} onAccount={() => navigate('today')} />;
 
   return (
     <>

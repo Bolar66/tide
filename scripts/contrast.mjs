@@ -21,6 +21,10 @@ const pairs = [
   ['predicted', 'surface', 2], ['text-faint', 'surface', 2.5],
   ['fertile', 'fertile-soft', 4.5], ['surface', 'fertile', 4.5], ['text', 'fertile-soft', 4.5], ['text-muted', 'accent-soft', 4.5],
   ['period', 'surface', 3], ['fertile', 'surface', 3],
+  // Background gradient end: text and links sit on it too.
+  ['text', 'bg-2', 4.5], ['text-muted', 'bg-2', 4.5], ['accent', 'bg-2', 4.5], ['text-muted', 'surface-3', 3],
+  // Tinted cards (phase card, today's log).
+  ['text-muted', 'period-soft', 4.5], ['text-muted', 'fertile-soft', 4.5], ['text-muted', 'predicted-soft', 4.5],
 ];
 
 let failed = false;

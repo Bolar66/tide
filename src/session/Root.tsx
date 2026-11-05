@@ -45,9 +45,28 @@ const db = new TideDB();
  * secrets: the master secret lives only in this component's memory (or, with an account and no
  * PIN lock, in plaintext meta like the data itself). Also runs account sync.
  */
+const SIGNED_OUT_KEY = 'tide.signedOut';
+
 export function Root() {
   const [phase, setPhase] = useState<Phase>({ kind: 'checking' });
   const [acct, setAcct] = useState<account.AccountInfo | null>(null);
+  // After signing out the data stays on the device and a welcome/sign-in screen is shown.
+  const [signedOut, setSignedOutState] = useState(() => {
+    try {
+      return localStorage.getItem(SIGNED_OUT_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const setSignedOut = useCallback((on: boolean) => {
+    try {
+      if (on) localStorage.setItem(SIGNED_OUT_KEY, '1');
+      else localStorage.removeItem(SIGNED_OUT_KEY);
+    } catch {
+      /* ignore */
+    }
+    setSignedOutState(on);
+  }, []);
   const [sync, setSync] = useState<SyncStatus>({ state: 'off' });
   const master = useRef<Master | null>(null);
   const syncing = useRef(false);
@@ -341,6 +360,7 @@ export function Root() {
       account: acct,
       sync,
       async createAccount(email, password) {
+        setSignedOut(false);
         // Reuse the PIN lock's master secret and recovery code when there is one.
         if (config && master.current) {
           const info = await account.createAccount(remote, email, password, master.current, config.recovery);
@@ -367,11 +387,17 @@ export function Root() {
         await store.getPersistence().saveSyncState(null); // first sync merges both sides
         master.current = secret;
         setAcct(info);
+        setSignedOut(false);
       },
       async signOut() {
+        // Push the latest changes first so nothing logged on this device is left only here.
+        await runSync().catch(() => undefined);
         await remote.signOut().catch(() => undefined);
         await forgetAccount();
+        setSignedOut(true);
       },
+      signedOut,
+      dismissSignedOut: () => setSignedOut(false),
       async deleteAccount() {
         await remote.deleteAccount();
         await forgetAccount();
@@ -507,7 +533,7 @@ export function Root() {
         setSharedCache(cache);
       },
     };
-  }, [phase, lockNow, acct, sync, runSync, shareRows, partnerNames, sharedCache, settings, messages]);
+  }, [phase, lockNow, acct, sync, runSync, shareRows, partnerNames, sharedCache, settings, messages, signedOut, setSignedOut]);
 
   if (phase.kind === 'checking') return <div className="center-screen" aria-busy="true" />;
   if (phase.kind === 'locked') {

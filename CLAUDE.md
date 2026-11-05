@@ -116,6 +116,11 @@ Jos muutit värejä: myös `pnpm contrast`.**
 Tyyli: hillitty premium. Otsikot Fraunces (soft, luokka `.display`), leipäteksti Inter. Fontit ovat
 itse hostattuja (`styles/fonts.css`, vain latin-subset), ei CDN:ää.
 
+- Teemat (Meri oletus, Ruusu, Salvia, Laventeli) määritellään vain `scripts/palettes.mjs`:ssä → `pnpm palettes`
+  generoi `styles/palettes.css`:n. Jokaisella teemalla oma taustaliukuma (`bg`→`bg-2`), hehku (`glow`) ja
+  hitaasti liikkuva taustakuvio (`components/Backdrop.tsx`: aallot, valopallot, lehdet, tähdet).
+- Ensimmäinen avaus: `features/welcome` (tervetulonäkymä + esittely) → `Onboarding`. Uloskirjautuessa data jää
+  laitteelle ja näytetään sama näkymä kirjautumistilassa (`session.signedOut`).
 - Värit, välistykset (`--space-*`), pyöristykset, typografia ja liike (`--ease-*`, `--dur-*`) vain `styles/tokens.css`:stä.
 - Kaikki animaatiot kunnioittavat `prefers-reduced-motion`-asetusta (globaali sääntö `global.css`:ssä).
 - Näkymien vaihdot käyttävät View Transitions -rajapintaa (`useHashRoute`). Etusivun rengas ja kalenterikortti

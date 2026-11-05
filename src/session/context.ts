@@ -49,6 +49,9 @@ export interface Session {
   createAccount(email: string, password: string): Promise<string | null>;
   signIn(email: string, password: string): Promise<void>;
   signOut(): Promise<void>;
+  /** True after signing out until the user signs in again or continues without an account. */
+  signedOut: boolean;
+  dismissSignedOut(): void;
   deleteAccount(): Promise<void>;
   changePassword(newPassword: string): Promise<void>;
   syncNow(): Promise<void>;

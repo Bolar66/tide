@@ -1,14 +1,13 @@
-import { Logo } from '../../components/Logo';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { IconChevronLeft, IconCloudOff, IconLock, IconUserOff } from '../../components/icons';
 import { Stepper } from '../../components/Stepper';
-import { parseBackup } from '../../db/backup';
 import { addDaysISO } from '../../domain/dates';
 import { DEFAULT_CYCLE_LENGTH, DEFAULT_PERIOD_LENGTH } from '../../domain/prediction';
 import { useToday } from '../../hooks/useToday';
 import { useI18n } from '../../i18n';
 import { ProfilePicker } from '../../components/ProfilePicker';
 import type { Profile } from '../../domain/profile';
+import { useSession } from '../../session/context';
 import { useStore } from '../../store/context';
 import { DEFAULT_TRACKERS } from '../../trackers/registry';
 import { AccountComparison, AccountForm } from '../account/AccountForm';
@@ -16,43 +15,29 @@ import { RecoveryCode } from '../settings/LockSettings';
 import { TrackerSettings } from '../settings/TrackerSettings';
 import './onboarding.css';
 
-const OWN_STEPS = ['welcome', 'profile', 'privacy', 'account', 'lastPeriod', 'lengths', 'trackers', 'done'] as const;
+const OWN_STEPS = ['profile', 'privacy', 'account', 'lastPeriod', 'lengths', 'trackers', 'done'] as const;
 /** "Haluan ymmärtää ja pysyä mukana": no cycle questions. */
-const FOLLOWER_STEPS = ['welcome', 'profile', 'privacy', 'account', 'done'] as const;
+const FOLLOWER_STEPS = ['profile', 'privacy', 'account', 'done'] as const;
 type Step = (typeof OWN_STEPS)[number];
 
 const PRIVACY_ICONS = [IconUserOff, IconCloudOff, IconLock];
 
-export function Onboarding() {
+/** First-run questions; the welcome screen and intro come before this (features/welcome). */
+export function Onboarding({ onBack }: { onBack: () => void }) {
   const store = useStore();
+  const session = useSession();
   const { t } = useI18n();
   const today = useToday();
   const [index, setIndex] = useState(0);
   const [profile, setProfile] = useState<Profile>('own');
-  const STEPS: readonly Step[] = profile === 'follower' ? FOLLOWER_STEPS : OWN_STEPS;
   const [lastStart, setLastStart] = useState('');
   const [cycle, setCycle] = useState(DEFAULT_CYCLE_LENGTH);
   const [period, setPeriod] = useState(DEFAULT_PERIOD_LENGTH);
   const [useDefaults, setUseDefaults] = useState(false);
   const [trackers, setTrackers] = useState<string[]>(DEFAULT_TRACKERS);
   const [accountView, setAccountView] = useState<'choose' | 'create' | 'signin' | { code: string }>('choose');
-  const [restoreState, setRestoreState] = useState<{ busy: boolean; error: string | null }>({ busy: false, error: null });
-
-  /** New phone: restore everything from a backup file instead of answering the questions. */
-  const restore = async (file: File | undefined) => {
-    if (!file) return;
-    setRestoreState({ busy: true, error: null });
-    const r = parseBackup(await file.text());
-    if (!r.ok) return setRestoreState({ busy: false, error: t.settings.importErrors[r.error] });
-    try {
-      await store.importSnapshot(r.data, 'replace');
-      store.updateSettings({ onboarded: true });
-    } catch (err) {
-      console.error(err);
-      setRestoreState({ busy: false, error: t.common.saveError });
-    }
-  };
-
+  // Signed in on the welcome screen already: no need to ask about an account.
+  const STEPS: readonly Step[] = (profile === 'follower' ? FOLLOWER_STEPS : OWN_STEPS).filter((s) => !(s === 'account' && session.account && accountView === 'choose'));
   const step: Step = STEPS[index] ?? 'done';
   const next = () => setIndex((i) => Math.min(i + 1, STEPS.length - 1));
   const back = () => setIndex((i) => Math.max(i - 1, 0));
@@ -70,38 +55,6 @@ export function Onboarding() {
   let actions: ReactNode;
 
   switch (step) {
-    case 'welcome':
-      content = (
-        <>
-          <Logo size={112} className="onboarding__logo" />
-          <h1 className="onboarding__title display">{t.onboarding.welcomeTitle}</h1>
-          <p className="onboarding__text">{t.onboarding.welcomeText}</p>
-        </>
-      );
-      actions = (
-        <>
-          <button type="button" className="button" onClick={next} disabled={restoreState.busy}>
-            {t.onboarding.start}
-          </button>
-          <label className="button button--ghost">
-            {restoreState.busy ? t.onboarding.restoring : t.onboarding.restore}
-            <input
-              type="file"
-              accept="application/json,.json"
-              className="visually-hidden"
-              disabled={restoreState.busy}
-              onChange={(e) => void restore(e.target.files?.[0])}
-            />
-          </label>
-          {restoreState.error && (
-            <p className="error-text onboarding__error" role="alert">
-              {restoreState.error}
-            </p>
-          )}
-        </>
-      );
-      break;
-
     case 'profile':
       content = (
         <>
@@ -298,13 +251,9 @@ export function Onboarding() {
   return (
     <main className="onboarding">
       <div className="onboarding__top">
-        {index > 0 ? (
-          <button type="button" className="icon-button icon-button--filled" onClick={back} aria-label={t.common.back}>
-            <IconChevronLeft />
-          </button>
-        ) : (
-          <span className="onboarding__spacer" />
-        )}
+        <button type="button" className="icon-button icon-button--filled" onClick={index > 0 ? back : onBack} aria-label={t.common.back}>
+          <IconChevronLeft />
+        </button>
         <ol className="onboarding__dots" aria-label={t.onboarding.step(index + 1, STEPS.length)}>
           {STEPS.map((s, i) => (
             <li key={s} className={i === index ? 'is-active' : i < index ? 'is-done' : ''} />

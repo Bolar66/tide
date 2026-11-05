@@ -62,7 +62,10 @@
 
 /* ---------- Card ---------- */
 .card {
-  background: var(--surface);
+  /* Slightly see-through so the theme's backdrop glows through. */
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow-1);
@@ -810,4 +813,202 @@ button.list__row:active {
   to {
     opacity: 0;
   }
+}
+
+/* ---------- Theme backdrop ---------- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 55% at 85% -5%, rgb(var(--glow-rgb) / 30%), transparent 70%),
+    radial-gradient(70% 45% at 0% 100%, rgb(var(--glow-rgb) / 18%), transparent 70%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+}
+
+.backdrop__art {
+  width: 100%;
+  height: 100%;
+}
+
+.backdrop__wave {
+  fill: rgb(var(--glow-rgb) / 12%);
+  animation: backdrop-drift var(--t) linear infinite;
+}
+
+.backdrop__wave--rev {
+  animation-direction: reverse;
+}
+
+@keyframes backdrop-drift {
+  to {
+    transform: translateX(-400px);
+  }
+}
+
+.backdrop__float {
+  animation: backdrop-float var(--t) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes backdrop-float {
+  to {
+    transform: translate(18px, -60px);
+  }
+}
+
+.backdrop__leaf {
+  fill: rgb(var(--glow-rgb) / 16%);
+  stroke: rgb(var(--glow-rgb) / 22%);
+  stroke-width: 1.2;
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: backdrop-sway var(--t) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes backdrop-sway {
+  from {
+    transform: rotate(-6deg);
+  }
+  to {
+    transform: rotate(8deg);
+  }
+}
+
+.backdrop__star {
+  fill: rgb(var(--glow-rgb) / 70%);
+  animation: backdrop-twinkle var(--t) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes backdrop-twinkle {
+  from {
+    opacity: 0.15;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+
+.backdrop__moon {
+  fill: rgb(var(--glow-rgb) / 30%);
+}
+
+/* ---------- Phase illustrations ---------- */
+.phase-art {
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.phase-art__bg {
+  fill: var(--surface);
+  opacity: 0.7;
+}
+
+.phase-art__drop {
+  fill: var(--period);
+}
+
+.phase-art__shine {
+  fill: none;
+  stroke: var(--on-period);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+
+.phase-art__ripple {
+  fill: none;
+  stroke: var(--period);
+  stroke-width: 2;
+  opacity: 0.45;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: art-ripple 3.6s ease-out infinite;
+}
+
+.phase-art__ripple--2 {
+  animation-delay: -1.8s;
+}
+
+@keyframes art-ripple {
+  from {
+    transform: scale(0.5);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+.phase-art__sun {
+  fill: var(--predicted);
+  opacity: 0.55;
+}
+
+.phase-art__stem,
+.phase-art__ground {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.phase-art__ground {
+  opacity: 0.35;
+}
+
+.phase-art__leaf {
+  fill: var(--accent);
+}
+
+.phase-art__leaf--2 {
+  opacity: 0.75;
+}
+
+.phase-art__sway {
+  transform-origin: 48px 78px;
+  animation: art-sway 5s ease-in-out infinite alternate;
+}
+
+@keyframes art-sway {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg);
+  }
+}
+
+.phase-art__petal {
+  fill: var(--fertile);
+  opacity: 0.35;
+}
+
+.phase-art__rays {
+  transform-origin: 48px 48px;
+  animation: art-spin 40s linear infinite;
+}
+
+@keyframes art-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.phase-art__core {
+  fill: var(--fertile);
+}
+
+.phase-art__moon {
+  fill: var(--accent);
+}
+
+.phase-art__star {
+  fill: var(--predicted);
+  animation: backdrop-twinkle 2.4s ease-in-out infinite alternate;
+}
+
+.phase-art__star--2 {
+  animation-delay: -1.2s;
 }

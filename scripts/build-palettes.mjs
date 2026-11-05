@@ -3,9 +3,9 @@ import { writeFileSync } from 'node:fs';
 import { DEFAULT_PALETTE, PALETTES, resolved } from './palettes.mjs';
 
 const block = (selector, vars, scheme) => {
-  const { wave, ...rest } = vars;
+  const { wave, glow, ...rest } = vars;
   const lines = Object.entries(rest).map(([k, v]) => `  --${k}: ${v};`);
-  lines.push(`  --wave-front: rgb(${wave} / 15%);`, `  --wave-back: rgb(${wave} / 8%);`, `  color-scheme: ${scheme};`);
+  lines.push(`  --wave-front: rgb(${wave} / 15%);`, `  --wave-back: rgb(${wave} / 8%);`, `  --glow-rgb: ${glow};`, `  color-scheme: ${scheme};`);
   if (scheme === 'dark') lines.push('  --shadow-1: none;', '  --shadow-2: 0 12px 40px rgb(0 0 0 / 45%);', '  --overlay: rgb(0 0 0 / 55%);');
   return `${selector} {\n${lines.join('\n')}\n}\n`;
 };

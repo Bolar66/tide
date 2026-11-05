@@ -781,6 +781,37 @@ export const fi = {
     notifyPeriod: 'Ilmoita, kun kuukautiset alkavat',
     notifyPeriodHint: 'Hän saa ilmoituksen, kun merkitset kuukautiset alkaneiksi.',
   },
+  welcome: {
+    tagline: 'Kierto, hyvinvointi ja läheiset – rauhassa ja yksityisesti.',
+    start: 'Aloita',
+    haveAccount: 'Minulla on jo tili',
+    signedOutTitle: 'Kirjauduit ulos',
+    signedOutText: 'Tietosi ovat yhä tällä laitteella. Kirjaudu sisään, niin synkronointi ja jakaminen jatkuvat.',
+    signIn: 'Kirjaudu sisään',
+    continueWithout: 'Jatka ilman tiliä',
+    skip: 'Ohita',
+    next: 'Seuraava',
+    begin: 'Aloitetaan',
+    slide: (n: number, total: number) => `Esittely ${n}/${total}`,
+    slides: [
+      {
+        title: 'Ymmärrä kiertoasi',
+        text: 'Näet yhdellä silmäyksellä, missä vaiheessa kierto on, ja saat arvion seuraavista kuukautisista.',
+      },
+      {
+        title: 'Kirjaa muutamalla napautuksella',
+        text: 'Mieliala, uni, oireet ja muu hyvinvointi. Ei pitkiä lomakkeita – kaikki tallentuu heti.',
+      },
+      {
+        title: 'Tietosi ovat sinun',
+        text: 'Kaikki tallentuu vain tälle laitteelle. Tili ja synkronointi ovat vapaaehtoisia, ja silloinkin tiedot salataan ennen lähtöä.',
+      },
+      {
+        title: 'Ota läheiset mukaan',
+        text: 'Jaa vain haluamasi tiedot, kerro mitä tarvitset ja saa tsemppiviestejä. Tai seuraa itse jonkun toisen kiertoa.',
+      },
+    ],
+  },
   onboarding: {
     profileTitle: 'Miten haluat käyttää Tidea?',
     profileText: 'Voit vaihtaa tätä milloin tahansa asetuksista.',

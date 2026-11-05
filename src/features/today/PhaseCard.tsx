@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { IconSparkle } from '../../components/icons';
+import { PhaseArt } from '../../components/PhaseArt';
 import type { Phase } from '../../domain/phases';
 import { useI18n } from '../../i18n';
 
@@ -21,10 +22,15 @@ export function PhaseCard({ phase, cycleDay, showFertileNote, ovulation }: Props
 
   return (
     <section className={`card phase-card phase-card--${phase}`}>
-      <p className="eyebrow">
-        {p.title} · {p.dayLabel(cycleDay)}
-      </p>
-      <h2 className="card__title phase-card__name">{p.names[phase]}</h2>
+      <div className="phase-card__head">
+        <div>
+          <p className="eyebrow">
+            {p.title} · {p.dayLabel(cycleDay)}
+          </p>
+          <h2 className="card__title phase-card__name">{p.names[phase]}</h2>
+        </div>
+        <PhaseArt phase={phase} size={72} />
+      </div>
       <p className="phase-card__text">{p.summaries[phase]}</p>
       {ovulation && phase !== 'late' && (
         <p className="phase-card__ovulation">{p.ovulationOn(f.weekdayDate(ovulation.date), ovulation.inDays)}</p>

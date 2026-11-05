@@ -1,7 +1,7 @@
 .cycle-ring {
   position: relative;
   display: block;
-  width: min(100%, 340px);
+  width: min(100%, 380px);
   aspect-ratio: 1;
   margin: 0 auto;
   padding: 0;
@@ -10,7 +10,26 @@
   background: transparent;
   color: inherit;
   view-transition-name: cycle-hero;
+  isolation: isolate;
   transition: transform var(--dur) var(--ease-out);
+}
+
+.cycle-ring::before {
+  content: '';
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--glow-rgb) / 35%), transparent);
+  z-index: -1;
+  filter: blur(18px);
+  animation: ring-glow 6s ease-in-out infinite alternate;
+}
+
+@keyframes ring-glow {
+  to {
+    transform: scale(1.08);
+    opacity: 0.7;
+  }
 }
 
 .cycle-ring:active {
