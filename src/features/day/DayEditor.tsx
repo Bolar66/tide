@@ -122,6 +122,17 @@ function NoteField({ date, initial }: { date: ISODate; initial: string }) {
   const [value, setValue] = useState(initial);
   const timer = useRef<number | undefined>(undefined);
   const latest = useRef(value);
+  const [focused, setFocused] = useState(false);
+
+  // Show changes that arrive from sync, unless the user is typing right now.
+  const [seen, setSeen] = useState(initial);
+  if (initial !== seen) {
+    setSeen(initial);
+    if (!focused) setValue(initial);
+  }
+  useEffect(() => {
+    latest.current = value;
+  }, [value]);
 
   const save = () => {
     window.clearTimeout(timer.current);
@@ -136,6 +147,7 @@ function NoteField({ date, initial }: { date: ISODate; initial: string }) {
     <label className="field">
       <span className="section-label">{t.day.note}</span>
       <textarea
+        onFocus={() => setFocused(true)}
         className="textarea"
         value={value}
         placeholder={t.day.notePlaceholder}
@@ -145,7 +157,10 @@ function NoteField({ date, initial }: { date: ISODate; initial: string }) {
           window.clearTimeout(timer.current);
           timer.current = window.setTimeout(save, 800);
         }}
-        onBlur={save}
+        onBlur={() => {
+          setFocused(false);
+          save();
+        }}
       />
     </label>
   );

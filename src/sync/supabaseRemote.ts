@@ -89,6 +89,13 @@ export const supabaseRemote: Remote = {
   async deleteAccount() {
     const c = await client();
     check(await c.rpc('delete_my_account'));
-    await c.auth.signOut({ scope: 'local' });
+    // The user no longer exists, so a server-side sign-out would only fail: drop the session locally.
+    await c.auth.stopAutoRefresh();
+    try {
+      localStorage.removeItem('tide.auth');
+    } catch {
+      /* ignore */
+    }
+    clientPromise = null;
   },
 };

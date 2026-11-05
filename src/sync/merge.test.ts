@@ -32,6 +32,21 @@ describe('mergeThreeWay', () => {
     expect(mergeThreeWay(base, remote, local).days[0]?.note).toBe('remote');
   });
 
+  it('merges the same day field by field (two devices logging different things)', () => {
+    const b0 = snap({ days: [{ date: '2026-11-05', updatedAt: 1, note: 'aamu' }] });
+    const local = snap({ days: [{ date: '2026-11-05', updatedAt: 5, note: 'aamu', symptoms: { mood: 2 } }] });
+    const remote = snap({ days: [{ date: '2026-11-05', updatedAt: 3, note: 'aamu', symptoms: { cramps: 5 }, metrics: { sleepHours: 7 } }] });
+    expect(mergeThreeWay(b0, local, remote).days).toEqual([
+      { date: '2026-11-05', updatedAt: 5, note: 'aamu', symptoms: { mood: 2, cramps: 5 }, metrics: { sleepHours: 7 } },
+    ]);
+  });
+
+  it('clears a field removed on one side', () => {
+    const b0 = snap({ days: [{ date: '2026-11-05', updatedAt: 1, flow: 'light', note: 'x' }] });
+    const local = snap({ days: [{ date: '2026-11-05', updatedAt: 2, note: 'x' }] }); // flow cleared
+    expect(mergeThreeWay(b0, local, b0).days[0]).toEqual({ date: '2026-11-05', updatedAt: 2, note: 'x' });
+  });
+
   it('keeps an edit over a concurrent delete', () => {
     const local = snap({ ...base, days: [] });
     const remote = snap({ ...base, days: [day('2026-10-01', 'edited', 9)] });
