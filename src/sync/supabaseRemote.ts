@@ -146,6 +146,14 @@ export const supabaseRemote: Remote = {
     return data.session?.user.id ?? null;
   },
 
+  async savePushSubscription(sub) {
+    check(await (await client()).from('push_subscriptions').upsert(sub));
+  },
+
+  async deletePushSubscription(endpoint) {
+    check(await (await client()).from('push_subscriptions').delete().eq('endpoint', endpoint));
+  },
+
   async deleteAccount() {
     const c = await client();
     check(await c.rpc('delete_my_account'));

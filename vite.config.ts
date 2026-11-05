@@ -14,7 +14,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo.svg', 'apple-touch-icon-180x180.png'],
+      includeAssets: ['favicon.ico', 'logo.svg', 'apple-touch-icon-180x180.png', 'push-handler.js'],
       manifest: {
         name: 'Tide',
         short_name: 'Tide',
@@ -36,6 +36,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest,woff2}'],
         navigateFallback: 'index.html',
+        importScripts: ['push-handler.js'],
       },
     }),
   ],

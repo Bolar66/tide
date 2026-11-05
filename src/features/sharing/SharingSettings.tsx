@@ -6,6 +6,7 @@ import { useI18n } from '../../i18n';
 import { useSession, type OwnedShareView } from '../../session/context';
 import { SHARE_SCOPES, type ShareScope } from '../../sharing/types';
 import { useStore, useTide } from '../../store/context';
+import { PushSettings } from './PushSettings';
 import './sharing.css';
 
 type View = { kind: 'invite' } | { kind: 'link'; link: string } | { kind: 'share'; id: string } | { kind: 'follow'; id: string };
@@ -78,6 +79,7 @@ export function SharingSettings() {
           </button>
         </li>
       </ul>
+      <PushSettings />
 
       <Sheet open={view !== null} onClose={close} title={view?.kind === 'link' ? sh.linkTitle : view?.kind === 'invite' ? sh.invite : sh.section}>
         {view?.kind === 'invite' && (

@@ -79,6 +79,8 @@ export interface Remote {
   /** Messages of the given shares created after `since` (ISO), oldest first. */
   listMessages(shareIds: string[], since: string | null): Promise<MessageRow[]>;
   currentUserId(): Promise<string | null>;
+  savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string }): Promise<void>;
+  deletePushSubscription(endpoint: string): Promise<void>;
 }
 
 /** In-memory server with the same semantics as the SQL functions. Used in tests. */
@@ -89,6 +91,7 @@ export class MemoryServer {
   shares = new Map<string, ShareRow & { wrapped_key: Sealed }>();
   shared = new Map<string, SharedRow>();
   messages: MessageRow[] = [];
+  push = new Map<string, { user: string; p256dh: string; auth: string }>();
   now = () => Date.now();
 
   client(): Remote {
@@ -217,6 +220,12 @@ export class MemoryServer {
       },
       async currentUserId() {
         return session?.id ?? null;
+      },
+      async savePushSubscription(sub) {
+        server.push.set(sub.endpoint, { user: uid(), p256dh: sub.p256dh, auth: sub.auth });
+      },
+      async deletePushSubscription(endpoint) {
+        if (server.push.get(endpoint)?.user === uid()) server.push.delete(endpoint);
       },
       async pullShared(id) {
         const row = server.shares.get(id);

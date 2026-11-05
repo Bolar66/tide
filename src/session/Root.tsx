@@ -18,6 +18,7 @@ import { DEFAULT_SCOPES, type SharedCache } from '../sharing/types';
 import { EMPTY_SYNC_STATE, syncOnce } from '../sync/engine';
 import { canonical } from '../sync/merge';
 import { AuthError, type ShareRow } from '../sync/remote';
+import { subscribePush, unsubscribePush } from '../sync/push';
 import { supabaseRemote as remote } from '../sync/supabaseRemote';
 import { SessionContext, type FollowedView, type OwnedShareView, type Session, type SyncStatus } from './context';
 
@@ -235,6 +236,9 @@ export function Root() {
       last = s;
     });
     const onVisible = () => document.visibilityState === 'visible' && void runSync();
+    // A push arrived while the app is open: fetch the new message right away.
+    const onSwMessage = (e: MessageEvent) => (e.data as { type?: string } | null)?.type === 'tide-push' && void runSync();
+    navigator.serviceWorker?.addEventListener('message', onSwMessage);
     const onOnline = () => void runSync();
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('online', onOnline);
@@ -245,6 +249,7 @@ export function Root() {
       window.clearInterval(interval);
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('online', onOnline);
+      navigator.serviceWorker?.removeEventListener('message', onSwMessage);
     };
   }, [store, acct, runSync]);
 
@@ -420,6 +425,16 @@ export function Root() {
         const sealed = await sealForShare(key, body);
         await remote.sendMessage(shareId, sealed.iv, sealed.data);
         await runSync();
+      },
+      async enablePush() {
+        const r = await subscribePush();
+        if (typeof r === 'string') return r;
+        await remote.savePushSubscription(r);
+        return 'on';
+      },
+      async disablePush() {
+        const endpoint = await unsubscribePush();
+        if (endpoint) await remote.deletePushSubscription(endpoint).catch(() => undefined);
       },
       async leaveShare(id) {
         await remote.deleteShare(id).catch(() => undefined);

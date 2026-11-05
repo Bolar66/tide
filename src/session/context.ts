@@ -66,6 +66,10 @@ export interface Session {
   /** Messages of all active shares, oldest first. */
   messages: Message[];
   sendMessage(shareId: string, body: MessageBody): Promise<void>;
+
+  /** Turn push notifications on for this device; resolves with the outcome. */
+  enablePush(): Promise<'on' | 'denied' | 'unsupported'>;
+  disablePush(): Promise<void>;
 }
 
 export const SessionContext = createContext<Session | null>(null);

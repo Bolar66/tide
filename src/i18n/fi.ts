@@ -637,6 +637,15 @@ export const fi = {
       late: ['Kierto on tavallista pidempi. Ole läsnä ja kysy, miten hän voi.', 'Huoli on ymmärrettävää. Tue, älä painosta.'],
     },
   },
+  push: {
+    title: 'Ilmoitukset',
+    toggle: 'Ilmoitukset kumppanin viesteistä',
+    hint: 'Ilmoitus kertoo vain, että sinulle on jotain uutta. Sisältö näkyy vasta sovelluksessa.',
+    iosHomeScreen: 'iPhonessa ilmoitukset toimivat, kun Tide on lisätty Koti-valikkoon ja avattu sieltä.',
+    denied: 'Ilmoitukset on estetty. Salli ne puhelimen asetuksista (Asetukset → Ilmoitukset → Tide).',
+    unsupported: 'Tämä selain ei tue ilmoituksia.',
+    failed: 'Ilmoitusten käyttöönotto epäonnistui. Yritä uudelleen.',
+  },
   connect: {
     ownerTitle: 'Kumppani',
     needTitle: 'Tarvitsen…',
