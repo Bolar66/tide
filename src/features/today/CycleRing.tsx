@@ -22,6 +22,7 @@ function wavePath(level: number, amplitude: number): string {
 
 interface Props {
   ring: Ring;
+  cycleLength: number;
   status: string;
   onOpen: () => void;
 }
@@ -30,13 +31,17 @@ interface Props {
  * Home screen hero: the days of the current cycle as dots around a disc whose "tide" rises
  * through the cycle. The whole ring opens the calendar (and morphs into it via view transitions).
  */
-export function CycleRing({ ring, status, onOpen }: Props) {
+export function CycleRing({ ring, cycleLength, status, onOpen }: Props) {
   const { t } = useI18n();
   const n = ring.days.length;
   // Keep a little water even on day 1 and never fill the disc completely.
   const level = C + DISC_R - (0.14 + ring.progress * 0.68) * DISC_R * 2;
 
-  const label = [t.ring.openCalendar, ring.cycleDay ? `${t.ring.cycleDay} ${ring.cycleDay}` : t.ring.noData, status].join('. ');
+  const label = [
+    t.ring.openCalendar,
+    ring.cycleDay ? `${t.ring.cycleDay} ${ring.cycleDay} ${t.ring.ofLength(Math.max(cycleLength, ring.cycleDay))}` : t.ring.noData,
+    status,
+  ].join('. ');
 
   return (
     <button type="button" className="cycle-ring" onClick={onOpen} aria-label={label}>
@@ -71,7 +76,7 @@ export function CycleRing({ ring, status, onOpen }: Props) {
               key={day.date}
               cx={x}
               cy={y}
-              r={day.kind === 'period' ? 6 : 3.5}
+              r={day.kind === 'period' ? 6 : day.kind === 'ovulation' ? 6 : day.kind === 'fertile' ? 4.5 : 3.5}
               className={`cycle-ring__dot cycle-ring__dot--${day.kind}`}
               style={style}
             />
@@ -83,7 +88,10 @@ export function CycleRing({ ring, status, onOpen }: Props) {
         {ring.cycleDay !== null ? (
           <>
             <span className="cycle-ring__eyebrow">{t.ring.cycleDay}</span>
-            <span className="cycle-ring__number display tabular">{ring.cycleDay}</span>
+            <span className="cycle-ring__number display tabular">
+              {ring.cycleDay}
+              <span className="cycle-ring__of">{t.ring.ofLength(Math.max(cycleLength, ring.cycleDay))}</span>
+            </span>
           </>
         ) : (
           <span className="cycle-ring__empty display">{t.ring.noData}</span>

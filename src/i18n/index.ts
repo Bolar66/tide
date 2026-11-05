@@ -1,6 +1,6 @@
 import { fi as fiDate } from 'date-fns/locale/fi';
-import { useMemo } from 'react';
-import { useTide } from '../store/context';
+import { useContext, useMemo, useSyncExternalStore } from 'react';
+import { StoreContext } from '../store/context';
 import { fi } from './fi';
 import { createFormat } from './format';
 
@@ -19,9 +19,15 @@ export function bundleFor(locale: Locale = DEFAULT_LOCALE) {
   return { t: entry.messages, f: createFormat(entry.date) };
 }
 
-/** Messages (`t`) and date formatters (`f`) for the user's chosen language. */
+const noSubscribe = () => () => {};
+
+/**
+ * Messages (`t`) and date formatters (`f`) for the user's chosen language.
+ * Works outside the store too (lock screen), falling back to the default locale.
+ */
 export function useI18n() {
-  const locale = useTide((s) => s.settings.locale);
+  const store = useContext(StoreContext);
+  const locale = useSyncExternalStore(store?.subscribe ?? noSubscribe, () => store?.getState().settings.locale ?? DEFAULT_LOCALE);
   return useMemo(() => bundleFor(locale), [locale]);
 }
 

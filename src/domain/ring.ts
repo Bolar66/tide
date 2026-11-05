@@ -4,7 +4,7 @@ import { sortPeriods } from './periods';
 import type { CycleStats } from './prediction';
 import type { Period } from './types';
 
-export type RingDayKind = 'period' | 'past' | 'future';
+export type RingDayKind = 'period' | 'fertile' | 'ovulation' | 'past' | 'future';
 
 export interface RingDay {
   date: ISODate;
@@ -47,7 +47,8 @@ export function buildRing(
   const days: RingDay[] = Array.from({ length }, (_, i) => {
     const date = addDaysISO(last.start, i);
     const mark = marks.get(date);
-    const kind: RingDayKind = mark === 'period' ? 'period' : date <= today ? 'past' : 'future';
+    const kind: RingDayKind =
+      mark === 'period' || mark === 'fertile' || mark === 'ovulation' ? mark : date <= today ? 'past' : 'future';
     return { date, kind, isToday: date === today };
   });
   return { days, progress: Math.min(1, cycleDay / length), cycleDay };

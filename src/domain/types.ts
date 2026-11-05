@@ -46,6 +46,8 @@ export interface Settings {
   periodLengthHint?: number;
   /** Epoch ms of the last successful export. */
   lastBackupAt?: number;
+  /** Show the estimated fertile window on the ring and calendar. */
+  showFertility: boolean;
   /** Tracker ids shown in the day editor (phase 3). */
   enabledTrackers: string[];
 }
@@ -54,5 +56,6 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   locale: 'fi',
   onboarded: false,
+  showFertility: true,
   enabledTrackers: [],
 };

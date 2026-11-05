@@ -39,6 +39,18 @@ Jos muutit värejä: myös `pnpm contrast`.**
 - `src/brand.ts` – tuotenimi ja teemavärit. Mahdollinen nimenvaihto: `brand.ts`, taivutusmuodot `i18n/fi.ts`:n alussa,
   `public/logo.svg` (+ `pnpm icons`), `index.html`, `vite.config.ts`:n manifest.
 
+## Salaus (PIN-lukko, vaihe 2)
+
+- Avainhierarkia (`src/crypto/keys.ts`): satunnainen 32-tavuinen pääsalaisuus → HKDF → AES-GCM-datan avain
+  ja HMAC-avain rivitunnisteisiin. Pääsalaisuus tallennetaan vain lukittuna (wrapped): PIN (PBKDF2 600k),
+  palautuskoodi (HKDF), passkey/Face ID (WebAuthn PRF). Vaiheen 4 tilin salasana = uusi lukko samalle salaisuudelle.
+- Lukko päällä: data on `sealed`-taulussa (`EncryptedPersistence`), v1-taulut ovat tyhjiä. `meta`-taulussa
+  on vain lukon asetukset ja epäonnistuneet yritykset, ei koskaan terveystietoja.
+- **Älä odota WebCrypto-kutsuja Dexie-transaktion sisällä** (transaktio commitoituu kesken). Salaa ensin, kirjoita sitten.
+- Pääsalaisuus on vain `session/Root.tsx`:n muistissa. Älä tallenna sitä mihinkään, äläkä lokita avaimia tai purettua dataa.
+- Muutokset salaukseen vaativat testit (`src/crypto/*.test.ts`) ja selaintestin: käyttöönotto, väärä PIN,
+  avaus, palautuskoodi, poisto käytöstä.
+
 ## Datamalli ja skeemamuutokset
 
 - Päivämäärät ovat merkkijonoja `yyyy-MM-dd` (`ISODate`), ei `Date`-olioita tallennettuna. Käytä `domain/dates.ts`-apureita.

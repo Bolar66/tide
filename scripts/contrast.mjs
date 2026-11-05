@@ -24,6 +24,7 @@ const pairs = [
   ['on-period', 'period', 4.5], ['text', 'period-soft', 4.5], ['text', 'predicted-soft', 4.5],
   ['warning-text', 'warning-bg', 4.5], ['danger', 'surface', 4.5], ['danger', 'bg', 4.5],
   ['predicted', 'surface', 2], ['text-faint', 'surface', 2.5],
+  ['fertile', 'fertile-soft', 4.5], ['surface', 'fertile', 4.5], ['text', 'fertile-soft', 4.5], ['text-muted', 'accent-soft', 4.5],
 ];
 
 let failed = false;

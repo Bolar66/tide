@@ -12,7 +12,7 @@ const SWIPE_PX = 50;
 
 export function CalendarView() {
   const { t, f } = useI18n();
-  const { today, marks } = useCycle();
+  const { today, marks, fertile } = useCycle();
   const days = useTide((s) => s.days);
   const [month, setMonth] = useState(() => startOfMonth(fromISO(today)));
   const [direction, setDirection] = useState<'next' | 'prev' | null>(null);
@@ -33,8 +33,10 @@ export function CalendarView() {
     <div className="stack stack--lg">
       <header className="page-header">
         <div>
-          <p className="eyebrow">{t.tabs.calendar}</p>
-          <h1 className="display calendar-title">{capitalize(f.monthTitle(month))}</h1>
+          <p className="eyebrow">
+            {t.tabs.calendar} · {f.year(month)}
+          </p>
+          <h1 className="display calendar-title">{capitalize(f.monthName(month))}</h1>
         </div>
         <div className="calendar__nav">
           <button type="button" className="icon-button icon-button--filled" onClick={() => shift(-1)} aria-label={t.calendar.prev}>
@@ -75,8 +77,10 @@ export function CalendarView() {
             const weekday = getISODay(day);
             const entry = days[iso];
             const logged = entry && (entry.symptoms || entry.note || entry.metrics);
-            const bandStart = mark && (weekday === 1 || marks.get(addDaysISO(iso, -1)) !== mark);
-            const bandEnd = mark && (weekday === 7 || marks.get(addDaysISO(iso, 1)) !== mark);
+            // Ovulation sits inside the fertile band, so both count as one band.
+            const group = (m: typeof mark) => (m === 'ovulation' ? 'fertile' : m);
+            const bandStart = mark && (weekday === 1 || group(marks.get(addDaysISO(iso, -1))) !== group(mark));
+            const bandEnd = mark && (weekday === 7 || group(marks.get(addDaysISO(iso, 1))) !== group(mark));
             const classes = [
               'calendar__day',
               !isSameMonth(day, month) && 'calendar__day--outside',
@@ -87,7 +91,12 @@ export function CalendarView() {
             ]
               .filter(Boolean)
               .join(' ');
-            const markLabel = mark === 'period' ? t.calendar.legendPeriod : mark === 'predicted' ? t.calendar.legendPredicted : null;
+            const markLabel = {
+              period: t.calendar.legendPeriod,
+              predicted: t.calendar.legendPredicted,
+              fertile: t.calendar.legendFertile,
+              ovulation: t.phases.names.ovulation,
+            }[mark ?? 'none' as never] ?? null;
             return (
               <button
                 key={iso}
@@ -116,6 +125,12 @@ export function CalendarView() {
               <i className="legend legend--predicted" />
               {t.calendar.legendPredicted}
             </span>
+            {fertile.length > 0 && (
+              <span>
+                <i className="legend legend--fertile" />
+                {t.calendar.legendFertile}
+              </span>
+            )}
             <span>
               <i className="legend legend--logged" />
               {t.calendar.legendLogged}
@@ -135,6 +150,8 @@ export function CalendarView() {
           )}
         </div>
       </div>
+
+      {fertile.length > 0 && <p className="muted small calendar__disclaimer">{t.phases.fertileNote}</p>}
 
       <DaySheet date={selected} onClose={() => setSelected(null)} />
     </div>

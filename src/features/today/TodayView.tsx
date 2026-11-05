@@ -8,6 +8,8 @@ import { useStore, useTide } from '../../store/context';
 import { DayEditor } from '../day/DayEditor';
 import { CycleRing } from './CycleRing';
 import { OtherDaySheet } from './OtherDaySheet';
+import { PatternWarnings } from './PatternWarnings';
+import { PhaseCard } from './PhaseCard';
 import './today.css';
 
 const BACKUP_INTERVAL_DAYS = 30;
@@ -23,7 +25,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings }: Props) {
   const store = useStore();
   const { t, f } = useI18n();
   const lastBackupAt = useTide((s) => s.settings.lastBackupAt);
-  const { today, periods, prediction, stats, ring, hasHints } = useCycle();
+  const { today, periods, prediction, stats, ring, hasHints, phase, warnings, fertile } = useCycle();
   const [undo, setUndo] = useState<Undo | null>(null);
   const [otherDay, setOtherDay] = useState<'start' | 'end' | null>(null);
 
@@ -85,7 +87,7 @@ export function TodayView({ onOpenCalendar, onOpenSettings }: Props) {
       )}
 
       <section className="today-hero" aria-live="polite">
-        <CycleRing ring={ring} status={status} onOpen={onOpenCalendar} />
+        <CycleRing ring={ring} cycleLength={stats.avgCycle} status={status} onOpen={onOpenCalendar} />
 
         {inPeriod && periodDay > MAX_OPEN_PERIOD_DAYS && <p className="today-hero__note">{t.today.forgotEnd(periodDay)}</p>}
 
@@ -109,6 +111,10 @@ export function TodayView({ onOpenCalendar, onOpenSettings }: Props) {
           <p className="today-hero__note">{hasHints ? t.today.hintsNote : t.today.defaultsNote}</p>
         )}
       </section>
+
+      <PatternWarnings warnings={warnings} />
+
+      {phase && <PhaseCard phase={phase} showFertileNote={fertile.length > 0 && (phase === 'ovulation' || phase === 'follicular')} />}
 
       <section className="card enter" style={{ '--i': 3 } as CSSProperties}>
         <h2 className="card__title">{t.today.todayLog}</h2>

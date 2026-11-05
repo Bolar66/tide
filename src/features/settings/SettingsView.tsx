@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { IconChevronRight, IconDatabase, IconExport, IconImport, IconInfo } from '../../components/icons';
 import { Segmented } from '../../components/Segmented';
 import { Sheet } from '../../components/Sheet';
+import { Switch } from '../../components/Switch';
 import { parseBackup } from '../../db/backup';
 import type { Snapshot } from '../../db/persistence';
 import { todayISO } from '../../domain/dates';
@@ -9,6 +10,7 @@ import type { ThemeSetting } from '../../domain/types';
 import { useI18n } from '../../i18n';
 import { useStore, useTide } from '../../store/context';
 import { exportBackup } from './backupIO';
+import { LockSettings } from './LockSettings';
 import './settings.css';
 
 export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
@@ -80,6 +82,29 @@ export function SettingsView({ onOpenAbout }: { onOpenAbout: () => void }) {
             onChange={(theme) => store.updateSettings({ theme })}
           />
         </div>
+      </section>
+
+      <section className="settings-section">
+        <h2 className="section-label">{t.settings.cycle}</h2>
+        <ul className="list">
+          <li>
+            <Switch
+              label={t.settings.showFertility}
+              hint={t.settings.showFertilityHint}
+              checked={settings.showFertility}
+              onChange={(showFertility) => store.updateSettings({ showFertility })}
+            />
+          </li>
+        </ul>
+      </section>
+
+      <section className="settings-section">
+        <h2 className="section-label">{t.settings.security}</h2>
+        <ul className="list">
+          <li>
+            <LockSettings />
+          </li>
+        </ul>
       </section>
 
       <section className="settings-section">

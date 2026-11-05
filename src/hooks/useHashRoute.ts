@@ -35,8 +35,14 @@ export function useHashRoute(): [Route, (r: Route) => void] {
       window.history.pushState(null, '', r === 'today' ? window.location.pathname : `#/${r}`);
       window.scrollTo(0, 0);
     };
-    if (document.startViewTransition && !reducedMotion()) document.startViewTransition(update);
-    else update();
+    if (document.startViewTransition && !reducedMotion()) {
+      // A transition can be skipped (e.g. viewport resize mid-animation); the DOM update still happens.
+      const vt = document.startViewTransition(update);
+      vt.ready.catch(() => undefined);
+      vt.finished.catch(() => undefined);
+    } else {
+      update();
+    }
   };
 
   return [route, navigate];

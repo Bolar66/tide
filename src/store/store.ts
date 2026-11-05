@@ -51,7 +51,8 @@ function isEmptyDay(d: DayEntry): boolean {
   return Object.keys(d).every((k) => k === 'date' || k === 'updatedAt');
 }
 
-export function createStore(persistence: Persistence, now: () => Date = () => new Date()) {
+export function createStore(initialPersistence: Persistence, now: () => Date = () => new Date()) {
+  let persistence = initialPersistence;
   let state = initial;
   const listeners = new Set<() => void>();
 
@@ -197,6 +198,11 @@ export function createStore(persistence: Persistence, now: () => Date = () => ne
           : mergeSnapshots(snapshot(), incoming);
       await persistence.replaceAll(next);
       applySnapshot(next);
+    },
+
+    /** Switch storage (lock turned on/off). The data was already migrated, so in-memory state stays as is. */
+    setPersistence(next: Persistence) {
+      persistence = next;
     },
 
     dismissSaveError() {

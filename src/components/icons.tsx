@@ -111,3 +111,21 @@ export const IconMinus = (p: P) => (
     <path d="M5 12h14" />
   </svg>
 );
+export const IconFaceId = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" />
+    <path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5c1.4 1 3.6 1 5 0" />
+  </svg>
+);
+export const IconKey = (p: P) => (
+  <svg {...base} {...p}>
+    <circle cx="8" cy="15" r="4" />
+    <path d="m10.8 12.2 8.7-8.7M16 7l2.5 2.5M14 9l2 2" />
+  </svg>
+);
+export const IconSparkle = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M12 3.5c.6 4.2 2.3 5.9 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.6 5.9-2.3 6.5-6.5Z" />
+    <path d="M18.5 15.5c.3 1.6 1 2.3 2.5 2.5-1.6.3-2.3 1-2.5 2.5-.3-1.6-1-2.3-2.5-2.5 1.6-.3 2.3-1 2.5-2.5Z" />
+  </svg>
+);

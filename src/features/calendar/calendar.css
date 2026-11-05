@@ -1,5 +1,4 @@
 .calendar-title {
-  font-size: var(--text-2xl);
   white-space: nowrap;
 }
 
@@ -109,6 +108,22 @@
   border-right: 1.5px dashed var(--predicted);
 }
 
+.calendar__day--fertile::before,
+.calendar__day--ovulation::before {
+  background: var(--fertile-soft);
+}
+
+.calendar__day--fertile .calendar__num,
+.calendar__day--ovulation .calendar__num {
+  color: var(--fertile);
+  font-weight: 600;
+}
+
+.calendar__day--ovulation .calendar__num {
+  background: var(--fertile);
+  color: var(--surface);
+}
+
 .calendar__num {
   position: relative;
   z-index: 1;
@@ -135,7 +150,7 @@
   opacity: 0.35;
 }
 
-.calendar__day:disabled:not(.calendar__day--predicted) .calendar__num {
+.calendar__day:disabled:not(.calendar__day--predicted, .calendar__day--fertile, .calendar__day--ovulation) .calendar__num {
   color: var(--text-faint);
 }
 
@@ -209,6 +224,16 @@
 .legend--predicted {
   background: var(--predicted-soft);
   border: 1.5px dashed var(--predicted);
+}
+
+.legend--fertile {
+  background: var(--fertile-soft);
+  box-shadow: inset 0 0 0 1.5px var(--fertile);
+}
+
+.calendar__disclaimer {
+  text-align: center;
+  padding: 0 var(--space-4);
 }
 
 .legend--logged {

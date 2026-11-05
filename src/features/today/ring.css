@@ -62,6 +62,16 @@
   fill: var(--period);
 }
 
+.cycle-ring__dot--fertile {
+  fill: var(--fertile-soft);
+  stroke: var(--fertile);
+  stroke-width: 1.5;
+}
+
+.cycle-ring__dot--ovulation {
+  fill: var(--fertile);
+}
+
 .cycle-ring__dot--past {
   fill: var(--text-faint);
 }
@@ -109,6 +119,13 @@
   line-height: 1;
   font-weight: 450;
   letter-spacing: -0.04em;
+}
+
+.cycle-ring__of {
+  font-size: var(--text-lg);
+  color: var(--text-muted);
+  letter-spacing: 0;
+  margin-left: 2px;
 }
 
 .cycle-ring__empty {

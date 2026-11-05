@@ -9,6 +9,10 @@ export function createFormat(locale: DateLocale) {
     shortDate: (d: ISODate) => format(fromISO(d), 'd.M.'),
     /** "5.11.2026" */
     fullDate: (d: ISODate) => format(fromISO(d), 'd.M.yyyy'),
+    /** "marraskuu" */
+    monthName: (d: Date) => format(d, 'LLLL', { locale }),
+    /** "2026" */
+    year: (d: Date) => format(d, 'yyyy'),
     /** "marraskuu 2026" */
     monthTitle: (d: Date) => format(d, 'LLLL yyyy', { locale }),
     /** "ma", "ti", … starting from Monday */
