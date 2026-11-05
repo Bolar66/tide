@@ -5,9 +5,9 @@ import webpush from 'npm:web-push@3.6.7';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const TEXT: Record<string, string> = {
-  message: 'Kumppanisi lähetti sinulle jotain 💛',
+  message: 'Sinulle on jotain uutta Tidessä 💛',
   request: 'Uusi liittymispyyntö odottaa hyväksyntääsi',
-  approved: 'Kumppanisi hyväksyi pyyntösi',
+  approved: 'Liittymispyyntösi hyväksyttiin',
 };
 
 Deno.serve(async (req) => {

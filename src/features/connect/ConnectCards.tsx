@@ -39,6 +39,7 @@ export function OwnerConnectCard() {
   if (active.length === 0) return null;
 
   const names = new Map(active.map((s) => [s.id, s.partnerName ?? '']));
+  const who = c.joinNames(active.map((s) => s.partnerName ?? '').filter(Boolean));
   const mine = session.messages.filter((m) => names.has(m.shareId));
   const acked = ackedIds(mine);
   const recent = (m: Message) => now - Date.parse(m.createdAt) < RECENT_MS;
@@ -53,7 +54,7 @@ export function OwnerConnectCard() {
 
   return (
     <section className="card connect">
-      <h2 className="card__title">{c.ownerTitle}</h2>
+      <h2 className="card__title">{who ? c.ownerTitle(who) : t.sharing.section}</h2>
 
       <h3 className="section-label">{c.needTitle}</h3>
       <div className="chips">
@@ -63,7 +64,7 @@ export function OwnerConnectCard() {
           </button>
         ))}
       </div>
-      <p className="muted small">{c.needHint}</p>
+      <p className="muted small">{c.needHint(who)}</p>
       {myNeeds.length > 0 && (
         <ul className="connect__list">
           {myNeeds
