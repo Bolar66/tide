@@ -4,10 +4,11 @@
 import webpush from 'npm:web-push@3.6.7';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-const TEXT: Record<string, string> = {
-  message: 'Sinulle on jotain uutta Tidessä 💛',
-  request: 'Uusi liittymispyyntö odottaa hyväksyntääsi',
-  approved: 'Liittymispyyntösi hyväksyttiin',
+// With the sender's chosen display name when they have set one, otherwise neutral.
+const TEXT: Record<string, (name: string | null) => string> = {
+  message: (n) => (n ? `${n} lähetti sinulle jotain 💛` : 'Sinulle on jotain uutta Tidessä 💛'),
+  request: (n) => (n ? `${n} haluaa liittyä, hyväksy pyyntö Tidessä` : 'Uusi liittymispyyntö odottaa hyväksyntääsi'),
+  approved: (n) => (n ? `${n} hyväksyi pyyntösi` : 'Liittymispyyntösi hyväksyttiin'),
 };
 
 Deno.serve(async (req) => {
@@ -26,14 +27,17 @@ Deno.serve(async (req) => {
   if (!recipient) return Response.json({ sent: 0 });
 
   const { data: subs } = await db.from('push_subscriptions').select('endpoint, p256dh, auth').eq('user_id', recipient);
+  if (!subs?.length) return Response.json({ sent: 0 });
+  const { data: profile } = await db.from('profiles').select('display_name').eq('user_id', sender_id).maybeSingle();
+  const body = TEXT[kind](profile?.display_name ?? null);
   webpush.setVapidDetails(Deno.env.get('VAPID_SUBJECT')!, Deno.env.get('VAPID_PUBLIC_KEY')!, Deno.env.get('VAPID_PRIVATE_KEY')!);
 
   let sent = 0;
-  for (const s of subs ?? []) {
+  for (const s of subs) {
     try {
       await webpush.sendNotification(
         { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-        JSON.stringify({ title: 'Tide', body: TEXT[kind], tag: `tide-${kind}` }),
+        JSON.stringify({ title: 'Tide', body, tag: `tide-${kind}` }),
         { TTL: 24 * 3600, urgency: 'normal' },
       );
       sent++;

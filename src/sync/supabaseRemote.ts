@@ -150,6 +150,10 @@ export const supabaseRemote: Remote = {
     check(await (await client()).from('push_subscriptions').upsert(sub));
   },
 
+  async setDisplayName(name) {
+    check(await (await client()).from('profiles').upsert({ display_name: name.slice(0, 40), updated_at: new Date().toISOString() }));
+  },
+
   async deletePushSubscription(endpoint) {
     check(await (await client()).from('push_subscriptions').delete().eq('endpoint', endpoint));
   },

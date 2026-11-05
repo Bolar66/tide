@@ -81,6 +81,8 @@ export interface Remote {
   currentUserId(): Promise<string | null>;
   savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string }): Promise<void>;
   deletePushSubscription(endpoint: string): Promise<void>;
+  /** The only plaintext the user puts on the server: their display name, for notifications. */
+  setDisplayName(name: string): Promise<void>;
 }
 
 /** In-memory server with the same semantics as the SQL functions. Used in tests. */
@@ -223,6 +225,9 @@ export class MemoryServer {
       },
       async savePushSubscription(sub) {
         server.push.set(sub.endpoint, { user: uid(), p256dh: sub.p256dh, auth: sub.auth });
+      },
+      async setDisplayName() {
+        uid();
       },
       async deletePushSubscription(endpoint) {
         if (server.push.get(endpoint)?.user === uid()) server.push.delete(endpoint);

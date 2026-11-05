@@ -55,6 +55,7 @@ export function Root() {
   const [partnerNames, setPartnerNames] = useState<Record<string, string | null>>({});
   const [sharedCache, setSharedCache] = useState<SharedCache>({});
   const lastPushed = useRef<Record<string, string>>({});
+  const uploadedName = useRef<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesRef = useRef<Message[]>([]);
 
@@ -109,6 +110,14 @@ export function Root() {
   const syncShares = useCallback(async (store: Store) => {
     const rows = await remote.listShares();
     const settings = store.getState().settings;
+    // Keep the notification display name in step with the one used for sharing.
+    const name = settings.displayName?.trim();
+    if (name && uploadedName.current !== name) {
+      await remote.setDisplayName(name).then(
+        () => (uploadedName.current = name),
+        (err: unknown) => console.warn('Nimen tallennus epäonnistui', err),
+      );
+    }
     const owned = settings.shares ?? [];
     const following = settings.following ?? [];
     const names: Record<string, string | null> = {};

@@ -23,6 +23,25 @@ create policy "own subscriptions" on public.push_subscriptions
 revoke all on public.push_subscriptions from anon, authenticated;
 grant select, insert, update, delete on public.push_subscriptions to authenticated;
 
+-- Display names for notifications ("Ville lähetti sinulle jotain"). This is the only plaintext
+-- the user chooses to put on the server; health data and messages stay end-to-end encrypted.
+create table if not exists public.profiles (
+  user_id uuid primary key default auth.uid() references auth.users (id) on delete cascade,
+  display_name text not null check (char_length(display_name) between 1 and 40),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+drop policy if exists "own profile" on public.profiles;
+create policy "own profile" on public.profiles
+  for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+revoke all on public.profiles from anon, authenticated;
+grant select, insert, update, delete on public.profiles to authenticated;
+
 -- Ask the Edge Function to notify the other member of a share.
 create or replace function public.tide_notify(kind text, share uuid, sender uuid)
 returns void
