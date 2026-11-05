@@ -88,6 +88,14 @@ Jos muutit värejä: myös `pnpm contrast`.**
   eikä niitä saa lisätä. Testi `sharing.test.ts` varmistaa tämän.
 - Jakotiedot (`shares`, `following`) ovat käyttäjän omissa salatuissa asetuksissa ja synkronoituvat hänen laitteilleen.
 
+## Ilmoitukset (vaihe 5c)
+
+- Web Push: tietokantaliipaisin (`0004_tide_push.sql`) → Edge Function `notify` (`supabase/functions/notify`) → push.
+  Ilmoituksessa vain lähettäjän itse antama nimi (`profiles`, ainoa salaamaton tieto) ja yleinen teksti.
+- VAPID-yksityisavain ja webhook-salaisuus ovat vain Supabasen salaisuuksissa. **Ei koskaan repoon.**
+  Migraatiossa salaisuuden kohdalla on paikkamerkki `__TIDE_WEBHOOK_SECRET__`.
+- Service workerin push-käsittelijä: `public/push-handler.js` (workbox `importScripts`).
+
 ## Datamalli ja skeemamuutokset
 
 - Päivämäärät ovat merkkijonoja `yyyy-MM-dd` (`ISODate`), ei `Date`-olioita tallennettuna. Käytä `domain/dates.ts`-apureita.
